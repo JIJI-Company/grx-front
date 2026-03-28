@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GRX | TEAM HISTORY</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;700&family=Noto+Sans+KR:wght@400;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="bg-layer" id="bg1"></div>
+    <div class="bg-layer" id="bg2"></div>
+    <div class="bg-layer" id="bg3"></div>
+    <div class="bg-layer" id="bg4"></div>
+
+    <!-- NAV -->
+    <nav id="mainNav">
+      <a href="/ggg/GGU/" class="logo">G-CASTLE</a>
+      <div class="nav-links">
+        <a href="#">LIVE</a>
+        <a href="/ggg/GGCard/card.html">MEMBERS</a>
+        <a href="ddd.html" class="active">HISTORY</a>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-burst"></div>
+      <div class="hero-sideline left"></div>
+      <div class="hero-sideline right"></div>
+      <div class="hero-eyebrow">Record of Glory · 꾸한성 크루</div>
+      <h1 class="hero-title">GRX<span class="slash">/</span>HISTORY</h1>
+      <p class="hero-sub">영광스러운 기록들</p>
+      <div class="hero-scroll">
+        <span class="hero-scroll-txt"></span>
+        <div class="hero-scroll-line"></div>
+      </div>
+    </section>
+
+    <!-- STATS BANNER -->
+    <div class="stats-banner reveal">
+      <div class="stats-inner" id="statsInner"></div>
+    </div>
+
+    <!-- HALL OF FAME -->
+    <section class="hof-section">
+      <div class="sec-wrap reveal">
+        <div class="sec-eyebrow">All Records</div>
+        <h2 class="sec-title">HALL OF FAME</h2>
+        <div class="cards-grid" id="hofGrid"></div>
+      </div>
+    </section>
+
+    <!-- BY CATEGORY -->
+    <section class="cat-section">
+      <div class="sec-wrap reveal">
+        <div class="sec-eyebrow">Filter by Game</div>
+        <h2 class="sec-title">BY CATEGORY</h2>
+        <div class="tabs-row">
+          <button class="tab-btn active" data-cat="all">🏆 ALL</button>
+          <button class="tab-btn" data-cat="lol">⚔️ LOL</button>
+          <button class="tab-btn" data-cat="battleground">🪖 배그</button>
+          <button class="tab-btn" data-cat="vr">🥽 VR</button>
+          <button class="tab-btn" data-cat="minecraft">⛏️ MC</button>
+          <button class="tab-btn" data-cat="multi">🎮 MULTI</button>
+        </div>
+        <div class="badges-row" id="catBadges"></div>
+        <div class="cards-grid" id="catGrid"></div>
+      </div>
+    </section>
+
+    <footer>
+      <span class="footer-logo">GRX</span>
+      <p>© 2025 GRX GAMING. ALL RIGHTS RESERVED.</p>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>

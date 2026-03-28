@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GGU-CASTLE | INFINITE CASTLE</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+ 
+  <body>
+    <div id="intro-gate">
+      <div class="gate gate-left"></div>
+      <div class="gate gate-right"></div>
+      <div class="intro-content">
+        <span class="sub-title">UPPER MOON PROJECT</span>
+        <h1>GGU-CASTLE</h1>
+        <button id="enter-btn">ENTER THE INFINITE</button>
+      </div>
+    </div>
+
+    <div id="main-app">
+      <div class="bg-castle">
+        <div class="blood-particles"></div>
+      </div>
+
+      <nav id="navbar">
+        <a href="index.html" class="logo">G-CASTLE</a>
+        <div class="nav-links">
+          <a href="#">LIVE</a>
+          <a href="/ggg/GGCard/card.html">MEMBERS</a>
+          <a href="#">HISTORY</a>
+        </div>
+      </nav>
+
+      <section class="hero animate-fade-inr" background="/img/ggu_title.jpg>
+        <span class="hero-label">:</span>
+        <h1>GGU<br />CASTLE</h1>
+        <p></p>
+      </section>
+
+      <div class="container updates-section animate-fade-in">
+        <h2 class="section-title">CURRENT MISSION</h2>
+        <div class="updates-grid">
+          <div class="update-box live-box">
+            <div class="box-header">LIVE STREAMING</div>
+            <div class="content-placeholder">
+              공간 이동 중... 방송 데이터를 수신합니다.
+            </div>
+          </div>
+          <div class="update-box schedule-box">
+            <div class="box-header">CASTLE SCHEDULE</div>
+            <div class="content-placeholder">
+              이번 주의 혈귀술 훈련 일정입니다.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="container animate-fade-in">
+        <h2 class="section-title">LATEST ANNOUNCEMENT</h2>
+        <div class="grid">
+          <div class="card">
+            <span class="card-tag">NOTICE</span>
+            <h3 class="card-title">무한성 시스템 개편</h3>
+            <p class="card-desc">
+              더욱 기괴하고 압도적인 공간으로 무한성이 재탄생했습니다.
+            </p>
+          </div>
+          <div class="card">
+            <span class="card-tag">RANKING</span>
+            <h3 class="card-title">십이귀월 랭킹</h3>
+            <p class="card-desc">
+              이번 달 가장 압도적인 활약을 보여준 멤버를 확인하세요.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <section class="member-section">
+    <div class="section-header">
+        <h2 class="section-title">G-CASTLE CREW</h2>
+        <p class="section-desc">멤버가 아무리 많아도 가로로 슥슥 넘겨보세요.</p>
+    </div>
+
+    <button class="slider-btn btn-prev" onclick="moveSlider(-300)">❮</button>
+    <button class="slider-btn btn-next" onclick="moveSlider(300)">❯</button>
+
+   <div class="slider-container" id="memberSlider">
+    <div class="mini-card">
+        <img src="/img/gugu.png" alt="꾸티뉴">
+        <div class="mini-card-info">
+            <p class="mini-name">꾸티뉴</p>
+        </div>
+    </div>
+
+
+    <div class="mini-card">
+        <img src="/img/엔쥬.png" alt="엔쥬">
+        <div class="mini-card-info">
+            <p class="mini-name">엔쥬</p>
+        </div>
+    </div>
+
+    <div class="mini-card">
+        <img src="/img/나나나.png" alt="난워니">
+        <div class="mini-card-info">
+            <p class="mini-name">난워니</p>
+        </div>
+    </div>
+    <div class="mini-card">
+        <img src="/img/야무자.png" alt="야무지">
+        <div class="mini-card-info">
+            <span class="mini-tag">Art</span>
+            <p class="mini-name">야무지</p>
+        </div>
+    </div>
+    <div class="mini-card">
+      <img src="/img/란다.png" alt="란다">
+      <div class="mini-card-info">
+        <p class="mini-name">란다</p>
+      </div>
+    </div>
+
+    <div class="mini-card">
+      <img src="/img/셀키.png" alt="셀키">
+      <div class="mini-card-info">
+        <p class="mini-name">셀키</p>
+      </div>
+    </div>
+
+    <div class="mini-card">
+      <img src="/img/리카.png" alt="리카">
+      <div class="mini-card-info">
+        <p class="mini-name">리카</p>
+      </div>
+    </div>
+
+    <div class="mini-card">
+      <img src="/img/철수.png" alt="철쑤">
+      <div class="mini-card-info">
+        <p class="mini-name">철쑤</p>
+      </div>
+    </div>
+
+    <div class="mini-card">
+      <img src="/img/r구구구.png" alt="구본좌">
+      <div class="mini-card-info">
+        <p class="mini-name">구본좌</p>
+      </div>
+    </div>
+
+    <div class="mini-card">
+      <img src="/img/영감.png" alt="영감">
+      <div class="mini-card-info">
+        <p class="mini-name">영감</p>
+      </div>
+    </div>
+
+    <div class="mini-card">
+      <img src="/img/다뮤.png" alt="다뮤">
+      <div class="mini-card-info">
+        <p class="mini-name">다뮤</p>
+      </div>
+    </div>
+
+    <div class="mini-card">
+      <img src="/img/딴딴.png" alt="딴딴2당">
+      <div class="mini-card-info">
+        <p class="mini-name">딴딴2당</p>
+      </div>
+    </div>
+
+    <div class="mini-card">
+      <img src="/img/초귀.png" alt="초귀요미">
+      <div class="mini-card-info">
+        <p class="mini-name">RUI</p>
+      </div>
+    </div>
+
+    <div class="mini-card">
+      <img src="/img/밈먀.png" alt="밈먀">
+      <div class="mini-card-info">
+        <p class="mini-name">밈먀</p>
+      </div>
+    </div>
+
+    <div class="mini-card">
+      <img src="/img/바먀.png" alt="바먀">
+      <div class="mini-card-info">
+        <p class="mini-name">바먀</p>
+      </div>
+    </div>
+
+    </div>
+
+    <button class="view-all-btn" onclick="location.href='/ggg/GGCard/card.html'">멤버 전용 페이지 (플립 카드) 보러가기 →</button>
+</section>
+
+
+    </div>
+
+      <footer>
+        <div class="footer-logo">G-CASTLE</div>
+        <p> 2026 GGU-CASTLE. CREATED BY ㅇㅇ.</p>
+      </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
