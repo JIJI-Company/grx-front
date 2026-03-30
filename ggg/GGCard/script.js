@@ -89,7 +89,7 @@ const members = {
       name: '영감',
       rank: 'LOWER 1',
       img: '/img/영감.png',
-      art: '최면',
+      art: '하현 1',
       desc: '꿈의 지배자.',
       link: 'https://www.sooplive.com/station/y0unggam',
     },

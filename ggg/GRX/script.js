@@ -55,8 +55,6 @@ const MEDAL_TEXT = { gold: 'GOLD', silver: 'SILVER', bronze: 'BRONZE' };
 function buildCard(a, delay = 0) {
   return `
     <div class="team-card ${a.medal}" style="animation-delay:${delay}s">
-      <div class="card-top-bar"></div>
-      <div class="card-body">
         <div class="card-medal-label">${MEDAL_TEXT[a.medal]}</div>
         <div class="card-team-name">${a.team}</div>
         <div class="card-medal-icon">${MEDAL_NUM[a.medal]}</div>
@@ -64,7 +62,6 @@ function buildCard(a, delay = 0) {
         <div class="card-divider"></div>
         <div class="card-date">${a.date}</div>
         <div class="card-type">${a.type}</div>
-      </div>
     </div>
   `;
 }
@@ -185,7 +182,7 @@ function renderCatSlider(cat) {
 function slideCards(trackId, dir) {
   const track = document.getElementById(trackId);
   if (!track) return;
-  track.scrollLeft += dir * 275;
+  track.scrollLeft += dir * 310;
 }
 window.slideCards = slideCards;
 
@@ -210,11 +207,13 @@ function initNav() {
     'scroll',
     () => {
       if (window.scrollY > 60) {
-        nav.style.background = 'rgba(2,0,0,0.98)';
-        nav.style.borderBottom = '1px solid rgba(139,0,0,0.75)';
+        nav.style.background = 'rgba(5, 0, 2, 0.7)';
+        nav.style.borderBottom = '1px solid rgba(255, 26, 74, 0.3)';
+        nav.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.5)';
       } else {
-        nav.style.background = 'rgba(4,0,0,0.92)';
-        nav.style.borderBottom = '1px solid rgba(139,0,0,0.5)';
+        nav.style.background = 'rgba(5, 0, 2, 0.5)';
+        nav.style.borderBottom = '1px solid rgba(255, 26, 74, 0.15)';
+        nav.style.boxShadow = 'none';
       }
     },
     { passive: true },
