@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>G-CASTLE | 🩸 전언방 (GUESTBOOK)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;700&family=Noto+Sans+KR:wght@300;400;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- ── 배경 레이어 (핏빛 무한성 연출) ── -->
+    <div class="bg-base"></div>
+    <div class="bg-moon"></div>
+    <div class="bg-ash"></div> <!-- 흩날리는 붉은 재 -->
+
+    <!-- ── G-CASTLE 글로벌 네비게이션 ── -->
+            <nav id="navbar">
+      <a href="../GGU/index.html" class="logo glow-title">BACK TO CASTLE</a>
+      <div class="nav-links">
+        <a href="gallery.html">GALLERY</a><a href="gacha.html">GACHA</a><a href="guestbook.html" class="active">GUESTBOOK</a>
+      </div>
+    </nav>
+
+    <!-- ── 방명록 공간 (메시지 부적 공중 부양) ── -->
+    <div class="talisman-sky" id="talismanSky">
+      <!-- 더미 방명록 데이터들이 떠다닐 공간 -->
+    </div>
+
+    <!-- ── 방명록 작성 UI (다크 글래스모피즘) ── -->
+    <div class="guestbook-interface">
+      <div class="interface-header">
+        <h2>🩸 전언 남기기</h2>
+        <p>무한성 허공에 크루원들을 향한 메세지를 띄우세요</p>
+      </div>
+      <form id="cheerForm" class="cheer-form">
+        <div class="input-group">
+          <label>닉네임 (결귀명)</label>
+          <input type="text" id="fanName" placeholder="예: 무명의 하현" required />
+        </div>
+        <div class="input-group">
+          <label>수신 대상 (멤버)</label>
+          <select id="targetMember" required>
+            <option value="ALL">무한성 크루 전체</option>
+            <option value="꾸티뉴">꾸티뉴</option>
+            <option value="야무지">야무지</option>
+            <option value="엔쥬">엔쥬</option>
+            <option value="란다">란다</option>
+            <option value="셀키">셀키</option>
+            <option value="리카">리카</option>
+            <option value="철쑤">철쑤</option>
+            <option value="구본좌">구본좌</option>
+            <option value="하현">하현 (영감, 난워니, 다뮤, 딴딴2당...)</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label>전언 (혈귀술)</label>
+          <textarea id="fanMessage" rows="3" placeholder="빛나는 당신들의 행보를 응원합니다!" required></textarea>
+        </div>
+        <button type="submit" class="submit-btn" id="btnSubmit">
+          전언 띄우기 <span class="glow"></span>
+        </button>
+      </form>
+    </div>
+
+    <!-- 시각 효과용 파티클 컨테이너 -->
+    <div class="particle-system" id="particles"></div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

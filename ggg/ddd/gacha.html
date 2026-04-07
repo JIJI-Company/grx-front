@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>G-CASTLE | 🎴 상현의 소환</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;700&family=Noto+Sans+KR:wght@300;400;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="gacha_style.css" />
+  </head>
+  <body>
+    <!-- ── 배경 레이어 (무한성 연출) ── -->
+    <div class="bg-base"></div>
+    <div class="bg-ash"></div>
+
+    <!-- ── G-CASTLE 글로벌 네비게이션 ── -->
+            <nav id="navbar">
+      <a href="../GGU/index.html" class="logo glow-title">BACK TO CASTLE</a>
+      <div class="nav-links">
+        <a href="gallery.html">GALLERY</a><a href="gacha.html" class="active">GACHA</a><a href="guestbook.html">GUESTBOOK</a>
+      </div>
+    </nav>
+
+    <!-- ── 소환 제단 영역 (The Summoning Altar) ── -->
+    <section class="gacha-section">
+      <div class="gacha-header">
+        <h1 class="archive-title">UPPER MOON SUMMON</h1>
+        <p class="archive-subtitle">무한성의 문을 열어 오늘 당신의 운명을 함께할 혈귀를 맞이하세요.</p>
+      </div>
+
+      <div class="summon-altar">
+        <!-- 🚪 미닫이문 (이 문이 열리며 소환됨) -->
+        <div id="gachaGate" class="gacha-gate">
+          <div class="fusuma-left"></div>
+          <div class="fusuma-right"></div>
+          <div class="gate-seal">招</div>
+          <div class="summon-hint">CLICK TO SUMMON</div>
+        </div>
+
+        <!-- 🔮 소환 결과 카드 슬라이드 컨테이너 -->
+        <div id="summonResult" class="summon-result-container">
+          <!-- JS로 뽑힌 카드가 렌더링됨 -->
+        </div>
+
+        <div class="btn-group">
+            <button id="btnSummon" class="btn-primary-gacha">운명의 소환</button>
+            <button id="btnReset" class="btn-secondary-gacha" style="display:none;">다시 소환 (테스트용)</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 시각 효과용 파티클 컨테이너 -->
+    <div class="particle-system" id="particles"></div>
+
+    <script src="gacha_script.js"></script>
+    <!-- 공통 네비게이션 효과용 -->
+    <script>
+      window.addEventListener('scroll', () => {
+        const nav = document.getElementById('mainNav');
+        if (window.scrollY > 60) {
+          nav.style.background = 'rgba(5, 0, 2, 0.7)';
+        } else {
+          nav.style.background = 'rgba(5, 0, 2, 0.5)';
+        }
+      });
+    </script>
+  </body>
+</html>

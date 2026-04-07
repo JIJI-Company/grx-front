@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>G-CASTLE | SOOP LIVE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;700&family=Noto+Sans+KR:wght@400;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- 배경 레이어 -->
+    <div class="bg-base"></div>
+    <div class="bg-particles"></div>
+    <div class="bg-scanline"></div>
+    <div class="bg-vignette"></div>
+    <div class="flame flame-left"></div>
+    <div class="flame flame-right"></div>
+
+    <!-- NAV -->
+        <nav id="navbar">
+      <a href="../GGU/index.html" class="logo glow-title">G-CASTLE</a>
+      <div class="nav-links">
+        <a href="../lve/live.html" class="active">LIVE</a><a href="../GGCard/card.html">MEMBERS</a><a href="../GRX/history.html">HISTORY</a><a href="../ddd/times.html">TIMES</a><a href="../ddd/schedule.html">SCHEDULE</a>
+      </div>
+    </nav>
+
+    <!-- ── 라이브 통합 대시보드 ── -->
+    <section class="live-dashboard-section animate-fade-in">
+      <div class="dashboard-header">
+        <h1 class="glow-title">LIVE CASTLE</h1>
+        <p class="dashboard-subtitle">무한성의 대시보드에서 실시간 방송 상태를 확인하십시오.</p>
+      </div>
+
+      <div class="live-grid" id="liveDashboardGrid">
+        <!-- JS로 동적 생성되는 라이브 카드들 -->
+      </div>
+    </section>
+
+
+
+    <!-- ── 방송 일정표 ── -->
+    <section class="schedule-section">
+      <div class="section-header">
+        <div class="section-line"></div>
+        <h2 class="section-title">📅 LIVE SCHEDULE</h2>
+        <div class="section-line"></div>
+      </div>
+      <p class="section-desc">꾸한성 크루의 주요 방송 일정표</p>
+
+      <div class="schedule-grid" id="scheduleGrid"></div>
+    </section>
+
+    <footer>
+      <span class="footer-logo">G-CASTLE</span>
+      <p>© 2026 GGU-CASTLE. CREATED BY ㅇㅇ.</p>
+      <p class="footer-disclaimer">This is a non-commercial fan site. Kimetsu no Yaiba © Koyoharu Gotouge / Shueisha / Aniplex. All rights reserved to their respective owners.</p>
+    </footer>
+
+    <!-- 공통 데이터 서비스 (v3.1) -->
+    <script src="../common/config.js"></script>
+    <script src="../common/dataService.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
+

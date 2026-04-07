@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>G-CASTLE | 🎨 팬 아트 & 갤러리</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;700&family=Noto+Sans+KR:wght@300;400;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- ── 배경 레이어 ── -->
+    <div class="bg-base"></div>
+    <div class="bg-ash"></div>
+
+    <!-- ── G-CASTLE 글로벌 네비게이션 ── -->
+            <nav id="navbar">
+      <a href="../GGU/index.html" class="logo glow-title">BACK TO CASTLE</a>
+      <div class="nav-links">
+        <a href="gallery.html" class="active">GALLERY</a><a href="gacha.html">GACHA</a><a href="guestbook.html">GUESTBOOK</a>
+      </div>
+    </nav>
+
+    <!-- ── 갤러리 영역 (Masonry 레이아웃) ── -->
+    <section class="gallery-section">
+      <div class="gallery-header">
+        <h1 class="glow-title">ART ARCHIVE</h1>
+        <p>크루원들을 위해 헌정된 소중한 팬 아트 스탠드</p>
+      </div>
+
+      <!-- 핀터레스트 스타일 다단 칼럼 (Column) 로드 -->
+      <div class="gallery-masonry" id="galleryMasonry">
+        <!-- JS로 채워짐 -->
+      </div>
+    </section>
+
+    <div class="particle-system" id="particles"></div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

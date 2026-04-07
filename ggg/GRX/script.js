@@ -1,63 +1,18 @@
-// ════════════════════════════════════
-// ✅ 수상 기록 여기에 추가하세요
-// category: 'lol' | 'battleground' | 'vr' | 'minecraft' | 'multi'
-// medal:    'gold' | 'silver' | 'bronze'
-// ════════════════════════════════════
-const achievements = [
-  {
-    category: 'lol',
-    medal: 'gold',
-    team: 'GRX_LOL',
-    achievement: '2026 정기 대항전 최종 우승',
-    date: '2026.03',
-    type: 'LEAGUE OF LEGENDS TEAM',
-  },
-  {
-    category: 'battleground',
-    medal: 'silver',
-    team: 'GRX_BATTLE',
-    achievement: '공식 크루 매치 준우승',
-    date: '2026.02',
-    type: 'BATTLEGROUNDS TEAM',
-  },
-  {
-    category: 'vr',
-    medal: 'bronze',
-    team: 'GRX_VR',
-    achievement: 'VR 페스티벌 컨텐츠 입상',
-    date: '2025.12',
-    type: 'VRCHAT & VR TEAM',
-  },
-  {
-    category: 'minecraft',
-    medal: 'gold',
-    team: 'GRX_MC',
-    achievement: '대규모 건축 대회 대상',
-    date: '2025.11',
-    type: 'MINECRAFT TEAM',
-  },
-  {
-    category: 'multi',
-    medal: 'gold',
-    team: 'GRX_MLTY',
-    achievement: '종합 게임 크루 대항전 우승',
-    date: '2025.10',
-    type: 'MULTI-GAMING TEAM',
-  },
-];
+// ── 전역 데이터 변수 ──
+let achievements = [];
 
 // ── 상수 ──
 const MEDAL_ORDER = { gold: 0, silver: 1, bronze: 2 };
 const MEDAL_NUM = { gold: 1, silver: 2, bronze: 3 };
 const MEDAL_TEXT = { gold: 'GOLD', silver: 'SILVER', bronze: 'BRONZE' };
 
-// ── 카드 HTML 생성 (새 구조) ──
+// ── 카드 HTML 생성 (기본 구조) ──
 function buildCard(a, delay = 0) {
   return `
     <div class="team-card ${a.medal}" style="animation-delay:${delay}s">
-        <div class="card-medal-label">${MEDAL_TEXT[a.medal]}</div>
+        <div class="card-medal-label">${MEDAL_TEXT[a.medal] || 'ACHIEVEMENT'}</div>
         <div class="card-team-name">${a.team}</div>
-        <div class="card-medal-icon">${MEDAL_NUM[a.medal]}</div>
+        <div class="card-medal-icon">${MEDAL_NUM[a.medal] || '🏆'}</div>
         <div class="card-achievement">${a.achievement}</div>
         <div class="card-divider"></div>
         <div class="card-date">${a.date}</div>
@@ -67,14 +22,14 @@ function buildCard(a, delay = 0) {
 }
 
 function sortByMedal(arr) {
-  return [...arr].sort((a, b) => MEDAL_ORDER[a.medal] - MEDAL_ORDER[b.medal]);
+  return [...arr].sort((a, b) => (MEDAL_ORDER[a.medal] ?? 99) - (MEDAL_ORDER[b.medal] ?? 99));
 }
 
 function emptyHTML() {
   return `
     <div class="empty-state">
       <span class="empty-icon">🏆</span>
-      <p>아직 수상 기록이 없습니다</p>
+      <p>기록을 불러오는 중이거나 아직 수상 기록이 없습니다</p>
     </div>
   `;
 }
@@ -85,7 +40,9 @@ function renderTotalStats() {
   if (!el) return;
 
   const c = { gold: 0, silver: 0, bronze: 0 };
-  achievements.forEach((a) => c[a.medal]++);
+  achievements.forEach((a) => {
+    if (c[a.medal] !== undefined) c[a.medal]++;
+  });
 
   el.innerHTML = `
     <div class="stat-item">
@@ -152,7 +109,9 @@ function renderCatSlider(cat) {
 
   if (statsEl) {
     const c = { gold: 0, silver: 0, bronze: 0 };
-    filtered.forEach((a) => c[a.medal]++);
+    filtered.forEach((a) => {
+      if (c[a.medal] !== undefined) c[a.medal]++;
+    });
     const badges = [];
     if (c.gold)
       badges.push(
@@ -220,7 +179,7 @@ function initNav() {
   );
 }
 
-// ── 스크롤 인 애니메이션 (Intersection Observer) ──
+// ── 스크롤 인 애니메이션 ──
 function initScrollReveal() {
   const observer = new IntersectionObserver(
     (entries) => {
@@ -244,7 +203,14 @@ function initScrollReveal() {
 }
 
 // ── 초기화 ──
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  achievements = await DataService.getData('history', (updatedData) => {
+    achievements = updatedData || [];
+    renderTotalStats();
+    renderHofSlider();
+    renderCatSlider(document.querySelector('.tab-btn.active')?.dataset.cat || 'all');
+  }) || [];
+
   renderTotalStats();
   renderHofSlider();
   renderCatSlider('all');
