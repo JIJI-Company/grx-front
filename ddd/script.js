@@ -19,12 +19,12 @@ let timesData = [];
 // 🎨 GALLERY 더미 데이터
 // ════════════════════════════════════
 const galleryData = [
-  { author: "팬아트머신", desc: "레전드 단체샷", height: 300, img: "/grx/img/ggu_title.jpg" },
-  { author: "붉은달", desc: "야무지 하이라이트", height: 250, img: "/grx/img/yamuzi.png" },
-  { author: "다뮤바라기", desc: "하현 귀요미 모음", height: 400, img: "/grx/img/damu.jpeg" },
-  { author: "얼음꽃", desc: "엔쥬 팬아트", height: 200, img: "/grx/img/enju.png" },
-  { author: "꾸꾸까까", desc: "마스터의 위엄", height: 350, img: "/grx/img/ggutinho.png" },
-  { author: "무한성주민", desc: "리카의 항아리", height: 280, img: "/grx/img/lika.png" }
+  { author: "팬아트머신", desc: "레전드 단체샷", height: 300, img: "../img/ggu_title.jpg" },
+  { author: "붉은달", desc: "야무지 하이라이트", height: 250, img: "../img/yamuzi.png" },
+  { author: "다뮤바라기", desc: "하현 귀요미 모음", height: 400, img: "../img/damu.jpeg" },
+  { author: "얼음꽃", desc: "엔쥬 팬아트", height: 200, img: "../img/enju.png" },
+  { author: "꾸꾸까까", desc: "마스터의 위엄", height: 350, img: "../img/ggutinho.png" },
+  { author: "무한성주민", desc: "리카의 항아리", height: 280, img: "../img/lika.png" }
 ];
 
 

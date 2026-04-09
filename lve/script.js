@@ -6,7 +6,7 @@ function buildDashboardCard(m) {
   const isLive = m.status === 'on-air';
   
   // 썸네일: 방송 중이면 방송 제목이나 썸네일을, 아니면 기본 이미지 사용
-  const thumbnail = m.thumbnail || '../grx/img/ggu_title.jpg';
+  const thumbnail = m.thumbnail || '..../img/ggu_title.jpg';
   
   return `
     <div class="live-card-v2 ${m.status}" onclick="window.open('${m.link}', '_blank')">

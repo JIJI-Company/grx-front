@@ -8,10 +8,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const gate = document.getElementById('intro-gate');
   const introContent = document.querySelector('.intro-content');
 
+  // 팝업 트리거 헬퍼 (게이트 상황에 맞게 딜레이 조절)
+  const triggerPopup = (delay) => {
+    if (typeof CONFIG !== 'undefined' && CONFIG.EVENT_POPUP && CONFIG.EVENT_POPUP.enable) {
+      if (!sessionStorage.getItem("eventPopupClosed")) {
+        setTimeout(showEventPopup, delay);
+      }
+    }
+  };
+
   // 한 번 봤으면 게이트 스킵
   if (sessionStorage.getItem('gateShown')) {
     if (gate) gate.style.display = 'none';
     document.body.classList.add('show-main');
+    triggerPopup(1000); // 메인화면 바로 진입 시 1초 뒤 등장
   }
 
   if (enterBtn && gate) {
@@ -29,6 +39,8 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
         gate.style.display = 'none';
         sessionStorage.setItem('gateShown', 'true'); // 본 것으로 저장
+        
+        triggerPopup(500); // 👉 무한성 게이트가 완전히 열리고 0.5초 뒤에 팝업 등장!
       }, 1200);
     });
   }
@@ -84,12 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }, 3000);
 
-  // 🎇 대규모 이벤트 팝업 체크 로직
-  if (typeof CONFIG !== 'undefined' && CONFIG.EVENT_POPUP && CONFIG.EVENT_POPUP.enable) {
-    if (!sessionStorage.getItem("eventPopupClosed")) {
-      setTimeout(showEventPopup, 1000); // 1초 뒤 자연스럽게 등장
-    }
-  }
+  // 🎇 팝업 노출 로직은 윗부분의 게이트 컨트롤(triggerPopup)으로 이동되었습니다.
 
   // 🖱️ 패럴랙스 (마우스 이동 대응)
   const heroSection = document.getElementById('heroSection');
@@ -187,14 +194,15 @@ async function checkLiveStatus() {
 
     // 멤버 이미지 맵핑
     const memberImages = {
-      "꾸티뉴": "/grx/img/ggutinho.png", "엔쥬": "/grx/img/enju.png",
-      "난워니": "/grx/img/nanana.png", "야무지": "/grx/img/yamuzi.png",
-      "란다": "/grx/img/randa.png", "셀키": "/grx/img/selky.png",
-      "리카": "/grx/img/lika.png", "철쑤": "/grx/img/choelssu.png",
-      "구본좌": "/grx/img/koo.png", "영감": "/grx/img/younggam.png",
-      "다뮤": "/grx/img/damu.jpeg", "딴딴2당": "/grx/img/ttanttan.jpeg",
-      "초귀요미": "/grx/img/cho-cutie.png", "밈먀": "/grx/img/mimmya.png",
-      "바먀": "/grx/img/baamya.png"
+      "꾸티뉴": "img/ggutinho.png", "엔쥬": "img/enju.png",
+      "난워니": "img/nanana.png", "야무지": "img/yamuzi.png",
+      "란다": "img/randa.png", "셀키": "img/selky.png",
+      "리카": "img/lika.png", "철쑤": "img/choelssu.png",
+      "구본좌": "img/koo.png", "영감": "img/younggam.png",
+      "다뮤": "img/damu.jpeg", "딴딴2당": "img/ttanttan.jpeg",
+      "초귀요미": "img/cho-cutie.png", "밈먀": "img/mimmya.png",
+      "바먀": "img/baamya.png",
+      "서라0": "img/서라0.png"
     };
 
     function getAvatar(name) {
@@ -393,9 +401,9 @@ function renderHomeSchedule() {
   
   // (임시 데이터) 추후 시트에서 받아오게 연결 가능합니다.
   const mockSchedules = [
-    { title: "GGU-CASTLE 대규모 합방", time: "오늘 21:00", member: "꾸티뉴", avatar: "/grx/img/ggutinho.png", category: "합방" },
-    { title: "마인크래프트 건축 노가다", time: "오늘 23:30", member: "엔쥬", avatar: "/grx/img/enju.png", category: "게임" },
-    { title: "혈귀술 집중 훈련 (Just Chatting)", time: "내일 19:00", member: "야무지", avatar: "/grx/img/yamuzi.png", category: "소통" }
+    { title: "GGU-CASTLE 대규모 합방", time: "오늘 21:00", member: "꾸티뉴", avatar: "img/ggutinho.png", category: "합방" },
+    { title: "마인크래프트 건축 노가다", time: "오늘 23:30", member: "엔쥬", avatar: "img/enju.png", category: "게임" },
+    { title: "혈귀술 집중 훈련 (Just Chatting)", time: "내일 19:00", member: "야무지", avatar: "img/yamuzi.png", category: "소통" }
   ];
   
   container.innerHTML = mockSchedules.map(sc => `

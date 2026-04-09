@@ -21,9 +21,9 @@ const CONFIG = {
   // 큰 행사가 있을 때 enable을 true로 변경하면 첫 접속 시 자동으로 화려한 팝업이 뜹니다.
   EVENT_POPUP: {
     enable: true, // 팝업 띄우기 온/오프 (true / false)
-    title: "🎉 GGU-CASTLE 대규모 축제 🎉", // 팝업 제목
-    message: "무한성 크루 충동서버 준우승을 진심으로 축하합니다!<br>멤버들의 멋진 행보를 계속해서 지켜봐주세요.", // 팝업 메시지 (html 태그 사용 가능)
-    imageUrl: "/grx/img/ggu_title.jpg", // 팝업 상단 이미지 (안 쓸거면 "" 로 비워두시면 됩니다)
+    title: "🎉 Welcome 서라0 🎉", // 팝업 제목
+    message: "아꾸츠키 서라0 환영해주세요<br> 멋진 행보를 계속해서 지켜봐주세요.", // 팝업 메시지 (html 태그 사용 가능)
+    imageUrl: "img/서라0.png", // 팝업 상단 이미지 (안 쓸거면 "" 로 비워두시면 됩니다)
     link: "" // "자세히 보기" 버튼 클릭 시 이동할 링크 (안 쓸거면 "" 로 비워두세요)
   }
 };
