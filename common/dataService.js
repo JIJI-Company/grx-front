@@ -71,7 +71,8 @@ const DataService = {
 
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      // [수정] 16명 전원의 라이브 체크 로직이 10초 이상 걸리므로, 대기 시간을 20초로 늘립니다.
+      const timeoutId = setTimeout(() => controller.abort(), 20000);
 
       // 🔗 Token을 URL 끝에 붙여서 보안 강화
       const url = `${CONFIG.GAS_URL}?sheet=${sheetName}&token=${CONFIG.API_TOKEN || ''}`;

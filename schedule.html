@@ -17,6 +17,43 @@
         border-bottom: 1px solid rgba(255, 26, 74, 0.2);
         background: linear-gradient(to bottom, rgba(5,0,2,0.9), transparent);
       }
+      
+      /* 👑 멤버별 공지 그룹 커스텀 스타일 */
+      .member-schedule-group {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+      .member-sch-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        border-bottom: 1px solid rgba(255, 26, 74, 0.3);
+        padding-bottom: 12px;
+        margin-bottom: 10px;
+      }
+      .member-sch-header img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--bright-red);
+        background: #000;
+      }
+      .member-sch-header h2 {
+        color: #fff;
+        font-size: 1.5rem;
+        margin: 0;
+        font-family: 'Noto Sans KR', sans-serif;
+      }
+      .member-sch-header h2 span {
+        color: #888;
+        font-size: 0.9rem;
+        font-weight: 300;
+        margin-left: 10px;
+      }
+
       .sch-title-main {
         font-family: 'Oswald', sans-serif;
         font-size: 4rem;
@@ -47,11 +84,11 @@
       }
       .sch-tabs {
         display: flex;
-        overflow-x: auto;
-        padding-bottom: 10px;
-        scrollbar-width: none;
-        -webkit-overflow-scrolling: touch;
+        flex-wrap: wrap; /* 2줄 이상으로 감싸기 */
+        justify-content: center;
         gap: 10px;
+        max-width: 1000px;
+        margin: 0 auto;
       }
       .sch-tabs::-webkit-scrollbar { display: none; }
       
@@ -96,6 +133,48 @@
         border-color: rgba(255, 26, 74, 0.8);
         box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 30px rgba(255, 26, 74, 0.2);
       }
+      
+      /* 🖼️ 썸네일 없을 때의 커스텀 스타일 (제목 강조형) */
+      .sch-card.no-thumbnail {
+        height: 220px; /* 고정 높이 */
+        display: flex;
+        flex-direction: column;
+      }
+      .sch-card.no-thumbnail .vc-content {
+        flex: 1;
+        padding: 30px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgba(255, 26, 74, 0.15), transparent);
+        text-align: center;
+      }
+      .sch-card.no-thumbnail .vc-title {
+        font-size: 1.4rem; /* 적절한 크기로 조정 */
+        line-height: 1.5;
+        max-height: 4.5em; /* 최대 3줄 높이 */
+        -webkit-line-clamp: 3; /* 최대 3줄까지만 노출 */
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        word-break: keep-all; /* 한글 단어 단위 끊기 */
+        color: #fff;
+        text-shadow: 0 0 15px rgba(255, 26, 74, 0.4);
+      }
+      
+      /* 일반 제목 스타일 보강 */
+      .vc-title {
+        font-family: 'Noto Sans KR', sans-serif;
+        font-weight: 700;
+        margin: 0;
+        color: #fff;
+      }
+
+      .vc-content {
+        padding: 15px 20px;
+        background: rgba(0,0,0,0.2);
+      }
 
       @media (max-width: 768px) {
         .sch-title-main { font-size: 2.5rem; }
@@ -108,11 +187,23 @@
         .sch-title-main { font-size: 2rem; }
         .schedule-container { margin-bottom: 60px; }
       }
+
+      /* 애니메이션 효과 강제 정의 (카드 나타나기) */
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-in {
+        opacity: 0;
+        animation: fadeIn 0.8s ease-out forwards !important;
+      }
     </style>
   </head>
-  <body class="bg-castle">
+  <body class="show-main">
     <!-- 배경 이펙트 (공통) -->
-    <div class="blood-particles" id="particles"></div>
+    <div class="bg-castle">
+      <div class="blood-particles" id="particles"></div>
+    </div>
 
     <div class="layout-wrapper">
         <nav id="navbar">
@@ -127,13 +218,12 @@
         <p class="sch-title-sub">무한성의 모든 작전 일정을 확인하세요</p>
       </section>
 
+
       <main class="schedule-container">
         <div class="schedule-actions">
-          <div class="sch-tabs">
+          <div class="sch-tabs" id="memberTabs">
             <button class="active">전체 보기</button>
-            <button>합방</button>
-            <button>개인방송</button>
-            <button>이벤트</button>
+            <!-- 탭 (JS 동적 렌더링) -->
           </div>
         </div>
 
@@ -152,58 +242,133 @@
     <script src="common/config.js"></script>
     <script src="common/dataService.js"></script>
     <script>
-      document.addEventListener('DOMContentLoaded', () => {
+
+      document.addEventListener('DOMContentLoaded', async () => {
         // 입자 렌더링
         const pContainer = document.getElementById('particles');
-        for (let i = 0; i < 40; i++) {
-          let span = document.createElement('span');
-          span.style.left = Math.random() * 100 + '%';
-          span.style.top = Math.random() * 100 + '%';
-          span.style.animationDuration = (Math.random() * 10 + 5) + 's';
-          span.style.animationDelay = (Math.random() * 5) + 's';
-          pContainer.appendChild(span);
-        }
-
-        // [SOOP 연동] GAS URL을 여기에 입력하세요.
-        // [공식 API 지원 대기] 현재는 안정성을 위해 견본 데이터를 출력합니다.
-        const grid = document.getElementById('fullScheduleGrid');
-        
-        async function loadRealSchedules() {
-          grid.innerHTML = '<p style="color:#aaa; text-align:center; width:100%; padding:50px;">데이터를 불러오는 중...</p>';
-          
-          try {
-            const schedules = await DataService.getSchedules();
-            
-            if (!schedules || schedules.length === 0) {
-              grid.innerHTML = '<p style="color:#aaa; text-align:center; width:100%; padding:50px;">진행 예정인 일정이 없습니다.</p>';
-              return;
-            }
-
-            grid.innerHTML = schedules.map(data => `
-              <div class="sch-card animate-fade-in">
-                <div class="vc-thumbnail">
-                  <img src="${data.Thumbnail || data.thumbnail || 'img/ggu_title.jpg'}" alt="Thumbnail">
-                </div>
-                <div class="vc-content">
-                  <h3 class="vc-title">${data.Title || data.title}</h3>
-                  <p class="vc-desc">${data.Description || data.desc || ''}</p>
-                </div>
-                <div class="vc-footer">
-                  <img src="${data.Avatar || data.avatar || 'img/ggu_title.jpg'}" class="vc-avatar" alt="${data.Member || data.member}">
-                  <div class="vc-meta">
-                    <span class="vc-author">${data.Member || data.member}</span>
-                    <span class="vc-time">${data.Time || data.time}</span>
-                  </div>
-                </div>
-              </div>
-            `).join('');
-          } catch (err) {
-            console.error("Schedule load error:", err);
-            grid.innerHTML = '<p style="color:#ff1a4a; text-align:center; width:100%; padding:50px;">일정을 불러오는데 실패했습니다.</p>';
+        if (pContainer) {
+          for (let i = 0; i < 40; i++) {
+            let span = document.createElement('span');
+            span.style.left = Math.random() * 100 + '%';
+            span.style.top = Math.random() * 100 + '%';
+            span.style.animationDuration = (Math.random() * 10 + 5) + 's';
+            span.style.animationDelay = (Math.random() * 5) + 's';
+            pContainer.appendChild(span);
           }
         }
 
-        // 실데이터 로드
+        // [일정표 그리드] 실데이터 로드 및 멤버별 그룹핑 함수
+        const grid = document.getElementById('fullScheduleGrid');
+        
+        async function loadRealSchedules() {
+          if (!grid) return;
+          grid.innerHTML = '<p style="color:#aaa; text-align:center; width:100%; padding:50px;">무한성 통신망을 통해 전 멤버의 기록을 불러오는 중...</p>';
+          
+          try {
+            // 📡 1. 전체 멤버 리스트와 일정을 동시에 가져옵니다.
+            const [liveResponse, schResponse] = await Promise.all([
+              DataService.getLive(),
+              DataService.getSchedules()
+            ]);
+
+            // 💡 [수정] 이름이나 ID가 없는 유령 멤버는 필터링하여 제외합니다.
+            const allMembers = (Array.isArray(liveResponse) ? liveResponse : (liveResponse?.Live || []))
+                               .filter(m => (m.name && String(m.name).trim()) || (m.id && String(m.id).trim()));
+            
+            const rawSchedules = (schResponse && schResponse.Schedule) ? schResponse.Schedule : (Array.isArray(schResponse) ? schResponse : []);
+            
+            if (!allMembers || allMembers.length === 0) {
+                grid.innerHTML = '<p style="color:#ff1a4a; text-align:center; width:100%; padding:50px;">멤버 정보를 불러오지 못했습니다. Live 시트를 확인하세요.</p>';
+                return;
+            }
+
+            // 👑 2. 기존 그리드 속성 해제 및 스택 컨테이너 설정
+            grid.innerHTML = "";
+            grid.classList.remove('sch-grid');
+            grid.style.display = 'flex';
+            grid.style.flexDirection = 'column';
+            grid.style.gap = '50px';
+
+            // 👑 3. 모든 멤버에 대해 루프를 돌며 섹션 생성
+            const blocksHtml = allMembers.map(member => {
+              const memberName = member.name || member.id;
+              const memberAvatar = member.profileImg || member.avatar || "img/ggu_title.jpg";
+              
+              // 해당 멤버의 일정만 필터링
+              const mySchedules = rawSchedules.filter(s => s.Member === memberName || s.member === memberName);
+              
+              let cardsHtml = "";
+              if (mySchedules.length > 0) {
+                cardsHtml = mySchedules.map(data => {
+                  const postLink = data.Link || data.link || "#";
+                  const hasRealThumb = data.Thumbnail && !data.Thumbnail.includes('ggu_title.jpg');
+                  const cardClass = hasRealThumb ? 'sch-card animate-fade-in' : 'sch-card animate-fade-in no-thumbnail';
+
+                  return `
+                  <div class="${cardClass}" onclick="window.open('${postLink}', '_blank')">
+                    ${hasRealThumb ? `
+                    <div class="vc-thumbnail">
+                      <img src="${data.Thumbnail}" alt="Thumbnail">
+                    </div>` : ''}
+                    <div class="vc-content">
+                      <h3 class="vc-title">${data.Title || data.title || ""}</h3>
+                    </div>
+                    <div class="vc-footer">
+                      <div class="vc-meta" style="flex-direction:row; align-items:center; gap:8px;">
+                        <span class="vc-author" style="color:var(--bright-red); font-weight:bold;">새 소식 📡</span>
+                        <span class="vc-time">${data.Time || data.time}</span>
+                      </div>
+                    </div>
+                    <div class="vc-click-overlay">해당 글 확인하기 →</div>
+                  </div>
+                  `;
+                }).join('');
+              }
+
+              return `
+                <div class="member-schedule-group animate-fade-in" data-member="${memberName}">
+                  <div class="member-sch-header">
+                    <img src="${memberAvatar}" alt="${memberName}" onerror="this.src='img/ggu_title.jpg'">
+                    <h2>${memberName}<span>님의 최근 공지사항</span></h2>
+                  </div>
+                  <div class="sch-grid">
+                    ${cardsHtml}
+                  </div>
+                </div>
+              `;
+            }).join('');
+
+            grid.innerHTML = blocksHtml;
+
+            // 👑 4. 멤버 탭 업데이트 (전체 멤버 기준)
+            const tabsContainer = document.getElementById('memberTabs');
+            if (tabsContainer) {
+              const memberNames = allMembers.map(m => m.name || m.id);
+              tabsContainer.innerHTML = `<button class="active" onclick="filterMember('ALL', this)">전체 보기</button>` + 
+                memberNames.map(name => `<button onclick="filterMember('${name}', this)">${name}</button>`).join('');
+            }
+
+          } catch (err) {
+            console.error("Schedule load error:", err);
+            grid.innerHTML = '<p style="color:#ff1a4a; text-align:center; width:100%; padding:50px;">데이터 통신 중 오류가 발생했습니다.</p>';
+          }
+        }
+
+        // 👑 필터링 기능 (전역 함수로 추가)
+        window.filterMember = function(member, btn) {
+          document.querySelectorAll('#memberTabs button').forEach(b => b.classList.remove('active'));
+          if (btn) btn.classList.add('active');
+          
+          document.querySelectorAll('.member-schedule-group').forEach(group => {
+            if (member === 'ALL' || group.getAttribute('data-member') === member) {
+              group.style.display = 'flex';
+            } else {
+              group.style.display = 'none';
+            }
+          });
+        };
+
+        // 초기 실행
         loadRealSchedules();
       });
     </script>
