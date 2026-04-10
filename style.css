@@ -826,6 +826,12 @@ nav {
   width: 110px;
   height: 110px;
   flex-shrink: 0;
+  transition: all 0.5s ease;
+}
+/* 📌 썸네일이 있을 때의 스타일 확장 */
+.live-hero-avatar.has-thumbnail {
+  width: 320px;
+  height: 180px; /* 16:9 비율 확보 */
 }
 .hero-ring {
   position: absolute;
@@ -833,6 +839,10 @@ nav {
   border-radius: 50%;
   border: 2px dashed rgba(255, 26, 74, 0.5);
   animation: spin-slow 10s linear infinite;
+}
+/* 📌 썸네일일 때는 동그란 링 제거 */
+.live-hero-avatar.has-thumbnail .hero-ring {
+  display: none;
 }
 @keyframes spin-slow {
   100% { transform: rotate(360deg); }
@@ -844,20 +854,26 @@ nav {
   object-fit: cover;
   border: 3px solid var(--bright-red);
   box-shadow: 0 0 20px rgba(255, 26, 74, 0.3);
+  transition: all 0.5s ease;
+}
+/* 📌 썸네일 이미지 라운딩 조절 */
+.live-hero-avatar.has-thumbnail img {
+  border-radius: 12px;
 }
 .hero-badge {
   position: absolute;
-  bottom: -5px;
+  bottom: -10px;
   left: 50%;
   transform: translateX(-50%);
   background: var(--bright-red);
   color: #fff;
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 900;
-  padding: 4px 12px;
+  padding: 4px 16px;
   border-radius: 20px;
-  letter-spacing: 0.1rem;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  letter-spacing: 0.15rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+  z-index: 5;
 }
 .live-info-panel {
   display: flex;

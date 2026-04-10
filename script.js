@@ -234,14 +234,16 @@ async function checkLiveStatus() {
         <div class="premium-live-single animate-fade-in is-visible">
           <div class="live-hero-avatar ${stream.thumbnail ? 'has-thumbnail' : ''}">
             <div class="hero-ring"></div>
-            <img src="${imgUrl}" alt="${name}" style="${stream.thumbnail ? 'border-radius:12px; aspect-ratio:16/9; width:220px; object-fit:cover;' : ''}">
+            <img src="${imgUrl}" alt="${name}">
             <div class="hero-badge">ON AIR</div>
           </div>
           
           <div class="live-info-panel">
             <div class="premium-platform ${platformLower}">${stream.platform || 'SOOP'}</div>
             <h2 class="premium-streamer-name">${name}</h2>
-            <p class="premium-stream-title" title="${stream.liveTitle || stream.title || '현재 방송 중입니다.'}">${stream.liveTitle || stream.title || '단독 방송 송출 중입니다!'}</p>
+            <p class="premium-stream-title" title="${stream.liveTitle || stream.title || '현재 방송 중입니다.'}">
+              ${stream.liveTitle || stream.title || '단독 방송 송출 중입니다!'}
+            </p>
             
             <button class="premium-action-btn" onclick="window.open('${stream.link || ('http://play.sooplive.com/' + (stream.BJ_ID || stream.bj_id))}', '_blank')">
               라이브 참여하기 <span class="arrow-icon">➜</span>

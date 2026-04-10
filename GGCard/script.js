@@ -185,7 +185,7 @@ const members = {
       name: '초귀요미',
       rank: 'LOWER 6',
       img: 'img/cho-cutie.png',
-      art: '세라핀',
+      art: '하현 6',
       desc: '하현의 6위.',
       keywords: '#위선자 #아잉이',
       birthday: '12.25',

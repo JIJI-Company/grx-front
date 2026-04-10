@@ -16,16 +16,8 @@ let timesData = [];
 
 
 // ════════════════════════════════════
-// 🎨 GALLERY 더미 데이터
-// ════════════════════════════════════
-const galleryData = [
-  { author: "팬아트머신", desc: "레전드 단체샷", height: 300, img: "../img/ggu_title.jpg" },
-  { author: "붉은달", desc: "야무지 하이라이트", height: 250, img: "../img/yamuzi.png" },
-  { author: "다뮤바라기", desc: "하현 귀요미 모음", height: 400, img: "../img/damu.jpeg" },
-  { author: "얼음꽃", desc: "엔쥬 팬아트", height: 200, img: "../img/enju.png" },
-  { author: "꾸꾸까까", desc: "마스터의 위엄", height: 350, img: "../img/ggutinho.png" },
-  { author: "무한성주민", desc: "리카의 항아리", height: 280, img: "../img/lika.png" }
-];
+// 🎨 GALLERY 데이터 변수 (시트 연동으로 대체됨)
+let galleryData = [];
 
 
 // ── 페이지 초기화 분기 처리 ──
@@ -210,22 +202,45 @@ function initTimes() {
 // ════════════════════════════════════
 // [3] GALLERY 로직
 // ════════════════════════════════════
-function initGallery(container) {
+async function initGallery(container) {
+  // 💡 [V11.0] 시트에서 갤러리 데이터를 가져옵니다.
+  galleryData = await DataService.getData('Gallery') || [];
+  
+  if (galleryData.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 100px 20px; color: #555; width: 100%; grid-column: 1/-1;">
+        <p style="font-size: 1.2rem; letter-spacing: 2px;">갤러리에 등록된 작품이 없습니다.</p>
+        <p style="font-size: 0.8rem; margin-top: 10px; opacity: 0.5;">시트에 게시글 URL을 추가해 보세요!</p>
+      </div>
+    `;
+    return;
+  }
+
   galleryData.forEach((art, idx) => {
     const item = document.createElement('div');
     item.className = "gallery-item";
+    
+    // 사진을 클릭하면 원본 게시글로 이동
+    item.onclick = () => {
+      const link = art.URL || art.url || '#';
+      if (link !== '#') window.open(link, '_blank');
+    };
     
     item.style.opacity = 0;
     item.style.transform = 'translateY(20px)';
     item.style.transitionDelay = `${idx * 0.1}s`;
     
-    // 랜덤 이미지가 없을 수 있으니 높이를 임의로 할당해서 Masonry 보장
-    // (실제 프로젝트에선 뼈대 잡은 후 img태그 로드처리)
+    const thumb = art.Thumbnail || art.thumbnail || '../img/ggu_title.jpg';
+    const author = art.Author || art.author || '익명의 팬';
+    const desc = art.Description || art.description || 'G-CASTLE FAN ART';
+
     item.innerHTML = `
-      <div style="width: 100%; height: ${art.height}px; background: url('${art.img}') center/cover no-repeat; border-radius: 4px;"></div>
+      <div class="gallery-wrapper" style="width: 100%; background: rgba(0,0,0,0.2); border-radius: 4px; overflow: hidden;">
+        <img src="${thumb}" alt="${author}" style="width: 100%; display: block; border-radius: 4px;" onerror="this.src='../img/ggu_title.jpg'">
+      </div>
       <div class="gallery-overlay">
-        <div class="gallery-author">BY: ${art.author}</div>
-        <div class="gallery-desc">${art.desc}</div>
+        <div class="gallery-author">BY: ${author}</div>
+        <div class="gallery-desc">${desc}</div>
       </div>
     `;
     
