@@ -3,6 +3,12 @@ function moveSlider(amount) {
   slider.scrollLeft += amount;
 }
 
+// ⚡ 라이브 데이터 사전 로드 (LIVE 페이지 진입 시 속도 향상을 위해)
+DataService.getLive().then(data => {
+  console.log("[Prefetch] Live data ready.");
+  if (data) renderHomeLiveStatus(data); // 홈 화면의 실시간 상태도 즉시 업데이트
+});
+
 document.addEventListener('DOMContentLoaded', () => {
   const enterBtn = document.getElementById('enter-btn');
   const gate = document.getElementById('intro-gate');
