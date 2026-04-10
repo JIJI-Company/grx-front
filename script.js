@@ -405,29 +405,50 @@ function displayNews(grid, items) {
 }
 
 /** 메인화면 미니 스케줄 렌더러 */
-function renderHomeSchedule() {
+async function renderHomeSchedule() {
   const container = document.getElementById('homeScheduleList');
   if (!container) return;
   
-  // (임시 데이터) 추후 시트에서 받아오게 연결 가능합니다.
-  const mockSchedules = [
-    { title: "GGU-CASTLE 대규모 합방", time: "오늘 21:00", member: "꾸티뉴", avatar: "img/ggutinho.png", category: "합방" },
-    { title: "마인크래프트 건축 노가다", time: "오늘 23:30", member: "엔쥬", avatar: "img/enju.png", category: "게임" },
-    { title: "혈귀술 집중 훈련 (Just Chatting)", time: "내일 19:00", member: "야무지", avatar: "img/yamuzi.png", category: "소통" }
-  ];
-  
-  container.innerHTML = mockSchedules.map(sc => `
-    <div class="schedule-item-mini">
-       <span class="cat-badge">${sc.category}</span>
-       <div class="sch-main">
-         <h4 class="sch-title">${sc.title}</h4>
-         <span class="sch-time">${sc.time}</span>
-       </div>
-       <div class="sch-member">
-         <img src="${sc.avatar}" alt="${sc.member}">
-         <span>${sc.member}</span>
-       </div>
-    </div>
-  `).join('');
+  try {
+    const schedules = await DataService.getSchedules();
+
+    // 📅 [날짜순 정렬 보강] 시간(MM.dd HH:mm) 문자열을 기준으로 내림차순 정렬
+    const sortedSchedules = [...schedules].sort((a, b) => {
+      const timeA = a.Time || a.time || "";
+      const timeB = b.Time || b.time || "";
+      return timeB.localeCompare(timeA); // 최신 날짜가 앞으로 오게 정렬
+    });
+
+    const top3 = sortedSchedules.slice(0, 3);
+
+    if (!top3 || top3.length === 0) {
+      container.innerHTML = '<div style="text-align:center; padding:20px; color:#666; font-size:0.85rem;">진행 예정인 일정이 없습니다.</div>';
+      return;
+    }
+    
+    container.innerHTML = top3.map(sc => {
+      const name = sc.Member || sc.member || "CREW";
+      const avatar = sc.Avatar || sc.avatar || `img/${name}.png`;
+      const time = sc.Time || sc.time || "RECENT";
+      const title = sc.Title || sc.title || "새로운 공지사항";
+
+      return `
+        <div class="schedule-item-mini" onclick="window.open('${sc.Link || '#'}', '_blank')" style="cursor:pointer;">
+           <span class="cat-badge">NEWS</span>
+           <div class="sch-main">
+             <h4 class="sch-title">${title}</h4>
+             <span class="sch-time">${time}</span>
+           </div>
+           <div class="sch-member">
+             <img src="${avatar}" alt="${name}" onerror="this.src='img/ggu_title.jpg'">
+             <span>${name}</span>
+           </div>
+        </div>
+      `;
+    }).join('');
+  } catch (err) {
+    console.error("Home schedule render error:", err);
+    container.innerHTML = '<div style="text-align:center; padding:20px; color:#ff1a4a; font-size:0.8rem;">일정을 불러오지 못했습니다.</div>';
+  }
 }
 
