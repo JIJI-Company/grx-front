@@ -178,8 +178,8 @@ async function checkLiveStatus() {
     }
 
     const activeStreams = (Array.isArray(liveData) ? liveData : []).filter(s => {
-        const status = String(s.status || s.isLive || "").toLowerCase().trim();
-        return status === 'on-air' || status === 'on_air' || status === 'y';
+        const status = String(s.status || s.isLive || "").toUpperCase().trim();
+        return status === 'ON-AIR' || status === 'ON_AIR' || status === 'Y' || status === 'LIVE';
     });
 
     if (activeStreams.length === 0) {
@@ -202,11 +202,11 @@ async function checkLiveStatus() {
       "다뮤": "img/damu.jpeg", "딴딴2당": "img/ttanttan.jpeg",
       "초귀요미": "img/cho-cutie.png", "밈먀": "img/mimmya.png",
       "바먀": "img/baamya.png",
-      "서라0": "img/서라0.png"
+      "서라0": "img/서라0.jpg"
     };
 
     function getAvatar(name) {
-      const n = name.replace(/\\s+/g, "");
+      const n = name.replace(/\s+/g, "");
       for (const key in memberImages) {
         if (n.includes(key) || key.includes(n)) return memberImages[key];
       }
@@ -217,23 +217,27 @@ async function checkLiveStatus() {
       // 🟢 단독 방송 - 초고급화 & 넓은 프로필 중심 레이아웃
       const stream = activeStreams[0];
       const name = stream.name || stream.bj_name || 'CREW';
-      const imgUrl = getAvatar(name);
+      let imgUrl = stream.thumbnail || getAvatar(name); // SOOP 썸네일 우선 적용
+      // 썸네일 캐시 방지 처리
+      if(imgUrl.includes('liveimg.sooplive.co.kr')) {
+          imgUrl += `?t=${Date.now()}`;
+      }
       const platformLower = (stream.platform || "").toLowerCase();
 
       portal.innerHTML = `
         <div class="premium-live-single animate-fade-in is-visible">
-          <div class="live-hero-avatar">
+          <div class="live-hero-avatar ${stream.thumbnail ? 'has-thumbnail' : ''}">
             <div class="hero-ring"></div>
-            <img src="${imgUrl}" alt="${name}">
+            <img src="${imgUrl}" alt="${name}" style="${stream.thumbnail ? 'border-radius:12px; aspect-ratio:16/9; width:220px; object-fit:cover;' : ''}">
             <div class="hero-badge">ON AIR</div>
           </div>
           
           <div class="live-info-panel">
-            <div class="premium-platform ${platformLower}">${stream.platform || 'LIVE'}</div>
+            <div class="premium-platform ${platformLower}">${stream.platform || 'SOOP'}</div>
             <h2 class="premium-streamer-name">${name}</h2>
-            <p class="premium-stream-title" title="${stream.title || '현재 방송 중입니다.'}">${stream.title || '단독 방송 송출 중입니다!'}</p>
+            <p class="premium-stream-title" title="${stream.liveTitle || stream.title || '현재 방송 중입니다.'}">${stream.liveTitle || stream.title || '단독 방송 송출 중입니다!'}</p>
             
-            <button class="premium-action-btn" onclick="window.open('${stream.link}', '_blank')">
+            <button class="premium-action-btn" onclick="window.open('${stream.link || ('http://play.sooplive.com/' + (stream.BJ_ID || stream.bj_id))}', '_blank')">
               라이브 참여하기 <span class="arrow-icon">➜</span>
             </button>
           </div>

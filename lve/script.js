@@ -3,10 +3,15 @@ let liveMembers = [];
 
 // ── 라이브 대시보드 카드 생성 ──
 function buildDashboardCard(m) {
-  const isLive = m.status === 'on-air';
+  const status = String(m.status || '').toLowerCase();
+  const isLive = status === 'on-air' || status === 'live';
   
-  // 썸네일: 방송 중이면 방송 제목이나 썸네일을, 아니면 기본 이미지 사용
-  const thumbnail = m.thumbnail || '..../img/ggu_title.jpg';
+  // 썸네일: SOOP API에서 받은 실시간 썸네일 → 없으면 기본 이미지
+  let thumbnail = (m.thumbnail && m.thumbnail !== '') ? m.thumbnail : 'img/ggu_title.jpg';
+  // 브라우저 캐시 방지: 현재 시간 추가
+  if (thumbnail.includes('liveimg.sooplive.co.kr')) {
+      thumbnail += `?t=${Date.now()}`;
+  }
   
   return `
     <div class="live-card-v2 ${m.status}" onclick="window.open('${m.link}', '_blank')">

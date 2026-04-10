@@ -23,7 +23,15 @@ const CONFIG = {
     enable: true, // 팝업 띄우기 온/오프 (true / false)
     title: "🎉 Welcome 서라0 🎉", // 팝업 제목
     message: "아꾸츠키 서라0 환영해주세요<br> 멋진 행보를 계속해서 지켜봐주세요.", // 팝업 메시지 (html 태그 사용 가능)
-    imageUrl: "img/서라0.png", // 팝업 상단 이미지 (안 쓸거면 "" 로 비워두시면 됩니다)
+    imageUrl: "img/서라0.jpg", // 팝업 상단 이미지 (안 쓸거면 "" 로 비워두시면 됩니다)
     link: "" // "자세히 보기" 버튼 클릭 시 이동할 링크 (안 쓸거면 "" 로 비워두세요)
+  },
+
+  // 📡 SOOP (아프리카TV) OpenAPI 설정
+  SOOP: {
+    CLIENT_ID: "434d1e81ddc9744680eb65ede7c6eabf",
+    ACCESS_TOKEN: "3cd50fb722f291aaa2e196a275829114c0f57401",
+    REDIRECT_URI: "https://harmonious-pothos-e84d1b.netlify.app/",
+    ENABLED: true // true면 SOOP API를 직접/간접 활용합니다.
   }
 };

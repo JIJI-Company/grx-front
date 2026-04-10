@@ -590,12 +590,12 @@ nav {
 .update-box {
   background: linear-gradient(145deg, rgba(15, 0, 5, 0.95), rgba(5, 0, 2, 0.95));
   border: 1px solid rgba(255, 26, 74, 0.15);
-  border-top: 1px solid rgba(255, 26, 74, 0.5); /* Specular Lighting Edge */
+  border-top: 1px solid rgba(255, 26, 74, 0.5);
   padding: 40px;
   position: relative;
   transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-  box-shadow: 0 15px 30px rgba(0,0,0,0.9), inset 0 1px 1px rgba(255, 255, 255, 0.05); /* 깊이감 극대화 */
-  overflow: hidden;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.9), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  overflow: hidden; /* 박스 크기 고정 + 모서리 장식 클립 */
 }
 .update-box::after {
   content: '';
@@ -929,12 +929,34 @@ nav {
 }
 
 /* Premium Multi Level */
+/* LIVE STREAMING 헤더 & ON AIR 상태 텍스트 넘침 방지 */
+.box-header {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.status-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.status-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
 .premium-live-multi {
   margin-top: 15px;
   background: rgba(255, 26, 74, 0.02);
   border-radius: 20px;
-  padding: 25px;
+  padding: 20px;
   border: 1px solid rgba(255, 26, 74, 0.08);
+  width: 100%;
+  max-width: 100%;
 }
 .multi-header {
   font-size: 1rem;
@@ -949,11 +971,19 @@ nav {
 }
 .multi-avatar-grid {
   display: flex;
-  gap: 20px;
+  flex-direction: row;
   flex-wrap: nowrap;
-  overflow-x: auto;
+  gap: 20px;
+  width: 100%;
+  max-width: 100%;        /* ← 이게 핵심: 부모 너비를 넘지 못하도록 */
+  overflow-x: scroll;
+  -webkit-overflow-scrolling: touch;
   padding-bottom: 15px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
+.multi-avatar-grid::-webkit-scrollbar { display: none; }
+
 .premium-multi-item {
   display: flex;
   flex-direction: column;
@@ -962,6 +992,7 @@ nav {
   cursor: pointer;
   transition: 0.3s;
   min-width: 80px;
+  flex-shrink: 0; /* 절대 줄어들지 않게 - 스크롤 필수 */
 }
 .premium-multi-item:hover {
   transform: translateY(-8px);

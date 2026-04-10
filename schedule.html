@@ -146,37 +146,43 @@
         // [공식 API 지원 대기] 현재는 안정성을 위해 견본 데이터를 출력합니다.
         const grid = document.getElementById('fullScheduleGrid');
         
-        function renderMockData() {
-          const mockData = [
-            { title: "무한성 건축 대작전 (Season 2)", desc: "마인크래프트 GGU 서버 건축 노가다 및 힐링 소통", img: "img/ggu_title.jpg", member: "꾸티뉴", avatar: "img/ggutinho.png", time: "내일 20:00" },
-            { title: "상현 집결 긴급 회의", desc: "전 멤버가 모여 하반기 프로젝트 방향성을 논의합니다.", img: "img/ggu_title.jpg", member: "난워니", avatar: "img/nanana.png", time: "금주 금요일" },
-            { title: "혈귀술 집중 훈련", desc: "Just Chatting - 야무지의 심야 심리 상담소 오픈", img: "", member: "야무지", avatar: "img/yamuzi.png", time: "금주 주말" },
-            { title: "합방 게릴라 습격", desc: "예고 없는 합방, 누가누가 당할 것인가?", img: "", member: "엔쥬", avatar: "img/enju.png", time: "미정" },
-            { title: "Coming Soon...", desc: "공식 일정 동기화 기능이 준비 중입니다.", img: "", member: "GGU-CASTLE", avatar: "img/ggu_title.jpg", time: "SOOP API 대기 중" }
-          ];
+        async function loadRealSchedules() {
+          grid.innerHTML = '<p style="color:#aaa; text-align:center; width:100%; padding:50px;">데이터를 불러오는 중...</p>';
+          
+          try {
+            const schedules = await DataService.getSchedules();
+            
+            if (!schedules || schedules.length === 0) {
+              grid.innerHTML = '<p style="color:#aaa; text-align:center; width:100%; padding:50px;">진행 예정인 일정이 없습니다.</p>';
+              return;
+            }
 
-          grid.innerHTML = mockData.map(data => `
-            <div class="sch-card">
-              <div class="vc-thumbnail">
-                <img src="${data.img || 'img/ggu_title.jpg'}" alt="Thumbnail">
-              </div>
-              <div class="vc-content">
-                <h3 class="vc-title">${data.title}</h3>
-                <p class="vc-desc">${data.desc}</p>
-              </div>
-              <div class="vc-footer">
-                <img src="${data.avatar}" class="vc-avatar" alt="${data.member}">
-                <div class="vc-meta">
-                  <span class="vc-author">${data.member}</span>
-                  <span class="vc-time">${data.time}</span>
+            grid.innerHTML = schedules.map(data => `
+              <div class="sch-card animate-fade-in">
+                <div class="vc-thumbnail">
+                  <img src="${data.Thumbnail || data.thumbnail || 'img/ggu_title.jpg'}" alt="Thumbnail">
+                </div>
+                <div class="vc-content">
+                  <h3 class="vc-title">${data.Title || data.title}</h3>
+                  <p class="vc-desc">${data.Description || data.desc || ''}</p>
+                </div>
+                <div class="vc-footer">
+                  <img src="${data.Avatar || data.avatar || 'img/ggu_title.jpg'}" class="vc-avatar" alt="${data.Member || data.member}">
+                  <div class="vc-meta">
+                    <span class="vc-author">${data.Member || data.member}</span>
+                    <span class="vc-time">${data.Time || data.time}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          `).join('');
+            `).join('');
+          } catch (err) {
+            console.error("Schedule load error:", err);
+            grid.innerHTML = '<p style="color:#ff1a4a; text-align:center; width:100%; padding:50px;">일정을 불러오는데 실패했습니다.</p>';
+          }
         }
 
-        // 견본 데이터 로드
-        renderMockData();
+        // 실데이터 로드
+        loadRealSchedules();
       });
     </script>
   </body>

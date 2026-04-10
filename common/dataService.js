@@ -60,7 +60,13 @@ const DataService = {
       return null;
     }
 
-    const sheetNameMap = { 'live': 'Live', 'history': 'History', 'times': 'Times', 'posts': 'Posts' };
+    const sheetNameMap = { 
+      'live': 'Live', 
+      'history': 'History', 
+      'times': 'Times', 
+      'posts': 'Posts',
+      'schedule': 'Schedule' 
+    };
     const sheetName = sheetNameMap[type] || type;
 
     try {
@@ -114,8 +120,9 @@ const DataService = {
   },
 
   // 편의 함수들 (하위 호환성 유지)
-  async getLive()   { return await this.getData('live'); },
-  async getHistory(){ return await this.getData('history'); },
-  async getTimes()  { return await this.getData('times'); },
-  async getPosts()  { return await this.getData('posts'); }
+  async getLive()      { return await this.getData('live'); },
+  async getHistory()   { return await this.getData('history'); },
+  async getTimes()     { return await this.getData('times'); },
+  async getPosts()     { return await this.getData('posts'); },
+  async getSchedules() { return await this.getData('schedule'); }
 };
