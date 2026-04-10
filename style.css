@@ -315,13 +315,14 @@ nav {
 .nav-links a {
   color: #a0a0a0;
   text-decoration: none;
-  margin-left: 40px;
+  margin-left: 30px;
   font-size: 0.8rem;
   font-weight: 700;
-  letter-spacing: 0.25rem;
+  letter-spacing: 0.2rem;
   text-transform: uppercase;
   transition: 0.4s;
   position: relative;
+  white-space: nowrap;
 }
 .nav-links a::after {
   content: '';
@@ -1419,6 +1420,7 @@ footer::before {
 @media (max-width: 1100px) {
   .section-row { flex-direction: column; }
   .news-side { width: 100%; }
+  .updates-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 768px) {
@@ -1427,8 +1429,52 @@ footer::before {
   .mini-card { flex: 0 0 240px; height: 340px; }
   .section-title { font-size: 1.8rem; }
   .update-box, .card { padding: 30px; }
-  nav { height: 60px; }
+  
+  nav { 
+    height: auto; 
+    min-height: 80px;
+    padding: 15px 6%;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+  }
+  
+  .logo {
+    font-size: 1.4rem;
+    letter-spacing: 2px;
+  }
+  
+  .nav-links {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    overflow-x: auto;
+    padding-bottom: 5px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .nav-links::-webkit-scrollbar { display: none; }
+  
+  .nav-links a {
+    margin: 0 12px;
+    font-size: 0.7rem;
+    letter-spacing: 0.1rem;
+  }
+
   .hero-vertical-text { display: none; }
+  
+  .intro-content h1 { font-size: 4.5rem; }
+  #enter-btn { padding: 12px 40px; font-size: 0.7rem; }
+}
+
+@media (max-width: 480px) {
+  .hero h1 { font-size: 3.5rem; }
+  .hero p { font-size: 0.8rem; letter-spacing: 0.2rem; }
+  .section-title { font-size: 1.5rem; padding-left: 15px; }
+  .container { padding: 60px 5%; }
+  
+  .intro-content h1 { font-size: 3.2rem; }
+  .sub-title { font-size: 0.6rem; letter-spacing: 0.4rem; }
 }
 
 /* 🎇 대규모 행사 / 축하 이벤트 팝업스타일 */

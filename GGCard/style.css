@@ -107,17 +107,18 @@ nav {
 
 .nav-links {
   display: flex;
-  gap: 40px;
+  gap: 30px;
 }
 .nav-links a {
   color: #a0a0a0;
   text-decoration: none;
   font-size: 0.8rem;
   font-weight: 700;
-  letter-spacing: 0.25rem;
+  letter-spacing: 0.2rem;
   text-transform: uppercase;
   transition: 0.4s;
   position: relative;
+  white-space: nowrap;
 }
 .nav-links a::after {
   content: '';
@@ -531,19 +532,54 @@ footer::before {
    모바일
 ════════════════════════════ */
 @media (max-width: 768px) {
-  nav { height: 60px; padding: 0 20px; }
-  .logo { font-size: 1.4rem; }
-  .nav-links { gap: 15px; }
-  .nav-links a { font-size: 0.65rem; margin-left: 0; }
+  nav { 
+    height: auto; 
+    min-height: 80px;
+    padding: 15px 6%;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+  }
   
-  .rank-title { font-size: 2.2rem; }
-  .flip-container { height: 360px; }
+  .logo {
+    font-size: 1.4rem;
+    letter-spacing: 2px;
+  }
   
-  .modal-content { width: 95%; height: auto; max-height: 90vh; overflow-y: auto; }
+  .nav-links {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    overflow-x: auto;
+    padding-bottom: 5px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 0;
+  }
+  .nav-links::-webkit-scrollbar { display: none; }
+  
+  .nav-links a {
+    margin: 0 12px;
+    font-size: 0.7rem;
+    letter-spacing: 0.1rem;
+  }
+  
+  .rank-title { font-size: 2.2rem; margin: 40px 0 30px; }
+  .flip-container { height: 360px; max-width: 280px; }
+  
+  .modal-content { width: 95%; height: auto; max-height: 90vh; overflow-y: auto; flex-direction: column; }
   #modal-detail-view { flex-direction: column; }
-  .modal-left { flex: none; height: 250px; }
+  .modal-left { flex: none; height: 300px; padding: 20px; }
+  .modal-left img { max-width: 180px; }
   .modal-left::after { background: linear-gradient(to top, rgba(15, 0, 5, 1), transparent 50%); }
-  .modal-right { padding: 30px; }
+  .modal-right { padding: 30px 20px; flex: none; }
+  .modal-right h2 { font-size: 1.8rem; }
+  .btn-visit { width: 100%; text-align: center; }
+}
+
+@media (max-width: 480px) {
+  .rank-title { font-size: 1.8rem; letter-spacing: 3px; }
+  .members-grid { grid-template-columns: 1fr; }
 }
 
 
