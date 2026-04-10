@@ -1,17 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;700&family=Noto+Sans+KR:wght@300;400;700;900&display=swap');
 
 :root {
-  --main-red: #cc0033;
-  --bright-red: #ff1a4a;
-  --dark-bg: #050002;
-  --border-red: rgba(255, 26, 74, 0.4);
-  --gold: #ffe600;
-  --silver: #e2e8f0;
-  --bronze: #e67e22;
-  --card-bg: rgba(15, 0, 5, 0.6);
-  --glass-border: rgba(255, 26, 74, 0.15);
-  --glass-blur: blur(16px) saturate(180%);
+  --main-ruby: #990B2E;    /* 더 어둡게 */
+  --bright-rose: #B91C1C;  /* 더 어둡게 */
+  --name-gold: #EAB308;    /* 조금 더 진한 골드 */
+  --dark-bg: #030001;      /* 배경도 조금 더 어둡게 */
+  --card-bg: rgba(15, 0, 5, 0.82);
+  --glass-border: rgba(225, 29, 72, 0.2);
+  --glass-blur: blur(15px);
 }
+
 
 * {
   margin: 0;
@@ -815,38 +813,65 @@ footer::before {
   transform: scale(1.08);
 }
 
-/* 라이브 뱃지 */
+/* 라이브 뱃지 (Pill 디자인) */
 .card-live-badge {
   position: absolute;
   top: 15px; left: 15px;
-  background: var(--bright-red);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
   color: #fff;
-  font-size: 0.7rem;
-  font-weight: 900;
-  padding: 4px 10px;
-  border-radius: 4px;
-  box-shadow: 0 0 15px var(--bright-red);
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 5px 12px;
+  border-radius: 50px;
+  border: 1px solid rgba(225, 29, 72, 0.5);
   z-index: 5;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.card-live-badge::before {
+  content: '';
+  width: 7px; height: 7px;
+  background: var(--bright-rose);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--bright-rose);
+  animation: badge-pulse 1.5s infinite;
+}
+@keyframes badge-pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.5; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 .live-card-v2.offline .card-live-badge {
-  background: #333;
+  background: rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+.live-card-v2.offline .card-live-badge::before {
+  background: #555;
   box-shadow: none;
-  opacity: 0.6;
+  animation: none;
 }
 
 /* 멤버 아바타 오버랩 */
 .card-avatar-wrap {
   position: absolute;
-  bottom: -25px; left: 25px;
-  width: 60px; height: 60px;
+  bottom: -30px; left: 25px;
+  width: 70px; height: 70px;
   border-radius: 50%;
-  border: 3px solid #050002;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+  border: 3px solid var(--dark-bg);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.8), 0 0 20px var(--accent-glow);
   overflow: hidden;
   z-index: 10;
   background: #222;
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+.live-card-v2:hover .card-avatar-wrap {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.9), 0 0 30px var(--neon-cyan);
+  border-color: var(--neon-cyan);
 }
 .card-avatar-wrap img {
   width: 100%;
@@ -856,18 +881,18 @@ footer::before {
 
 /* 카드 바디 */
 .card-body-v2 {
-  padding: 40px 25px 25px;
+  padding: 50px 25px 25px;
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
 .card-streamer-name {
-  font-size: 0.85rem;
-  color: var(--bright-red);
-  font-weight: 700;
-  margin-bottom: 8px;
-  letter-spacing: 1px;
+  font-size: 0.9rem;
+  color: var(--name-gold);
+  font-weight: 800;
+  margin-bottom: 6px;
+  letter-spacing: 1.5px;
 }
 
 .card-stream-title {
@@ -892,19 +917,24 @@ footer::before {
 }
 
 .btn-visit-soop {
-  color: #fff;
+  color: #ddd;
   text-decoration: none;
   font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 2px;
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(255, 26, 74, 0.4);
-  transition: all 0.3s;
+  letter-spacing: 2.5px;
+  padding: 10px 24px;
+  border-radius: 4px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+  text-transform: uppercase;
 }
-.btn-visit-soop:hover {
-  color: var(--bright-red);
-  border-color: var(--bright-red);
-  padding-right: 10px;
+.live-card-v2:hover .btn-visit-soop {
+  color: #fff;
+  background: rgba(225, 29, 72, 0.1);
+  border-color: var(--bright-rose);
+  box-shadow: 0 0 15px rgba(225, 29, 72, 0.2);
+  letter-spacing: 3.5px;
 }
 
 @media (max-width: 1200px) {

@@ -1,13 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;700&family=Noto+Sans+KR:wght@300;400;700;900&display=swap');
 
 :root {
-  --main-red: #cc0033;
-  --bright-red: #ff1a4a;
+  --main-ruby: #BE123C;
+  --bright-rose: #E11D48;
+  --name-gold: #FACC15;
   --dark-bg: #050002;
-  --border-red: rgba(255, 26, 74, 0.4);
+  --border-red: rgba(225, 29, 72, 0.4);
   --gold: #ffe600;
   --card-bg: rgba(15, 0, 5, 0.6);
-  --glass-border: rgba(255, 26, 74, 0.15);
+  --glass-border: rgba(225, 29, 72, 0.15);
   --glass-blur: blur(20px) saturate(180%);
 }
 
