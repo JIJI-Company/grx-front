@@ -5,6 +5,7 @@
 const CONFIG = {
   // 🔗 [필독] 구글 시트 배포 후 받으신 웹 앱 URL을 여기에 붙여넣으세요!
   GAS_URL: "https://script.google.com/macros/s/AKfycbwHRxKUFPpgkycGTj1vuteTmLl3U-1cRZTjpp7x-XBXz0h_rHR_OLDqF-iKEVdj0QX-/exec", 
+  GALLERY_GAS_URL: "https://script.google.com/macros/s/AKfycbybmF9BIsWWE_3CV_Lgnyu05fKniJKHzwCDV0hTeREDHtWY-rdfDU_NxPhuptVM8SCk3Q/exec",
   API_TOKEN: "ggu_castle_secure_99", // 🔑 구글 앱스 스크립트 보안용 암호 (임의로 설정)
   
   // ⏱️ 데이터별 캐시 유지 시간 (0이면 매번 새로고침)

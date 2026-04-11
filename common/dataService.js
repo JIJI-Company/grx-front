@@ -55,19 +55,26 @@ const DataService = {
 
   /** GAS에서 데이터 가져오기 (타임아웃 8초 포함) */
   async fetchFromServer(type) {
-    if (!CONFIG.GAS_URL) {
-      console.warn("GAS URL 설정 필요 (config.js)");
-      return null;
-    }
-
     const sheetNameMap = { 
       'live': 'Live', 
       'history': 'History', 
       'times': 'Times', 
       'posts': 'Posts',
-      'schedule': 'Schedule' 
+      'schedule': 'Schedule',
+      'Gallery': 'Gallery'
     };
     const sheetName = sheetNameMap[type] || type;
+
+    // 🏛️ [V7.0] 다중 시트 관리 대응: 갤러리는 전용 URL 사용
+    let baseUrl = CONFIG.GAS_URL;
+    if (sheetName === 'Gallery' && CONFIG.GALLERY_GAS_URL) {
+      baseUrl = CONFIG.GALLERY_GAS_URL;
+    }
+
+    if (!baseUrl) {
+      console.warn("GAS URL 설정 필요 (config.js)");
+      return null;
+    }
 
     try {
       const controller = new AbortController();
@@ -75,7 +82,7 @@ const DataService = {
       const timeoutId = setTimeout(() => controller.abort(), 20000);
 
       // 🔗 Token을 URL 끝에 붙여서 보안 강화
-      const url = `${CONFIG.GAS_URL}?sheet=${sheetName}&token=${CONFIG.API_TOKEN || ''}`;
+      const url = `${baseUrl}?sheet=${sheetName}&token=${CONFIG.API_TOKEN || ''}`;
       const response = await fetch(url, { signal: controller.signal });
       clearTimeout(timeoutId);
       

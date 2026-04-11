@@ -16,7 +16,25 @@ let timesData = [];
 
 
 // ════════════════════════════════════
-// 🎨 GALLERY 데이터 변수 (시트 연동으로 대체됨)
+// 🎨 GALLERY 데이터 변수
+const staticImages = [
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 꾸티뉴", img: "../img2/꾸티뉴.png" },
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 난워니", img: "../img2/난워니.png" },
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 다뮤", img: "../img2/다뮤.png" },
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 딴딴", img: "../img2/딴딴.png" },
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 란다", img: "../img2/란다.jpg" },
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 리카", img: "../img2/리카.jpg" },
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 밈먀", img: "../img2/밈먀.png" },
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 바먀", img: "../img2/바먀.png" },
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 구본좌", img: "../img2/본좌.png" },
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 셀키", img: "../img2/셀키.png" },
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 야주미", img: "../img2/야주미.jpg" },
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 엔쥬", img: "../img2/엔쥬.jpg" },
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 영감", img: "../img2/영감.png" },
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 철쑤", img: "../img2/철쑤.png" },
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 초구ㅏ", img: "../img2/초구ㅏ.png" },
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 서라0", img: "../img2/서라0.jpg" }
+];
 let galleryData = [];
 
 
@@ -203,40 +221,60 @@ function initTimes() {
 // [3] GALLERY 로직
 // ════════════════════════════════════
 async function initGallery(container) {
-  // 💡 [V11.0] 시트에서 갤러리 데이터를 가져옵니다.
-  galleryData = await DataService.getData('Gallery') || [];
+  if (!container) return;
   
-  if (galleryData.length === 0) {
+  // 🔄 초기화 진행
+  container.innerHTML = '<div style="text-align:center; padding:50px; width:100%; grid-column:1/-1; color:#888;">데이터를 관측 중입니다...</div>';
+
+  let sheetData = [];
+  try {
+    // 💡 시트 데이터를 가져오되, 실패해도 멈추지 않게 처리
+    sheetData = await DataService.getData('Gallery') || [];
+  } catch (err) {
+    console.warn("Dynamic gallery fetch failed, showing static images only.", err);
+  }
+
+  // 💡 로컬 스페셜 사진 + 시트 데이터를 합칩니다.
+  const combinedData = [...staticImages, ...sheetData];
+  
+  if (combinedData.length === 0) {
     container.innerHTML = `
       <div style="text-align: center; padding: 100px 20px; color: #555; width: 100%; grid-column: 1/-1;">
-        <p style="font-size: 1.2rem; letter-spacing: 2px;">갤러리에 등록된 작품이 없습니다.</p>
-        <p style="font-size: 0.8rem; margin-top: 10px; opacity: 0.5;">시트에 게시글 URL을 추가해 보세요!</p>
+        <p style="font-size: 1.2rem; letter-spacing: 2px;">전시된 작품이 없습니다.</p>
       </div>
     `;
     return;
   }
 
-  galleryData.forEach((art, idx) => {
+  container.innerHTML = ''; // 로딩 문구 제거
+
+  combinedData.forEach((art, idx) => {
     const item = document.createElement('div');
     item.className = "gallery-item";
     
-    // 사진을 클릭하면 원본 게시글로 이동
-    item.onclick = () => {
-      const link = art.URL || art.url || '#';
-      if (link !== '#') window.open(link, '_blank');
-    };
+    const link = art.URL || art.url || art.link || '#';
+    const thumb = art.Thumbnail || art.thumbnail || art.img || '../img/ggu_title.jpg';
+    const author = art.Author || art.author || 'G-CASTLE';
+    const desc = art.Description || art.description || art.desc || '무한성 아카이브';
+
+    if (link !== '#') {
+      item.onclick = () => window.open(link, '_blank');
+      item.style.cursor = 'pointer';
+    }
     
     item.style.opacity = 0;
     item.style.transform = 'translateY(20px)';
-    item.style.transitionDelay = `${idx * 0.1}s`;
+    item.style.transitionDelay = `${idx * 0.03}s`;
     
-    const thumb = art.Thumbnail || art.thumbnail || '../img/ggu_title.jpg';
-    const author = art.Author || art.author || '익명의 팬';
-    const desc = art.Description || art.description || 'G-CASTLE FAN ART';
-
     item.innerHTML = `
-      <div class="gallery-wrapper" style="width: 100%; background: rgba(0,0,0,0.2); border-radius: 4px; overflow: hidden;">
-        <img src="${thumb}" alt="${author}" style="width: 100%; display: block; border-radius: 4px;" onerror="this.src='../img/ggu_title.jpg'">
+      <div class="gallery-wrapper" style="width: 100%; min-height: 200px; background: rgba(0,0,0,0.4); border-radius: 4px; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center;">
+        <img src="${thumb}" alt="${author}" 
+             style="width: 100%; display: block; border-radius: 4px; transition: transform 0.5s ease;" 
+             onerror="this.src='../img/ggu_title.jpg'; this.style.opacity='0.4'; this.nextElementSibling.style.display='flex'">
+        <div class="img-error-hint" style="position: absolute; display: none; flex-direction: column; align-items: center; justify-content: center; color: #fff; font-size: 0.7rem; text-align: center; padding: 10px;">
+           <span style="font-size: 1.5rem; margin-bottom: 5px;">🖼️</span>
+           <span>이미지 보호 중<br>(클릭 시 원본 확인)</span>
+        </div>
       </div>
       <div class="gallery-overlay">
         <div class="gallery-author">BY: ${author}</div>
@@ -246,10 +284,22 @@ async function initGallery(container) {
     
     container.appendChild(item);
     
+    // 🎨 자유분방한 랜덤 각도 및 오프셋 부여
+    const randomTilt = (Math.random() * 8 - 4).toFixed(2); // -4deg ~ 4deg
+    const randomOffset = (Math.random() * 20 - 10).toFixed(2); // -10px ~ 10px
+    item.style.setProperty('--tilt', `${randomTilt}deg`);
+    item.style.setProperty('--offset', `${randomOffset}px`);
+
+    // 🏷️ 작가/설명 텍스트 색상 조정 (흰 배경 대응)
+    const overlayAuthor = item.querySelector('.gallery-author');
+    const overlayDesc = item.querySelector('.gallery-desc');
+    if (overlayAuthor) overlayAuthor.style.color = '#cc0033'; // 진한 루비 레드
+    if (overlayDesc) overlayDesc.style.color = '#333'; // 어두운 회색
+
     setTimeout(() => {
       item.style.opacity = 1;
-      item.style.transform = 'translateY(0)';
-    }, 100);
+      item.style.transform = `rotate(${randomTilt}deg) translateY(${randomOffset}px)`;
+    }, 100 + (idx * 30));
   });
 }
 

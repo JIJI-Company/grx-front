@@ -600,32 +600,48 @@ nav {
 
 .gallery-item {
   break-inside: avoid;
-  margin-bottom: 30px;
+  margin-bottom: 40px;
   position: relative;
-  border-radius: 12px;
-  overflow: hidden;
-  background: #000;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+  padding: 12px 12px 45px 12px; /* 폴라로이드 느낌의 하단 여백 */
+  background: #fff; /* 사진 인화지 효과 */
+  box-shadow: 5px 15px 35px rgba(0,0,0,0.5);
   cursor: pointer;
-  transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1), box-shadow 0.5s;
-  border: 1px solid rgba(255, 26, 74, 0.08);
+  transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  
+  /* 🎨 자유분방함을 위한 변수 적용 */
+  transform: rotate(var(--tilt, 0deg)) translateY(var(--offset, 0px));
+}
+
+/* 📌 사진 상단에 고정용 테이프 효과 추가 */
+.gallery-item::before {
+  content: '';
+  position: absolute;
+  top: -15px; left: 50%;
+  transform: translateX(-50%) rotate(-2deg);
+  width: 90px; height: 30px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(2px);
+  border: 1px solid rgba(255,255,255,0.1);
+  z-index: 10;
+  pointer-events: none;
 }
 
 .gallery-item:hover {
-  transform: translateY(-8px) scale(1.01);
-  box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 20px rgba(255, 26, 74, 0.15);
-  border-color: rgba(255, 26, 74, 0.3);
+  transform: rotate(0deg) scale(1.1) translateY(-15px); /* 호스트 시 정렬 및 확대 */
+  box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 40px rgba(255, 26, 74, 0.3);
+  z-index: 100 !important;
 }
 
 .gallery-item img {
   width: 100%;
   display: block;
   transition: transform 0.8s cubic-bezier(0.2, 1, 0.3, 1), filter 0.4s;
+  border-radius: 2px;
 }
 
 .gallery-item:hover img {
-  transform: scale(1.08);
-  filter: brightness(0.7) saturate(1.1);
+  filter: brightness(1.1) saturate(1.2);
 }
 
 .gallery-overlay {
