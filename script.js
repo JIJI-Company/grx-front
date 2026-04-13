@@ -299,32 +299,19 @@ function setOfflineUI(container, portal, message) {
   `;
 }
 
-// 🔑 YouTube API KEY 설정 (본인의 API Key를 입력하세요)
-// 발급 링크: https://console.cloud.google.com/
-const YOUTUBE_API_KEY = "AIzaSyADZTHVDe9z-fZ_iEkR9s3T6-mRWhToFr4";
-
+// 🔑 YouTube 설정 (보안을 위해 API_KEY는 Netlify 환경 변수로 이동)
 async function renderYoutubeFeed() {
   const container = document.getElementById('youtubeFeed');
   if (!container) return;
 
   const CHANNEL_ID = "UChU1YQle9vX1xRipUcBcR5g";
-  // 채널 ID (UC...)를 업로드 목록 ID (UU...)로 변경
   const UPLOADS_PLAYLIST_ID = CHANNEL_ID.replace(/^UC/, 'UU');
 
-  if (!YOUTUBE_API_KEY || YOUTUBE_API_KEY.includes("발급받은_API_KEY를_넣으세요")) {
-    container.innerHTML = `
-      <div class="yt-placeholder">
-        <p>🔑 YouTube API Key가 필요합니다.</p>
-        <span style="font-size: 0.8rem; color: #888; margin-top: 5px;">script.js 파일 상단에 발급받은 키를 입력해주세요.</span>
-      </div>
-    `;
-    return;
-  }
-
-  const API_URL = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${UPLOADS_PLAYLIST_ID}&maxResults=1&key=${YOUTUBE_API_KEY}`;
+  // 🏛️ [V7.2] YouTube Proxy 호출
+  const PROXY_URL = `/.netlify/functions/youtube-proxy?playlistId=${UPLOADS_PLAYLIST_ID}`;
 
   try {
-    const res = await fetch(API_URL);
+    const res = await fetch(PROXY_URL);
     if (!res.ok) {
       if (res.status === 403) throw new Error("API 키 권한 오류 (할당량 초과 또는 키 미승인)");
       throw new Error(`API 요청 실패 (${res.status})`);
