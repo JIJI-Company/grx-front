@@ -76,6 +76,21 @@ const DataService = {
       return null;
     }
 
+    // 🏛️ [V7.1] Live 요청 시 Netlify Proxy 사용 (보안 강화)
+    if (type === 'live' && CONFIG.SOOP && CONFIG.SOOP.ENABLED && CONFIG.SOOP.PROXY_URL) {
+      try {
+        const response = await fetch(CONFIG.SOOP.PROXY_URL);
+        if (response.ok) {
+          const soopData = await response.json();
+          // SOOP OpenAPI는 { broad: [...] } 형태 또는 리스트 형태일 수 있음
+          // [참고] 받아온 데이터를 프로젝트의 Live 포맷으로 변환하는 과정이 필요할 수 있습니다.
+          return soopData.broad || soopData; 
+        }
+      } catch (err) {
+        console.warn("[DataService] Proxy 호출 실패, GAS로 전환합니다.", err.message);
+      }
+    }
+
     try {
       const controller = new AbortController();
       // [수정] 16명 전원의 라이브 체크 로직이 10초 이상 걸리므로, 대기 시간을 20초로 늘립니다.

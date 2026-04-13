@@ -31,10 +31,9 @@ const CONFIG = {
   },
 
   // 📡 SOOP (아프리카TV) OpenAPI 설정
+  // 🔒 보안을 위해 키 정보는 Netlify 환경 변수로 이동되었습니다.
   SOOP: {
-    CLIENT_ID: "434d1e81ddc9744680eb65ede7c6eabf",
-    ACCESS_TOKEN: "3cd50fb722f291aaa2e196a275829114c0f57401",
-    REDIRECT_URI: "https://harmonious-pothos-e84d1b.netlify.app/",
-    ENABLED: true // true면 SOOP API를 직접/간접 활용합니다.
+    PROXY_URL: "/.netlify/functions/soop-proxy",
+    ENABLED: true // true면 Proxy를 통해 SOOP API를 활용합니다.
   }
 };
