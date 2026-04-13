@@ -51,19 +51,15 @@ const DataService = {
     };
     const sheetName = sheetNameMap[type] || type;
 
-    const proxyUrl = (type === 'live' && CONFIG.SOOP?.ENABLED) 
-                   ? CONFIG.SOOP.PROXY_URL 
-                   : `${CONFIG.GAS_PROXY}?sheet=${sheetName}${type === 'Gallery' ? '&type=gallery' : ''}`;
+    // 🏛️ 모든 요청을 우선 GAS Proxy로 통합하여 안정성 확보
+    const proxyUrl = `${CONFIG.GAS_PROXY}?sheet=${sheetName}${type === 'Gallery' ? '&type=gallery' : ''}`;
 
     try {
       const response = await fetch(proxyUrl);
       if (!response.ok) throw new Error(`Proxy Error: ${response.status}`);
       
       const data = await response.json();
-      
-      const targetData = (type === 'live' && CONFIG.SOOP?.ENABLED)
-                       ? (data.broad || data)
-                       : (data[sheetName] || data[type] || null);
+      const targetData = data[sheetName] || data[type] || data;
 
       if (targetData && (CONFIG.TTLS[type] > 0)) {
         this.setCache(type, targetData);
