@@ -1,0 +1,9 @@
+.env
+node_modules
+.netlify
+.DS_Store
+.idea/
+.vscode/
+*.log
+.npm
+dist/

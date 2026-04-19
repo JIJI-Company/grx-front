@@ -14,9 +14,9 @@ const CONFIG = {
 
   EVENT_POPUP: {
     enable: true,
-    title: "🎉 Welcome 서라0 🎉",
-    message: "아꾸츠키 서라0 환영해주세요<br> 멋진 행보를 계속해서 지켜봐주세요.",
-    imageUrl: "img/서라0.jpg",
+    title: "🎉 딴딴2당의 천옵대 우승을 축하합니다!! 🎉",
+    message: "딴딴2당의 우승을 축하해주세요<br>",
+    imageUrl: "img/windan.jpeg",
     link: ""
   },
 
