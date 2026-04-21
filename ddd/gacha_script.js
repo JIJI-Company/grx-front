@@ -9,7 +9,6 @@ const summonPool = {
         { name: '란다', rank: '상현 3', img: '../img/randa.png', fortune: '파괴살의 투지가 솟구칩니다! 열정적으로 도전하면 무엇이든 이룰 수 있습니다.' },
         { name: '셀키', rank: '상현 4', img: '../img/selky.png', fortune: '분신술처럼 몸이 열 개라도 모자랄 바쁜 하루지만, 성과는 배가 될 것입니다.' },
         { name: '리카', rank: '상현 5', img: '../img/lika.png', fortune: '항아리에서 행운이 쏟아집니다. 뜻밖의 소중한 인연을 만날 수도 있어요.' },
-        { name: '철쑤', rank: '상현 6', img: '../img/choelssu.png', fortune: '맹독의 날카로움이 직관력을 높여줍니다. 중요한 결정을 내리기에 최적의 날입니다.' },
         { name: '구본좌', rank: '상현 6', img: '../img/koo.png', fortune: '피의 낫처럼 날카로운 집중력이 발휘됩니다. 오랫동안 고민하던 일이 해결됩니다.' }
     ],
     r: [

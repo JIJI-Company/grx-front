@@ -93,21 +93,6 @@ const members = {
       link: 'https://www.sooplive.com/station/lika07',
     },
     {
-      id: 'choelssu',
-      name: '철쑤',
-      sub: '상현의 6',
-      rank: '상현 6',
-      img: 'img/choelssu.png',
-      art: '맹독 혈귀술',
-      desc: '독의 수호자.',
-      keywords: '#하마 #철쑤세미',
-      birthday: '05.05',
-      mbti: 'INTP',
-      tmi: '음주가무와 돈을 사랑하는 자유 영혼',
-      color: '#8A4B5A',
-      link: 'https://www.sooplive.com/station/choelssu',
-    },
-    {
       id: 'koo',
       name: '구본좌',
       sub: '상현의 6',
@@ -342,7 +327,7 @@ function openMemberModal(data) {
 
   const luminance = getLuminance(accentColor);
   const isLight = luminance > 180;
-  const isDark = luminance < 80; // ✅ 철쑤처럼 너무 어두운 색상 감지
+  const isDark = luminance < 80; // ✅ 어두운 색상 감지
   
   // 뱃지 텍스트 색상: 너무 어두우면 밝은 색으로 대체
   const badgeTextColor = isDark ? '#e8c4c9' : accentColor;

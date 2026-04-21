@@ -8,7 +8,6 @@ const initialMessages = [
   { author: '주먹이 운다', target: '란다', text: '파괴살 권술 타격감 완전 돌았음... 란다님 방송 너무 재밌어요!' },
   { author: '항아리 요정', target: '리카', text: '리카님 항아리 소환할 때마다 빵빵 터져요 ㅋㅋㅋ' },
   { author: '하현 뉴비', target: '하현', text: '하현 분들 다들 너무 귀여우신 거 아닙니까 ㅠㅠ 다뮤 난워니 화이팅!' },
-  { author: '독설가', target: '철쑤', text: '맹독 혈귀술 철쑤님, 이번 생존 게임 빡겜 기대할게요 🐍' }
 ];
 
 // 📰 KKUHAN TIMES 데이터 변수
@@ -31,7 +30,6 @@ const staticImages = [
   { author: "GRVR", desc: "고퀄리티 스페셜 - 야주미", img: "../img2/야주미.jpg" },
   { author: "GRVR", desc: "고퀄리티 스페셜 - 엔쥬", img: "../img2/엔쥬.jpg" },
   { author: "GRVR", desc: "고퀄리티 스페셜 - 영감", img: "../img2/영감.png" },
-  { author: "GRVR", desc: "고퀄리티 스페셜 - 철쑤", img: "../img2/철쑤.png" },
   { author: "GRVR", desc: "고퀄리티 스페셜 - 초구ㅏ", img: "../img2/초구ㅏ.png" },
   { author: "GRVR", desc: "고퀄리티 스페셜 - 서라0", img: "../img2/서라0.jpg" }
 ];
