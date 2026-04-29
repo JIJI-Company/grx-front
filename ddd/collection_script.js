@@ -6,9 +6,41 @@ document.addEventListener('DOMContentLoaded', () => {
     const slot1 = document.getElementById('slot1');
     const slot2 = document.getElementById('slot2');
     const targetInfo = document.getElementById('fusionTargetInfo');
+    
+    const btnSortStar = document.getElementById('btnSortStar');
+    const btnSortMember = document.getElementById('btnSortMember');
 
     let inventory = JSON.parse(localStorage.getItem('grx_inventory')) || [];
     let selectedCards = [];
+    let currentSortMode = 'star'; // 'star' or 'member'
+
+    if (btnSortStar && btnSortMember) {
+        btnSortStar.onclick = () => {
+            currentSortMode = 'star';
+            btnSortStar.style.background = 'rgba(255, 26, 74, 0.2)';
+            btnSortStar.style.color = '#fff';
+            btnSortStar.style.borderColor = '#ff1a4a';
+            
+            btnSortMember.style.background = 'transparent';
+            btnSortMember.style.color = '#777';
+            btnSortMember.style.borderColor = '#333';
+            
+            renderCollection();
+        };
+        
+        btnSortMember.onclick = () => {
+            currentSortMode = 'member';
+            btnSortMember.style.background = 'rgba(255, 26, 74, 0.2)';
+            btnSortMember.style.color = '#fff';
+            btnSortMember.style.borderColor = '#ff1a4a';
+            
+            btnSortStar.style.background = 'transparent';
+            btnSortStar.style.color = '#777';
+            btnSortStar.style.borderColor = '#333';
+            
+            renderCollection();
+        };
+    }
 
     // ── 카드 렌더링 ──
     let renderCollection = () => {
@@ -18,8 +50,19 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // 정렬: 성급 높은 순
-        inventory.sort((a, b) => (b.starRank || 1) - (a.starRank || 1));
+        if (currentSortMode === 'star') {
+            inventory.sort((a, b) => {
+                const rankDiff = (b.starRank || 1) - (a.starRank || 1);
+                if (rankDiff !== 0) return rankDiff;
+                return (a.name || '').localeCompare(b.name || '');
+            });
+        } else {
+            inventory.sort((a, b) => {
+                const nameCompare = (a.name || '').localeCompare(b.name || '');
+                if (nameCompare !== 0) return nameCompare;
+                return (b.starRank || 1) - (a.starRank || 1);
+            });
+        }
 
         inventory.forEach(card => {
             const rank = card.starRank || 1;
