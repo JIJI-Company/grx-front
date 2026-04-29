@@ -1,50 +1,45 @@
 // 1. 소환할 멤버 데이터 (GGCard 데이터 기반)
 const summonPool = {
     ssr: [
-        { name: '꾸티뉴', rank: 'MASTER', img: '../img/ggutinho.png', fortune: '무한성의 마스터가 당신을 굽어살핍니다. 오늘은 모든 일이 완벽하게 풀릴 것입니다!' }
+        { name: '꾸티뉴', rank: 'MASTER', img: '../img2/ggutinho.png', fortune: '무한성의 마스터가 당신을 굽어살핍니다. 오늘은 모든 일이 완벽하게 풀릴 것입니다!' }
     ],
     sr: [
-        { name: '야무지', rank: '상현 1', img: '../img/yamuzi.png', fortune: '상현 1의 기운이 깃들었습니다. 랭크전에서 압도적인 승리를 거둘 운명입니다.' },
-        { name: '엔쥬', rank: '상현 2', img: '../img/enju.png', fortune: '차분한 빙결의 기운이 마음을 다스려줍니다. 오늘 하루는 실수 없이 완벽할 거예요.' },
-        { name: '란다', rank: '상현 3', img: '../img/randa.png', fortune: '파괴살의 투지가 솟구칩니다! 열정적으로 도전하면 무엇이든 이룰 수 있습니다.' },
-        { name: '셀키', rank: '상현 4', img: '../img/selky.png', fortune: '분신술처럼 몸이 열 개라도 모자랄 바쁜 하루지만, 성과는 배가 될 것입니다.' },
-        { name: '리카', rank: '상현 5', img: '../img/lika.png', fortune: '항아리에서 행운이 쏟아집니다. 뜻밖의 소중한 인연을 만날 수도 있어요.' },
-        { name: '구본좌', rank: '상현 6', img: '../img/koo.png', fortune: '피의 낫처럼 날카로운 집중력이 발휘됩니다. 오랫동안 고민하던 일이 해결됩니다.' }
+        { name: '야무지', rank: '상현 1', img: '../img2/yamuzi.jpg', fortune: '상현 1의 기운이 깃들었습니다. 랭크전에서 압도적인 승리를 거둘 운명입니다.' },
+        { name: '엔쥬', rank: '상현 2', img: '../img2/enju.jpg', fortune: '차분한 빙결의 기운이 마음을 다스려줍니다. 오늘 하루는 실수 없이 완벽할 거예요.' },
+        { name: '란다', rank: '상현 3', img: '../img2/randa.jpg', fortune: '파괴살의 투지가 솟구칩니다! 열정적으로 도전하면 무엇이든 이룰 수 있습니다.' },
+        { name: '셀키', rank: '상현 4', img: '../img2/selky.png', fortune: '분신술처럼 몸이 열 개라도 모자랄 바쁜 하루지만, 성과는 배가 될 것입니다.' },
+        { name: '리카', rank: '상현 5', img: '../img2/lika.jpg', fortune: '항아리에서 행운이 쏟아집니다. 뜻밖의 소중한 인연을 만날 수도 있어요.' },
+        { name: '구본좌', rank: '상현 6', img: '../img2/gkoo.png', fortune: '피의 낫처럼 날카로운 집중력이 발휘됩니다. 오랫동안 고민하던 일이 해결됩니다.' }
     ],
     r: [
-        { name: '영감', rank: '하현 1', img: '../img/younggam.png', fortune: '달콤한 꿈같은 하루가 기다립니다. 편안하게 휴식을 취하기 좋은 날입니다.' },
-        { name: '난워니', rank: '하현 2', img: '../img/nanana.png', fortune: '기린처럼 멀리 내다보세요. 미래를 위한 계획을 세우면 운이 따를 것입니다.' },
-        { name: '다뮤', rank: '하현 4', img: '../img/damu.jpeg', fortune: '장난스러운 행운이 당신을 찾아옵니다. 가벼운 마음으로 하루를 즐기세요.' },
-        { name: '딴딴2당', rank: '하현 5', img: '../img/ttanttan.jpeg', fortune: '따뜻한 위로와 칭찬을 받게 될 거예요. 주변 사람들과의 관계가 좋아집니다.' },
-        { name: '초귀요미', rank: '하현 6', img: '../img/cho-cutie.png', fortune: '부드러운 카리스마가 빛납니다. 당신의 매력이 주변을 사로잡을 것입니다.' },
-        { name: '밈먀', rank: '하현', img: '../img/mimmya.png', fortune: '예상치 못한 웃음이 터지는 유쾌한 하루가 될 것입니다. 비타민 같은 시간입니다.' },
-        { name: '바먀', rank: '하현', img: '../img/baamya.png', fortune: '근본 있는 행운이 당신 곁에 머눕니다. 기본에 충실하면 큰 이득이 있습니다.' }
+        { name: '영감', rank: '하현 1', img: '../img2/yeonggam.png', fortune: '달콤한 꿈같은 하루가 기다립니다. 편안하게 휴식을 취하기 좋은 날입니다.' },
+        { name: '난워니', rank: '하현 2', img: '../img2/nanwoni.png', fortune: '기린처럼 멀리 내다보세요. 미래를 위한 계획을 세우면 운이 따를 것입니다.' },
+        { name: '다뮤', rank: '하현 4', img: '../img2/damu.png', fortune: '장난스러운 행운이 당신을 찾아옵니다. 가벼운 마음으로 하루를 즐기세요.' },
+        { name: '딴딴2당', rank: '하현 5', img: '../img2/ttanttan.png', fortune: '따뜻한 위로와 칭찬을 받게 될 거예요. 주변 사람들과의 관계가 좋아집니다.' },
+        { name: '초귀요미', rank: '하현 6', img: '../img2/chogua.png', fortune: '부드러운 카리스마가 빛납니다. 당신의 매력이 주변을 사로잡을 것입니다.' },
+        { name: '밈먀', rank: '하현', img: '../img2/mimmya.png', fortune: '예상치 못한 웃음이 터지는 유쾌한 하루가 될 것입니다. 비타민 같은 시간입니다.' },
+        { name: '바먀', rank: '하현', img: '../img2/baamya.png', fortune: '근본 있는 행운이 당신 곁에 머눕니다. 기본에 충실하면 큰 이득이 있습니다.' },
+        { name: '서라0', rank: '하현', img: '../img2/seora0.jpg', fortune: '비밀스러운 성장이 기대되는 하루입니다. 새로운 가능성을 발견하게 됩니다.' }
     ]
 };
 
 document.addEventListener('DOMContentLoaded', () => {
     const btnSummon = document.getElementById('btnSummon');
-    const btnReset = document.getElementById('btnReset'); // 테스트용
     const gachaGate = document.getElementById('gachaGate');
     const summonResult = document.getElementById('summonResult');
     const particlesContainer = document.getElementById('particles');
 
-    // ── 매일 한 번 제한 체크 ──
-    const checkDailySummon = () => {
-        const lastSummon = localStorage.getItem('lastSummonDate');
-        const today = new Date().toDateString();
-        
-        if (lastSummon === today) {
-            const savedMember = JSON.parse(localStorage.getItem('todayMember'));
-            showResult(savedMember, true); // 이미 뽑았다면 저장된 결과 바로 표시
-            btnSummon.disabled = true;
-            btnSummon.innerText = "오늘의 소환 완료";
-        }
-    };
-
     // ── 소환 로직 ──
     const performSummon = () => {
+        if (btnSummon.disabled) return;
+        
+        // 이전 결과 초기화
+        summonResult.classList.remove('show', 'instant');
+        gachaGate.classList.remove('opened');
+        gachaGate.style.display = 'block';
+
         btnSummon.disabled = true;
+        btnSummon.innerText = "소환 중...";
         gachaGate.classList.add('shaking'); // 문 진동
 
         // 1. 랜덤 확률 결정
@@ -66,19 +61,49 @@ document.addEventListener('DOMContentLoaded', () => {
             createExplosion(window.innerWidth / 2, window.innerHeight / 2, 50);
 
             setTimeout(() => {
-                showResult(picked);
-                // 결과 저장
-                localStorage.setItem('lastSummonDate', new Date().toDateString());
-                localStorage.setItem('todayMember', JSON.stringify(picked));
+                // 확률 로직: 1성(70%), 2성(20%), 3성(8%), 4성(2%)
+                const randStar = Math.random() * 100;
+                let earnedStars = 1;
+                if (randStar < 2) earnedStars = 4;
+                else if (randStar < 10) earnedStars = 3;
+                else if (randStar < 30) earnedStars = 2;
+
+                // 고유 ID 부여 (합성을 위해)
+                const cardToSave = { 
+                    ...picked, 
+                    id: Date.now(), 
+                    baseId: picked.name + '_' + picked.rank,
+                    starRank: earnedStars 
+                };
+                showResult(cardToSave);
+                
+                // 인벤토리에 추가
+                addToInventory(cardToSave);
+                
+                // 버튼 복구
+                btnSummon.disabled = false;
+                btnSummon.innerText = "무한의 소환 수행";
             }, 800);
         }, 1500);
     };
 
+    // ── 인벤토리 저장 로직 ──
+    const addToInventory = (card) => {
+        let inventory = JSON.parse(localStorage.getItem('grx_inventory')) || [];
+        inventory.push(card);
+        localStorage.setItem('grx_inventory', JSON.stringify(inventory));
+    };
+
     const showResult = (member, instant = false) => {
+        let starsHtml = '';
+        const rankValue = member.starRank || 1;
+        for(let i=0; i<rankValue; i++) starsHtml += '★';
+
         summonResult.innerHTML = `
-            <div class="summon-card ${member.rarityClass}">
+            <div class="summon-card ${member.rarityClass}" style="box-shadow: ${rankValue >= 4 ? '0 0 30px #ff1a4a, inset 0 0 20px #ff1a4a' : (rankValue >= 3 ? '0 0 20px #ffd700' : 'none')};">
                 <img src="${member.img}" class="card-img" alt="${member.name}">
                 <div class="card-body">
+                    <div style="color:${rankValue >= 4 ? '#ff1a4a' : '#ffd700'}; font-size:1.5rem; text-shadow:0 0 10px rgba(0,0,0,0.8); margin-bottom:10px;">${starsHtml}</div>
                     <div class="card-rank">${member.rank}</div>
                     <div class="card-name">${member.name}</div>
                     <div class="card-fortune">"${member.fortune}"</div>
@@ -97,19 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     btnSummon.addEventListener('click', performSummon);
-    gachaGate.addEventListener('click', () => {
-        if (!btnSummon.disabled) performSummon();
-    });
-
-    // ── 테스트용 리셋 (나중에 삭제 가능) ──
-    if(btnReset) {
-        btnReset.addEventListener('click', () => {
-            localStorage.removeItem('lastSummonDate');
-            location.reload();
-        });
-    }
-
-    checkDailySummon();
+    gachaGate.addEventListener('click', performSummon);
 });
 
 // 앰비언트 파티클 효과

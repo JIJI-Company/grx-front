@@ -17,21 +17,21 @@ let timesData = [];
 // ════════════════════════════════════
 // 🎨 GALLERY 데이터 변수
 const staticImages = [
-  { author: "GRVR", desc: "고퀄리티 스페셜 - 꾸티뉴", img: "../img2/꾸티뉴.png" },
-  { author: "GRVR", desc: "고퀄리티 스페셜 - 난워니", img: "../img2/난워니.png" },
-  { author: "GRVR", desc: "고퀄리티 스페셜 - 다뮤", img: "../img2/다뮤.png" },
-  { author: "GRVR", desc: "고퀄리티 스페셜 - 딴딴", img: "../img2/딴딴.png" },
-  { author: "GRVR", desc: "고퀄리티 스페셜 - 란다", img: "../img2/란다.jpg" },
-  { author: "GRVR", desc: "고퀄리티 스페셜 - 리카", img: "../img2/리카.jpg" },
-  { author: "GRVR", desc: "고퀄리티 스페셜 - 밈먀", img: "../img2/밈먀.png" },
-  { author: "GRVR", desc: "고퀄리티 스페셜 - 바먀", img: "../img2/바먀.png" },
-  { author: "GRVR", desc: "고퀄리티 스페셜 - 구본좌", img: "../img2/본좌.png" },
-  { author: "GRVR", desc: "고퀄리티 스페셜 - 셀키", img: "../img2/셀키.png" },
-  { author: "GRVR", desc: "고퀄리티 스페셜 - 야주미", img: "../img2/야주미.jpg" },
-  { author: "GRVR", desc: "고퀄리티 스페셜 - 엔쥬", img: "../img2/엔쥬.jpg" },
-  { author: "GRVR", desc: "고퀄리티 스페셜 - 영감", img: "../img2/영감.png" },
-  { author: "GRVR", desc: "고퀄리티 스페셜 - 초구ㅏ", img: "../img2/초구ㅏ.png" },
-  { author: "GRVR", desc: "고퀄리티 스페셜 - 서라0", img: "../img2/서라0.jpg" }
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 꾸티뉴", img: "/img2/ggutinho.png" },
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 난워니", img: "/img2/nanwoni.png" },
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 다뮤", img: "/img2/damu.png" },
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 딴딴", img: "/img2/ttanttan.png" },
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 란다", img: "/img2/randa.jpg" },
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 리카", img: "/img2/lika.jpg" },
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 밈먀", img: "/img2/mimmya.png" },
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 바먀", img: "/img2/baamya.png" },
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 구본좌", img: "/img2/gkoo.png" },
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 셀키", img: "/img2/selky.png" },
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 야주미", img: "/img2/yamuzi.jpg" },
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 엔쥬", img: "/img2/enju.jpg" },
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 영감", img: "/img2/yeonggam.png" },
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 초구ㅏ", img: "/img2/chogua.png" },
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 서라0", img: "/img2/seora0.jpg" }
 ];
 let galleryData = [];
 
@@ -65,14 +65,92 @@ document.addEventListener('DOMContentLoaded', async () => {
   const galleryMasonry = document.getElementById('galleryMasonry');
   if(galleryMasonry) {
     initGallery(galleryMasonry);
+    initGalleryAdmin();
   }
 });
 
+// ════════════════════════════════════
+// [ 관리자 전용 ] GALLERY ADMIN 로직
+// ════════════════════════════════════
+function toggleAdminModal() {
+  const modal = document.getElementById('adminModal');
+  if(!modal) return;
+  modal.style.display = (modal.style.display === 'none') ? 'block' : 'none';
+}
+
+function initGalleryAdmin() {
+  const form = document.getElementById('adminGalleryForm');
+  if(!form) return;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = form.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.innerText = "통신 중...";
+
+    const payload = {
+      action: 'addGallery',
+      thumbnail: document.getElementById('artUrl').value.trim(),
+      author: document.getElementById('artAuthor').value.trim() || 'G-CASTLE',
+      description: document.getElementById('artDesc').value.trim(),
+      url: document.getElementById('artLink').value.trim()
+    };
+
+    try {
+      // GAS Proxy를 통해 데이터 전송 (GET 쿼리 스트링 방식 혹은 POST 지원 필요)
+      // 현재는 호환성을 위해 쿼리 파라미터로 시도해봅니다.
+      const query = new URLSearchParams(payload).toString();
+      const targetUrl = `${CONFIG.GAS_PROXY}?sheet=Gallery&type=gallery&${query}`;
+      
+      const response = await fetch(targetUrl);
+      const resData = await response.json();
+
+      if (resData.error) throw new Error(resData.message);
+
+      alert('성공적으로 작품이 등록되었습니다! 🎨');
+      toggleAdminModal();
+      location.reload(); // 즉시 확인을 위해 리로드
+    } catch (err) {
+      console.error(err);
+      alert('등록 중 오류가 발생했습니다. (GAS/네트워크 확인 필요)\n' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerText = "등록 수행";
+    }
+  });
+}
 
 // ════════════════════════════════════
-// [1] GUESTBOOK 로직
+// [ 라이트박스 뷰어 로직 ]
+// ════════════════════════════════════
+window.openLightbox = (src, author, desc, originLink) => {
+  const box = document.getElementById('galleryLightbox');
+  if(!box) return;
+  document.getElementById('lightboxImg').src = src;
+  document.getElementById('lightboxDesc').innerText = desc;
+  document.getElementById('lightboxAuthor').innerHTML = `BY: ${author} &nbsp;&nbsp;|&nbsp;&nbsp; <a href="${originLink}" target="_blank" style="color:#ff1a4a;">원본 열기</a>`;
+  
+  box.style.display = 'flex';
+  requestAnimationFrame(() => {
+    box.style.opacity = '1';
+    document.getElementById('lightboxImg').style.transform = 'scale(1)';
+  });
+};
+
+window.closeLightbox = () => {
+  const box = document.getElementById('galleryLightbox');
+  if(!box) return;
+  box.style.opacity = '0';
+  document.getElementById('lightboxImg').style.transform = 'scale(0.9)';
+  setTimeout(() => box.style.display = 'none', 300);
+};
+
+// ════════════════════════════════════
+// [1] GUESTBOOK 로직 (기능 중단됨)
 // ════════════════════════════════════
 function spawnTalisman(author, target, text, delayMs = 0) {
+  // 방명록 기능 중단 (필요 시 아래 setTimeout 로직을 다시 활성화하세요)
+  /*
   setTimeout(() => {
     const skyContainer = document.getElementById('talismanSky');
     if(!skyContainer) return;
@@ -106,6 +184,7 @@ function spawnTalisman(author, target, text, delayMs = 0) {
     const rect = card.getBoundingClientRect();
     createExplosion(rect.left + rect.width/2, rect.top + rect.height/2, 10);
   }, delayMs);
+  */
 }
 
 function initTiltEffect(el) {
@@ -250,13 +329,25 @@ async function initGallery(container) {
     const item = document.createElement('div');
     item.className = "gallery-item";
     
-    const link = art.URL || art.url || art.link || '#';
-    const thumb = art.Thumbnail || art.thumbnail || art.img || '../img/ggu_title.jpg';
+    let link = art.URL || art.url || art.link || '#';
+    let thumb = art.Thumbnail || art.thumbnail || art.img || '/img/ggu_title.jpg';
+    
+    // [구글 드라이브 링크 자동 변환 - Thumbnail API 사용(403 차단 회피용)]
+    const getDriveDirectUrl = (url) => {
+      if (!url || typeof url !== 'string') return url;
+      if (url.includes('drive.google.com')) {
+        const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+        if (match && match[1]) return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000`;
+      }
+      return url;
+    };
+
+    thumb = getDriveDirectUrl(thumb);
     const author = art.Author || art.author || 'G-CASTLE';
     const desc = art.Description || art.description || art.desc || '무한성 아카이브';
 
     if (link !== '#') {
-      item.onclick = () => window.open(link, '_blank');
+      item.onclick = () => openLightbox(thumb, author, desc, link);
       item.style.cursor = 'pointer';
     }
     
@@ -265,14 +356,10 @@ async function initGallery(container) {
     item.style.transitionDelay = `${idx * 0.03}s`;
     
     item.innerHTML = `
-      <div class="gallery-wrapper" style="width: 100%; min-height: 200px; background: rgba(0,0,0,0.4); border-radius: 4px; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center;">
+      <div class="gallery-wrapper" style="width: 100%; min-height: 200px; background: rgba(255,25,74,0.05); border-radius: 4px; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1);">
         <img src="${thumb}" alt="${author}" 
              style="width: 100%; display: block; border-radius: 4px; transition: transform 0.5s ease;" 
-             onerror="this.src='../img/ggu_title.jpg'; this.style.opacity='0.4'; this.nextElementSibling.style.display='flex'">
-        <div class="img-error-hint" style="position: absolute; display: none; flex-direction: column; align-items: center; justify-content: center; color: #fff; font-size: 0.7rem; text-align: center; padding: 10px;">
-           <span style="font-size: 1.5rem; margin-bottom: 5px;">🖼️</span>
-           <span>이미지 보호 중<br>(클릭 시 원본 확인)</span>
-        </div>
+             onerror="this.src='../img/ggu_title.jpg'; this.style.opacity='0.2';">
       </div>
       <div class="gallery-overlay">
         <div class="gallery-author">BY: ${author}</div>
