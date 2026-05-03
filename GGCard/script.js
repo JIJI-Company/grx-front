@@ -197,7 +197,7 @@ const members = {
       name: '서라0',
       rank: 'LOWER',
       img: 'img/서라0.jpg',
-      art: '임시 혈귀술',
+      art: '눈꽃의 호흡',
       desc: '신입 혈귀 서라0입니다.',
       keywords: '#신입 #서라0',
       birthday: '08.23',
