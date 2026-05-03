@@ -14,9 +14,9 @@ const CONFIG = {
 
   EVENT_POPUP: {
     enable: true,
-    title: "🎉 딴딴2당의 천옵대 우승을 축하합니다!! 🎉",
-    message: "딴딴2당의 우승을 축하해주세요<br>",
-    imageUrl: "img/windan.jpeg",
+    title: "🎉 WELCOME 임민트 🎉",
+    message: "민트를 환영해주세요!<br>",
+    imageUrl: "img/mint2.png",
     link: ""
   },
 

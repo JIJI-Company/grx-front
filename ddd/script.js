@@ -31,7 +31,8 @@ const staticImages = [
   { author: "GRVR", desc: "고퀄리티 스페셜 - 엔쥬", img: "/img2/enju.jpg" },
   { author: "GRVR", desc: "고퀄리티 스페셜 - 영감", img: "/img2/yeonggam.png" },
   { author: "GRVR", desc: "고퀄리티 스페셜 - 초구ㅏ", img: "/img2/chogua.png" },
-  { author: "GRVR", desc: "고퀄리티 스페셜 - 서라0", img: "/img2/seora0.jpg" }
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 서라0", img: "/img2/seora0.jpg" },
+  { author: "GRVR", desc: "고퀄리티 스페셜 - 임민트", img: "/img/mint.png" }
 ];
 let galleryData = [];
 

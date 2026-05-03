@@ -19,7 +19,8 @@ const summonPool = {
         { name: '초귀요미', rank: '하현 6', img: '../img2/chogua.png', fortune: '부드러운 카리스마가 빛납니다. 당신의 매력이 주변을 사로잡을 것입니다.' },
         { name: '밈먀', rank: '하현', img: '../img2/mimmya.png', fortune: '예상치 못한 웃음이 터지는 유쾌한 하루가 될 것입니다. 비타민 같은 시간입니다.' },
         { name: '바먀', rank: '하현', img: '../img2/baamya.png', fortune: '근본 있는 행운이 당신 곁에 머눕니다. 기본에 충실하면 큰 이득이 있습니다.' },
-        { name: '서라0', rank: '하현', img: '../img2/seora0.jpg', fortune: '비밀스러운 성장이 기대되는 하루입니다. 새로운 가능성을 발견하게 됩니다.' }
+        { name: '서라0', rank: '하현', img: '../img2/seora0.jpg', fortune: '비밀스러운 성장이 기대되는 하루입니다. 새로운 가능성을 발견하게 됩니다.' },
+        { name: '임민트', rank: '하현', img: '../img/mint.png', fortune: '상쾌한 바람처럼 새로운 기운이 불어옵니다. 맑은 마음으로 하루를 시작하세요.' }
     ]
 };
 

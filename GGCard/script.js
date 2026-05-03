@@ -221,6 +221,20 @@ const members = {
       color: '#BFC9D6',
       link: 'https://www.sooplive.com/station/o0opha',
     },
+    {
+      id: 'mint',
+      name: '임민트',
+      rank: 'LOWER',
+      img: 'img/mint.png',
+      art: '양치의 호흡',
+      desc: '반올림하면 2m인 배그 요정.',
+      keywords: '#엄디 #임팔라 #임맹슈',
+      birthday: '06.16',
+      mbti: '????',
+      tmi: '키 190cm(조금 안됨)',
+      color: '#00C9A7',
+      link: '#',
+    },
   ],
 };
 
