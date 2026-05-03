@@ -8,8 +8,7 @@ const summonPool = {
         { name: '엔쥬', rank: '상현 2', img: '../img2/enju.jpg', fortune: '차분한 빙결의 기운이 마음을 다스려줍니다. 오늘 하루는 실수 없이 완벽할 거예요.' },
         { name: '란다', rank: '상현 3', img: '../img2/randa.jpg', fortune: '파괴살의 투지가 솟구칩니다! 열정적으로 도전하면 무엇이든 이룰 수 있습니다.' },
         { name: '셀키', rank: '상현 4', img: '../img2/selky.png', fortune: '분신술처럼 몸이 열 개라도 모자랄 바쁜 하루지만, 성과는 배가 될 것입니다.' },
-        { name: '리카', rank: '상현 5', img: '../img2/lika.jpg', fortune: '항아리에서 행운이 쏟아집니다. 뜻밖의 소중한 인연을 만날 수도 있어요.' },
-        { name: '구본좌', rank: '상현 6', img: '../img2/gkoo.png', fortune: '피의 낫처럼 날카로운 집중력이 발휘됩니다. 오랫동안 고민하던 일이 해결됩니다.' }
+        { name: '리카', rank: '상현 5', img: '../img2/lika.jpg', fortune: '항아리에서 행운이 쏟아집니다. 뜻밖의 소중한 인연을 만날 수도 있어요.' }
     ],
     r: [
         { name: '영감', rank: '하현 1', img: '../img2/yeonggam.png', fortune: '달콤한 꿈같은 하루가 기다립니다. 편안하게 휴식을 취하기 좋은 날입니다.' },

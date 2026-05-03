@@ -92,21 +92,6 @@ const members = {
       color: '#F2D27A',
       link: 'https://www.sooplive.com/station/lika07',
     },
-    {
-      id: 'koo',
-      name: '구본좌',
-      sub: '상현의 6',
-      rank: '상현 6',
-      img: 'img/koo.png',
-      art: '피의 낫',
-      desc: '낫을 쓰는 혈귀.',
-      keywords: '#본이루 #독거노인',
-      birthday: '06.09',
-      mbti: 'ISFJ',
-      tmi: '댄스와 장보기가 취미인 버혐좌(?)',
-      color: '#7AA07A',
-      link: 'https://www.sooplive.com/station/koo2202',
-    },
   ],
   lower: [
     {

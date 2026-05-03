@@ -204,7 +204,7 @@ async function checkLiveStatus() {
       "난워니": "img/nanana.png", "야무지": "img/yamuzi.png",
       "란다": "img/randa.png", "셀키": "img/selky.png",
       "리카": "img/lika.png",
-      "구본좌": "img/koo.png", "영감": "img/younggam.png",
+      "영감": "img/younggam.png",
       "다뮤": "img/damu.jpeg", "딴딴2당": "img/ttanttan.jpeg",
       "초귀요미": "img/cho-cutie.png", "밈먀": "img/mimmya.png",
       "바먀": "img/baamya.png",

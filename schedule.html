@@ -272,11 +272,30 @@
             ]);
 
             // 💡 [수정] 이름이나 ID가 없는 유령 멤버는 필터링하여 제외합니다.
-            const allMembers = (Array.isArray(liveResponse) ? liveResponse : (liveResponse?.Live || []))
+            let allMembers = (Array.isArray(liveResponse) ? liveResponse : (liveResponse?.Live || []))
                                .filter(m => (m.name && String(m.name).trim()) || (m.id && String(m.id).trim()));
+            
+            // 신규 멤버 등 Live 시트에 없을 수 있는 멤버 강제 추가
+            const extraMembers = [
+              { name: "서라0", profileImg: "img/서라0.jpg" },
+              { name: "임민트", profileImg: "img/mint.png" }
+            ];
+            extraMembers.forEach(extra => {
+              if (!allMembers.find(m => m.name === extra.name || m.id === extra.name)) {
+                allMembers.push(extra);
+              }
+            });
             
             const rawSchedules = (schResponse && schResponse.Schedule) ? schResponse.Schedule : (Array.isArray(schResponse) ? schResponse : []);
             
+            // 스케줄에는 있지만 allMembers에 없는 멤버도 추가 (예외 처리)
+            rawSchedules.forEach(s => {
+               const mName = s.Member || s.member;
+               if(mName && !allMembers.find(m => (m.name === mName || m.id === mName))) {
+                   allMembers.push({ name: mName, profileImg: `img/${mName}.png` });
+               }
+            });
+
             if (!allMembers || allMembers.length === 0) {
                 grid.innerHTML = '<p style="color:#ff1a4a; text-align:center; width:100%; padding:50px;">멤버 정보를 불러오지 못했습니다. Live 시트를 확인하세요.</p>';
                 return;
