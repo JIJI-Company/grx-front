@@ -19,7 +19,10 @@ const summonPool = {
         { name: '밈먀', rank: '하현', img: '../img2/mimmya.png', fortune: '예상치 못한 웃음이 터지는 유쾌한 하루가 될 것입니다. 비타민 같은 시간입니다.' },
         { name: '바먀', rank: '하현', img: '../img2/baamya.png', fortune: '근본 있는 행운이 당신 곁에 머눕니다. 기본에 충실하면 큰 이득이 있습니다.' },
         { name: '서라0', rank: '하현', img: '../img2/seora0.jpg', fortune: '비밀스러운 성장이 기대되는 하루입니다. 새로운 가능성을 발견하게 됩니다.' },
-        { name: '임민트', rank: '하현', img: '../img/mint.png', fortune: '상쾌한 바람처럼 새로운 기운이 불어옵니다. 맑은 마음으로 하루를 시작하세요.' }
+        { name: '임민트', rank: '하현', img: '../img/mint.png', fortune: '상쾌한 바람처럼 새로운 기운이 불어옵니다. 맑은 마음으로 하루를 시작하세요.' },
+        { name: '김옥독', rank: '하현', img: '../img/okdok.png', fortune: '옥독해옥독해! 오늘은 왠지 끈기 있게 밀어붙이면 좋은 결과가 있을 거예요.' },
+        { name: '냥쏘', rank: '하현', img: '../img/nangsso.png', fortune: '고양이처럼 유연하게 대처하세요. 생각지 못한 곳에서 행운이 찾아옵니다.' },
+        { name: '윤타미', rank: '하현', img: '../img/tami.png', fortune: '차분하게 자신만의 속도로 나아가세요. 당신의 진심이 결실을 맺을 날입니다.' }
     ]
 };
 
@@ -104,9 +107,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ── 인벤토리 저장 로직 ──
     const addToInventory = (card) => {
-        let inventory = JSON.parse(localStorage.getItem('grx_inventory')) || [];
-        inventory.push(card);
-        localStorage.setItem('grx_inventory', JSON.stringify(inventory));
+        let data = JSON.parse(localStorage.getItem('grx_inventory_v2')) || { items: [], lastUpdated: Date.now() };
+        data.items.push(card);
+        data.lastUpdated = Date.now(); // 저장할 때마다 시간 갱신
+        localStorage.setItem('grx_inventory_v2', JSON.stringify(data));
     };
 
     const showResult = (members, instant = false) => {

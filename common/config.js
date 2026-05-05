@@ -14,14 +14,18 @@ const CONFIG = {
 
   EVENT_POPUP: {
     enable: true,
-    title: "🎉 WELCOME 임민트 🎉",
-    message: "민트를 환영해주세요!<br>",
-    imageUrl: "img/mint2.png",
+    title: "🎉 WELCOME 냥쏘,윤타미,김옥독🎉",
+    message: "새로운 혈귀들을 환영해주세요!<br>",
+    imageUrl: "img/welcom.png",
     link: ""
   },
 
   SOOP: {
     PROXY_URL: "/.netlify/functions/soop-proxy",
     ENABLED: true
+  },
+
+  GACHA: {
+    EXPIRE_HOURS: 24 // 24시간 동안 미접속 시 보관함 초기화
   }
 };

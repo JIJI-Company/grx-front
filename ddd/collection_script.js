@@ -10,7 +10,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnSortStar = document.getElementById('btnSortStar');
     const memberFilter = document.getElementById('memberFilter');
 
-    let inventory = JSON.parse(localStorage.getItem('grx_inventory')) || [];
+    // ── 인벤토리 로드 및 기간 만료 체크 ──
+    const loadInventory = () => {
+        const rawData = localStorage.getItem('grx_inventory_v2');
+        if (!rawData) return [];
+
+        try {
+            const data = JSON.parse(rawData);
+            const expireHours = (typeof CONFIG !== 'undefined' && CONFIG.GACHA) ? CONFIG.GACHA.EXPIRE_HOURS : 24;
+            const expireMs = expireHours * 60 * 60 * 1000;
+
+            if (Date.now() - data.lastUpdated > expireMs) {
+                console.log("보관함 기간이 만료되어 초기화되었습니다.");
+                localStorage.removeItem('grx_inventory_v2');
+                return [];
+            }
+            // 접속할 때마다 시간을 갱신해주고 싶다면 아래 주석 해제
+            // data.lastUpdated = Date.now();
+            // localStorage.setItem('grx_inventory_v2', JSON.stringify(data));
+            
+            return data.items || [];
+        } catch (e) {
+            return [];
+        }
+    };
+
+    let inventory = loadInventory();
     let selectedCards = [];
     let currentFilterMember = '';
 
