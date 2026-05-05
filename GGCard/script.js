@@ -206,6 +206,8 @@ const members = {
       color: '#4FC3F7',
       link: 'https://www.sooplive.com/station/o0opha',
     },
+  ],
+  new: [
     {
       id: 'mint',
       name: '임민트',
@@ -344,6 +346,18 @@ document.addEventListener('DOMContentLoaded', () => {
       div.innerHTML = createCard(m);
       div.onclick = () => openMemberModal(m);
       lowerGrid.appendChild(div);
+    });
+  }
+
+  // NEW 렌더링
+  const newGrid = document.getElementById('new-grid');
+  if (newGrid) {
+    members.new.forEach((m) => {
+      const div = document.createElement('div');
+      div.className = 'flip-container';
+      div.innerHTML = createCard(m);
+      div.onclick = () => openMemberModal(m);
+      newGrid.appendChild(div);
     });
   }
 });

@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const grid = document.getElementById('collectionGrid');
     const fusionBar = document.getElementById('fusionBar');
     const btnFusion = document.getElementById('btnFusion');
-    const btnDelete = document.getElementById('btnDelete');
+    const btnDeselect = document.getElementById('btnDeselect');
     const slot1 = document.getElementById('slot1');
     const slot2 = document.getElementById('slot2');
     const targetInfo = document.getElementById('fusionTargetInfo');
@@ -148,15 +148,15 @@ document.addEventListener('DOMContentLoaded', () => {
             slot2.innerText = selectedCards[1] && selectedCards.length === 2 ? '✓' : (selectedCards.length > 2 ? '...' : '+');
             slot2.classList.toggle('filled', selectedCards.length >= 2);
 
-            if (btnDelete) {
-                btnDelete.disabled = false;
-                btnDelete.innerText = `선택 삭제 (${selectedCards.length})`;
+            if (btnDeselect) {
+                btnDeselect.disabled = false;
+                btnDeselect.innerText = `선택 취소 (${selectedCards.length})`;
             }
 
             if (selectedCards.length === 2) {
                 const [c1, c2] = selectedCards;
                 if (c1.starRank >= 5 || c2.starRank >= 5) {
-                    targetInfo.innerText = '전설 카드는 합성이 불가합니다. (삭제는 가능)';
+                    targetInfo.innerText = '전설 카드는 합성이 불가합니다.';
                     targetInfo.style.color = '#555';
                     btnFusion.disabled = true;
                 } else if (c1.baseId === c2.baseId && (c1.starRank || 1) === (c2.starRank || 1)) {
@@ -172,12 +172,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     btnFusion.disabled = true;
                 }
             } else if (selectedCards.length > 2) {
-                targetInfo.innerText = `현재 ${selectedCards.length}장 선택됨 (삭제만 가능)`;
+                targetInfo.innerText = `현재 ${selectedCards.length}장 선택됨`;
                 targetInfo.style.color = '#aaa';
                 btnFusion.disabled = true;
             } else {
                 if (selectedCards[0] && selectedCards[0].starRank >= 5) {
-                    targetInfo.innerText = '전설 카드는 삭제만 가능합니다.';
+                    targetInfo.innerText = '전설 카드는 합성할 수 없습니다.';
                 } else {
                     targetInfo.innerText = '합성하려면 1장 더 선택하세요.';
                 }
@@ -187,24 +187,14 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             fusionBar.classList.remove('active');
             btnFusion.disabled = true;
-            if (btnDelete) btnDelete.disabled = true;
+            if (btnDeselect) btnDeselect.disabled = true;
         }
     };
 
-    if (btnDelete) {
-        btnDelete.onclick = () => {
-            if (selectedCards.length === 0) return;
-            if (!confirm(`선택한 ${selectedCards.length}장의 카드를 정말 삭제하시겠습니까?`)) return;
-
-            const selectedIds = selectedCards.map(c => c.id);
-            inventory = inventory.filter(item => !selectedIds.includes(item.id));
-            
-            const dataToSave = { items: inventory, lastUpdated: Date.now() };
-            localStorage.setItem('grx_inventory_v2', JSON.stringify(dataToSave));
-            
+    if (btnDeselect) {
+        btnDeselect.onclick = () => {
             selectedCards = [];
             updateFusionUI();
-            updateMemberFilterOptions();
             renderCollection();
         };
     }
