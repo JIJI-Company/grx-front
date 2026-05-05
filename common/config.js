@@ -26,6 +26,6 @@ const CONFIG = {
   },
 
   GACHA: {
-    EXPIRE_HOURS: 24 // 24시간 동안 미접속 시 보관함 초기화
+    EXPIRE_HOURS: 48 // 24시간 동안 미접속 시 보관함 초기화
   }
 };
