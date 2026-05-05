@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LIKA - 다꾸(다이어리 꾸미기) 공간 🦖</title>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-yellow: #FFFDE7;
+      --grid-line: #FFE082;
+      --text-brown: #5D4037;
+      --tape-color: rgba(255, 255, 255, 0.7);
+    }
+
+    body, html {
+      margin: 0; padding: 0; width: 100%; height: 100%;
+      /* 귀여운 모눈종이(노트) 배경 */
+      background-color: var(--bg-yellow);
+      background-image: 
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+      background-size: 30px 30px;
+      color: var(--text-brown);
+      font-family: 'Jua', sans-serif;
+      overflow: hidden; /* 데스크 위에서만 놀도록 설정 */
+      user-select: none;
+    }
+
+    /* =========================================
+       1. 인트로 (화면을 집어삼키는 공룡)
+       ========================================= */
+    #intro-gate {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: #FFC107; z-index: 99999;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      transition: opacity 0.5s ease;
+      background-image: radial-gradient(#FF9800 2px, transparent 2px);
+      background-size: 20px 20px;
+      cursor: pointer;
+    }
+
+    .dino-mouth-wrap {
+      position: relative;
+      cursor: pointer;
+      transform-origin: center center;
+      transition: transform 1.5s cubic-bezier(0.8, -0.2, 0.2, 1.5);
+    }
+    
+    .dino-mouth-wrap.eat {
+      transform: scale(80);
+    }
+
+    .intro-title {
+      font-size: 3rem; color: #fff; text-shadow: 3px 3px 0 #FF5722;
+      margin-bottom: 30px; animation: wobble 2s infinite; pointer-events: none;
+    }
+
+    @keyframes wobble {
+      0%, 100% { transform: rotate(-3deg); }
+      50% { transform: rotate(3deg); }
+    }
+
+    /* 임시 공룡 이미지 (나중에 유저가 바꿀 수 있음) */
+    .dino-img {
+      width: 400px; height: 400px;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%23FF5722"/><circle cx="35" cy="35" r="8" fill="white"/><circle cx="65" cy="35" r="8" fill="white"/><circle cx="35" cy="35" r="3" fill="black"/><circle cx="65" cy="35" r="3" fill="black"/><path d="M 20 60 Q 50 100 80 60 Z" fill="%23000"/></svg>') no-repeat center;
+      background-size: contain;
+      filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
+    }
+
+    /* =========================================
+       2. 스크랩북 (다꾸) 데스크 탑 UI
+       ========================================= */
+    #desk-area {
+      position: relative;
+      width: 100%; height: 100%;
+      opacity: 0; visibility: hidden;
+      transition: opacity 1s ease 1s;
+    }
+    body.intro-done #intro-gate { visibility: hidden; opacity: 0; pointer-events: none; }
+    body.intro-done #desk-area { opacity: 1; visibility: visible; }
+
+    /* 낙서 장식들 (Absolute positioned) */
+    .doodle { position: absolute; opacity: 0.5; pointer-events: none; z-index: 1; }
+    .doodle-1 { top: 10%; left: 5%; font-size: 4rem; transform: rotate(-20deg); }
+    .doodle-2 { bottom: 15%; right: 10%; font-size: 5rem; transform: rotate(15deg); }
+    .doodle-3 { top: 40%; right: 5%; font-size: 3rem; transform: rotate(45deg); }
+
+    /* =========================================
+       [A] 폴라로이드 사진 (드래그 가능!)
+       ========================================= */
+    .polaroid {
+      position: absolute;
+      background: #fff;
+      padding: 15px 15px 50px 15px;
+      box-shadow: 3px 8px 20px rgba(0,0,0,0.15);
+      border-radius: 2px;
+      cursor: grab;
+      width: 200px;
+      height: 200px; /* 사진 크기: 정사각형 */
+      transition: transform 0.2s, box-shadow 0.2s;
+      z-index: 10;
+    }
+    .polaroid:active { cursor: grabbing; box-shadow: 8px 15px 30px rgba(0,0,0,0.25); }
+    
+    .polaroid img { width: 100%; height: 100%; object-fit: cover; background: #eee; pointer-events: none; }
+    
+    .polaroid::after {
+      content: attr(data-text);
+      position: absolute; bottom: 12px; left: 0; width: 100%; text-align: center;
+      font-size: 1.4rem; color: var(--text-brown); pointer-events: none;
+    }
+    
+    /* 마스킹 테이프 */
+    .polaroid::before {
+      content: ""; position: absolute; top: -10px; left: 50%; transform: translateX(-50%) rotate(-5deg);
+      width: 80px; height: 25px; background: var(--tape-color);
+      border: 1px solid rgba(0,0,0,0.05); box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      z-index: 12; pointer-events: none;
+      backdrop-filter: blur(2px);
+    }
+
+    /* =========================================
+       [B] 포스트잇 (통계 박스)
+       ========================================= */
+    .sticky-note {
+      position: absolute;
+      top: 50px; left: 50px;
+      width: 250px; height: 250px;
+      background: #FFFF8D;
+      box-shadow: 5px 5px 15px rgba(0,0,0,0.1);
+      padding: 20px;
+      transform: rotate(-3deg);
+      z-index: 5;
+      display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+    }
+    /* 포스트잇 테이프 */
+    .sticky-note::before {
+      content: ""; position: absolute; top: -10px; left: 30%;
+      width: 100px; height: 25px; background: rgba(255, 171, 145, 0.6);
+      transform: rotate(2deg);
+    }
+    .sticky-note img.profile-img {
+      width: 80px; height: 80px; border-radius: 50%; border: 3px solid #FF9800; margin-bottom: 10px;
+      object-fit: cover;
+    }
+    .sticky-note h1 { margin: 0; font-size: 2rem; color: #E65100; }
+    .stat-line { font-size: 1.2rem; margin: 5px 0; border-bottom: 2px dashed #FFCC80; width: 100%; padding-bottom: 5px;}
+    .live-badge { display: inline-block; background: #FF4081; color: #fff; padding: 2px 10px; border-radius: 10px; font-size: 1rem; animation: pop 1s infinite alternate; display: none; }
+    @keyframes pop { from { transform: scale(1); } to { transform: scale(1.1); } }
+
+    /* =========================================
+       [C] 레트로 TV (VOD 리스트)
+       ========================================= */
+    .retro-tv {
+      position: absolute;
+      top: 100px; right: 50px;
+      width: 350px; height: 450px;
+      background: #FF9800;
+      border-radius: 30px;
+      border: 8px solid #E65100;
+      box-shadow: inset -5px -5px 0 rgba(0,0,0,0.2), 10px 10px 20px rgba(0,0,0,0.3);
+      padding: 20px;
+      z-index: 5;
+      display: flex; flex-direction: column;
+      transform: rotate(2deg);
+    }
+    
+    .tv-antennas { position: absolute; top: -40px; left: 50%; transform: translateX(-50%); width: 100px; height: 40px; }
+    .tv-antennas::before, .tv-antennas::after { content:""; position:absolute; bottom:0; width:6px; height:60px; background:#8D6E63; border-radius:5px; }
+    .tv-antennas::before { left: 20%; transform: rotate(-30deg); }
+    .tv-antennas::after { right: 20%; transform: rotate(30deg); }
+
+    .tv-brand { text-align: center; font-size: 1.2rem; color: #FFE082; margin-bottom: 10px; letter-spacing: 2px; }
+
+    .tv-screen-wrap {
+      flex: 1; background: #212121; border-radius: 20px; border: 5px solid #4E342E;
+      position: relative; overflow: hidden;
+      box-shadow: inset 0 0 20px rgba(0,0,0,1);
+    }
+    
+    /* VOD 목록 나오는 화면 */
+    .tv-screen {
+      width: 100%; height: 100%;
+      overflow-y: auto; overflow-x: hidden;
+      padding: 10px; box-sizing: border-box;
+      /* 커스텀 스크롤바 (TV 안쪽) */
+    }
+    .tv-screen::-webkit-scrollbar { width: 8px; }
+    .tv-screen::-webkit-scrollbar-thumb { background: #4E342E; border-radius: 4px; }
+
+    .vod-item {
+      display: block; background: #3E2723; margin-bottom: 10px; border-radius: 10px;
+      text-decoration: none; color: #fff; padding: 8px; border: 2px solid #5D4037;
+      transition: 0.2s;
+    }
+    .vod-item:hover { background: #5D4037; border-color: #FFC107; transform: scale(1.02); }
+    .vod-thumb { width: 100%; height: 100px; object-fit: cover; border-radius: 5px; margin-bottom: 5px; filter: contrast(1.2) sepia(0.2); }
+    .vod-title { font-size: 0.9rem; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #FFD54F; }
+    
+    /* TV 노이즈 효과 */
+    .tv-noise {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.05) 2px, rgba(255,255,255,0.05) 4px);
+      pointer-events: none; z-index: 10; animation: scrollNoise 10s linear infinite;
+    }
+    @keyframes scrollNoise { from { background-position: 0 0; } to { background-position: 0 1000px; } }
+
+    /* 방문하기 버튼 */
+    .tv-btn {
+      display: block; text-align: center; margin-top: 15px; padding: 10px;
+      background: #FF5722; color: #fff; text-decoration: none; border-radius: 15px;
+      box-shadow: 0 5px 0 #D84315; transition: 0.2s; font-size: 1.2rem;
+    }
+    .tv-btn:active { transform: translateY(5px); box-shadow: none; }
+
+  </style>
+</head>
+<body>
+
+  <!-- 크앙 사운드 -->
+  <audio id="roarSound" preload="auto">
+    <source src="https://cdn.freesound.org/previews/434/434463_8857218-lq.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- [1] 인트로: 거대한 공룡 -->
+  <div id="intro-gate">
+    <h1 class="intro-title">입을 클릭해서 먹혀주세요! 🦖</h1>
+    <div class="dino-mouth-wrap" id="dinoBtn">
+      <!-- 유저님의 팬 캐릭터 이미지로 대체하세요 -->
+      <div class="dino-img"></div>
+    </div>
+  </div>
+
+  <!-- [2] 데스크(스크랩북) 영역 -->
+  <div id="desk-area">
+    
+    <!-- 귀여운 낙서들 -->
+    <div class="doodle doodle-1">💛</div>
+    <div class="doodle doodle-2">🦖</div>
+    <div class="doodle doodle-3">✨</div>
+
+    <!-- [A] 통계 포스트잇 -->
+    <div class="sticky-note" id="stickyNote">
+      <img src="img/lika.png" alt="리카" class="profile-img" onerror="this.src='img/ggu_title.jpg'">
+      <h1>LIKA <span class="live-badge" id="liveBadge">ON AIR</span></h1>
+      <div class="stat-line">팬클럽: <strong id="fanCount">---</strong>명</div>
+      <div class="stat-line">총조회수: <strong id="totalViews">---</strong>회</div>
+      <p style="color:#A1887F; font-size:1rem; margin-top:10px;">귀여운 상현 5 항아리의 혈귀!</p>
+    </div>
+
+    <!-- [B] VOD 레트로 TV -->
+    <div class="retro-tv" id="retroTv">
+      <div class="tv-antennas"></div>
+      <div class="tv-brand">LIKA TV</div>
+      <div class="tv-screen-wrap">
+        <div class="tv-noise"></div>
+        <div class="tv-screen" id="vodGrid">
+          <p style="color:#fff; text-align:center; padding:20px;">치지직... VOD 수신중...</p>
+        </div>
+      </div>
+      <a href="https://www.sooplive.com/station/lika07" target="_blank" class="tv-btn">방송국 놀러가기 📺</a>
+    </div>
+
+    <!-- [C] 흩뿌려진 폴라로이드 사진들 (드래그 가능!) -->
+    <!-- 
+      원하는 만큼 .polaroid를 복사해서 사진을 추가하세요!
+      top, left 퍼센트를 조절해서 위치를 흩뿌리고, transform: rotate 로 각도를 주세요.
+      data-text 에는 사진 밑에 적힐 짧은 메모를 쓰시면 됩니다!
+    -->
+    <div class="polaroid" data-text="우왕~!" style="top: 50%; left: 10%; transform: rotate(-10deg);">
+      <img src="img/lika.png" alt="사진1">
+    </div>
+    
+    <div class="polaroid" data-text="귀여워💛" style="top: 20%; left: 40%; transform: rotate(15deg);">
+      <img src="https://via.placeholder.com/800x800/FFD54F/5D4037?text=사진을+넣어주세요!" alt="사진2">
+    </div>
+    
+    <div class="polaroid" data-text="크앙🦖" style="top: 60%; left: 35%; transform: rotate(-5deg);">
+      <img src="https://via.placeholder.com/800x800/FFD54F/5D4037?text=사진을+넣어주세요!" alt="사진3">
+    </div>
+    
+    <div class="polaroid" data-text="최고야✨" style="top: 40%; left: 65%; transform: rotate(8deg);">
+      <img src="https://via.placeholder.com/800x800/FFD54F/5D4037?text=사진을+넣어주세요!" alt="사진4">
+    </div>
+
+  </div>
+
+  <script>
+    // 숫자에 콤마 찍기
+    function formatNum(num) {
+      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    // =========================================
+    // 1. 인트로 로직 (공룡 꿀꺽)
+    // =========================================
+    const introGate = document.getElementById('intro-gate');
+    const dinoBtn = document.getElementById('dinoBtn');
+    const roarSound = document.getElementById('roarSound');
+
+    // 화면 어디를 클릭해도 인트로가 넘어가도록 변경
+    introGate.addEventListener('click', () => {
+      document.querySelector('.intro-title').style.opacity = 0;
+      
+      // 소리 재생 (브라우저 정책으로 인해 실패할 경우를 대비한 안전한 처리)
+      try {
+        roarSound.volume = 0.6;
+        roarSound.currentTime = 0;
+        let playPromise = roarSound.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(e => {
+            console.warn("오디오 재생 실패 (TTS로 대체):", e);
+            let msg = new SpeechSynthesisUtterance("크앙!");
+            msg.pitch = 0.2; msg.rate = 0.8;
+            window.speechSynthesis.speak(msg);
+          });
+        }
+      } catch (e) {
+        console.error(e);
+      }
+
+      // 줌인 애니메이션
+      dinoBtn.classList.add('eat');
+
+      // 애니메이션 후 화면 전환
+      setTimeout(() => {
+        document.body.classList.add('intro-done');
+        loadApiData(); // 데스크 화면 진입 시 데이터 로드
+      }, 1200);
+    });
+
+    // =========================================
+    // 2. 드래그 앤 드롭 로직 (폴라로이드 & 포스트잇 & TV 잡고 끌기)
+    // =========================================
+    let highestZ = 100;
+    function makeDraggable(el) {
+      let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+      
+      // PC 마우스
+      el.onmousedown = dragMouseDown;
+      // 모바일 터치
+      el.ontouchstart = dragTouchStart;
+
+      function dragMouseDown(e) {
+        e.preventDefault();
+        pos3 = e.clientX; pos4 = e.clientY;
+        bringToFront();
+        document.onmouseup = closeDragElement;
+        document.onmousemove = elementDrag;
+      }
+      function dragTouchStart(e) {
+        if(e.touches.length > 1) return;
+        let touch = e.touches[0];
+        pos3 = touch.clientX; pos4 = touch.clientY;
+        bringToFront();
+        document.ontouchend = closeDragElement;
+        document.ontouchmove = elementDragTouch;
+      }
+
+      function bringToFront() {
+        highestZ++;
+        el.style.zIndex = highestZ;
+        el.style.transform = el.style.transform.replace(/scale\([^\)]*\)/, '') + ' scale(1.1)'; // 잡았을 때 살짝 커짐
+      }
+
+      function elementDrag(e) {
+        e.preventDefault();
+        pos1 = pos3 - e.clientX; pos2 = pos4 - e.clientY;
+        pos3 = e.clientX; pos4 = e.clientY;
+        el.style.top = (el.offsetTop - pos2) + "px";
+        el.style.left = (el.offsetLeft - pos1) + "px";
+      }
+      function elementDragTouch(e) {
+        let touch = e.touches[0];
+        pos1 = pos3 - touch.clientX; pos2 = pos4 - touch.clientY;
+        pos3 = touch.clientX; pos4 = touch.clientY;
+        el.style.top = (el.offsetTop - pos2) + "px";
+        el.style.left = (el.offsetLeft - pos1) + "px";
+      }
+
+      function closeDragElement() {
+        document.onmouseup = null; document.onmousemove = null;
+        document.ontouchend = null; document.ontouchmove = null;
+        el.style.transform = el.style.transform.replace(/scale\([^\)]*\)/, ''); // 놓았을 때 원상복구
+      }
+    }
+
+    // 사진, 포스트잇, TV 모두 드래그 가능하게 만들기
+    document.querySelectorAll('.polaroid, .sticky-note, .retro-tv').forEach(el => {
+      makeDraggable(el);
+    });
+
+    // =========================================
+    // 3. SOOP API 및 시트 데이터 로드
+    // =========================================
+    async function loadApiData() {
+      try {
+        const vodGrid = document.getElementById('vodGrid');
+        let isBroadcasting = false;
+        let liveThumbnail = '';
+        let liveTitle = '';
+
+        // [1] 구글 시트 Live 데이터 로드 (가장 정확한 라이브 상태 및 썸네일)
+        try {
+          const sheetRes = await fetch('/.netlify/functions/gas-proxy?sheet=Live');
+          if (sheetRes.ok) {
+            const sheetData = await sheetRes.json();
+            // 리카(lika07 또는 리카)가 방송중인지 확인
+            const likaLive = sheetData.find(bj => (bj.id === 'lika07' || bj.name === '리카') && bj.status === 'on-air');
+            
+            if (likaLive) {
+              isBroadcasting = true;
+              document.getElementById('liveBadge').style.display = 'inline-block';
+              liveThumbnail = likaLive.thumbnail || likaLive.profileImg || 'img/lika.png';
+              liveTitle = likaLive.streamTitle || '지금 방송 중입니다!';
+            }
+          }
+        } catch (e) { console.warn("Google Sheet Proxy Error"); }
+
+        // [2] 방송국 상세 정보 로드 (총 시청자, 팬클럽)
+        const stationRes = await fetch('https://bjapi.afreecatv.com/api/lika07/station');
+        const stationData = await stationRes.json();
+        if (stationData && stationData.upd) {
+          document.getElementById('totalViews').innerText = formatNum(stationData.upd.total_view_cnt);
+          document.getElementById('fanCount').innerText = formatNum(stationData.upd.fan_cnt);
+        }
+
+        // [3] TV 화면 분기 처리 (방송 중 vs 오프라인)
+        if (isBroadcasting) {
+          // 라이브 화면 출력
+          vodGrid.innerHTML = `
+            <a href="https://play.sooplive.co.kr/lika07" target="_blank" class="vod-item" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()" style="border-color:#FF4081; padding:0;">
+              <div style="position:relative; width:100%; height:150px;">
+                <img src="${liveThumbnail}" class="vod-thumb" style="height:100%; margin:0;" onerror="this.src='img/ggu_title.jpg'">
+                <span style="position:absolute; top:10px; left:10px; background:#FF4081; padding:2px 8px; border-radius:10px; font-weight:bold; font-size:0.9rem; animation:pop 1s infinite alternate;">ON-AIR</span>
+              </div>
+              <div style="padding:15px;">
+                <h4 class="vod-title" style="color:#FFC107; font-size:1.1rem; white-space:normal; line-height:1.4;">${liveTitle}</h4>
+                <p style="color:#A1887F; margin:5px 0 0; font-size:0.9rem;">지금 바로 시청하러 가기! 👉</p>
+              </div>
+            </a>
+          `;
+        } else {
+          // 오프라인일 때: VOD / 클립 / 캐치 출력
+          const vodRes = await fetch('https://bjapi.afreecatv.com/api/lika07/vods?page=1');
+          const vodData = await vodRes.json();
+          vodGrid.innerHTML = '';
+
+          if (vodData && vodData.data && vodData.data.length > 0) {
+            let allVods = vodData.data;
+            
+            // 최신순 정렬 (기본적으로 최신순이지만 확실히 보장)
+            allVods.sort((a,b) => new Date(b.reg_date) - new Date(a.reg_date));
+
+            // 최근 2~3일(상위 3개) 중 랜덤으로 하나를 '오늘의 클립/캐치'로 선정
+            const recentVods = allVods.slice(0, 3);
+            const randomPick = recentVods[Math.floor(Math.random() * recentVods.length)];
+            
+            // '오늘의 클립' 렌더링
+            let thumbUrl = randomPick.ucc.thumb;
+            if (thumbUrl && thumbUrl.startsWith('//')) thumbUrl = 'https:' + thumbUrl;
+            else if (!thumbUrl) thumbUrl = 'img/ggu_title.jpg';
+            const vodLink = `https://vod.sooplive.co.kr/player/${randomPick.title_no}`;
+            
+            vodGrid.innerHTML += `
+              <h3 style="color:#FF9800; text-align:center; margin:10px 0 10px 0; font-size:1.3rem;">✨ 오늘의 핫클립 / 캐치 ✨</h3>
+              <a href="${vodLink}" target="_blank" class="vod-item" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()" style="border-color:#FF9800; background:#4E342E;">
+                <img src="${thumbUrl}" class="vod-thumb" style="filter:none;" onerror="this.src='img/ggu_title.jpg'">
+                <h4 class="vod-title" style="color:#FFD54F;">${randomPick.title_name}</h4>
+              </a>
+              <div style="border-bottom: 2px dashed #5D4037; margin: 15px 0;"></div>
+              <h3 style="color:#FFE082; text-align:center; margin:0 0 10px 0; font-size:1.1rem;">📺 최근 동영상</h3>
+            `;
+
+            // 나머지 동영상들 렌더링
+            const remainingVods = allVods.filter(v => v.title_no !== randomPick.title_no).slice(0, 8);
+            
+            remainingVods.forEach(vod => {
+              let tUrl = vod.ucc.thumb;
+              if (tUrl && tUrl.startsWith('//')) tUrl = 'https:' + tUrl;
+              else if (!tUrl) tUrl = 'img/ggu_title.jpg';
+              const link = `https://vod.sooplive.co.kr/player/${vod.title_no}`;
+              
+              vodGrid.innerHTML += `
+                <a href="${link}" target="_blank" class="vod-item" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+                  <img src="${tUrl}" alt="VOD" class="vod-thumb" onerror="this.src='img/ggu_title.jpg'">
+                  <h4 class="vod-title">${vod.title_name}</h4>
+                </a>
+              `;
+            });
+          } else {
+            vodGrid.innerHTML = '<p style="text-align:center; color:#fff;">VOD가 없습니다.</p>';
+          }
+        }
+      } catch (err) {
+        console.error('API Error:', err);
+      }
+    }
+  </script>
+</body>
+</html>

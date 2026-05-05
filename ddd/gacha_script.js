@@ -25,34 +25,28 @@ const summonPool = {
 
 document.addEventListener('DOMContentLoaded', () => {
     const btnSummon = document.getElementById('btnSummon');
+    const btnSummon5 = document.getElementById('btnSummon5');
     const gachaGate = document.getElementById('gachaGate');
     const summonResult = document.getElementById('summonResult');
     const particlesContainer = document.getElementById('particles');
 
     // ── 소환 로직 ──
-    const performSummon = () => {
+    const performSummon = (count = 1) => {
         if (btnSummon.disabled) return;
         
         // 이전 결과 초기화
-        summonResult.classList.remove('show', 'instant');
+        summonResult.classList.remove('show', 'instant', 'multi');
+        if (count > 1) summonResult.classList.add('multi');
+
         gachaGate.classList.remove('opened');
         gachaGate.style.display = 'block';
 
         btnSummon.disabled = true;
+        if (btnSummon5) btnSummon5.disabled = true;
+
         btnSummon.innerText = "소환 중...";
+        if (btnSummon5) btnSummon5.innerText = "소환 중...";
         gachaGate.classList.add('shaking'); // 문 진동
-
-        // 1. 랜덤 확률 결정
-        const rand = Math.random() * 100;
-        let selectedRarity = 'r';
-        let rarityClass = '';
-
-        if (rand < 5) { selectedRarity = 'ssr'; rarityClass = 'rarity-ssr'; }
-        else if (rand < 30) { selectedRarity = 'sr'; rarityClass = 'rarity-sr'; }
-        
-        const pool = summonPool[selectedRarity];
-        const picked = pool[Math.floor(Math.random() * pool.length)];
-        picked.rarityClass = rarityClass;
 
         // 2. 연출 타임라인
         setTimeout(() => {
@@ -61,28 +55,49 @@ document.addEventListener('DOMContentLoaded', () => {
             createExplosion(window.innerWidth / 2, window.innerHeight / 2, 50);
 
             setTimeout(() => {
-                // 확률 로직: 1성(70%), 2성(20%), 3성(8%), 4성(2%)
-                const randStar = Math.random() * 100;
-                let earnedStars = 1;
-                if (randStar < 2) earnedStars = 4;
-                else if (randStar < 10) earnedStars = 3;
-                else if (randStar < 30) earnedStars = 2;
+                const cardsToSave = [];
 
-                // 고유 ID 부여 (합성을 위해)
-                const cardToSave = { 
-                    ...picked, 
-                    id: Date.now(), 
-                    baseId: picked.name + '_' + picked.rank,
-                    starRank: earnedStars 
-                };
-                showResult(cardToSave);
+                for (let i = 0; i < count; i++) {
+                    // 1. 랜덤 확률 결정
+                    const rand = Math.random() * 100;
+                    let selectedRarity = 'r';
+                    let rarityClass = '';
+
+                    if (rand < 5) { selectedRarity = 'ssr'; rarityClass = 'rarity-ssr'; }
+                    else if (rand < 30) { selectedRarity = 'sr'; rarityClass = 'rarity-sr'; }
+                    
+                    const pool = summonPool[selectedRarity];
+                    const picked = pool[Math.floor(Math.random() * pool.length)];
+                    picked.rarityClass = rarityClass;
+
+                    // 확률 로직: 1성(70%), 2성(20%), 3성(8%), 4성(2%)
+                    const randStar = Math.random() * 100;
+                    let earnedStars = 1;
+                    if (randStar < 2) earnedStars = 4;
+                    else if (randStar < 10) earnedStars = 3;
+                    else if (randStar < 30) earnedStars = 2;
+
+                    // 고유 ID 부여 (합성을 위해)
+                    cardsToSave.push({ 
+                        ...picked, 
+                        id: Date.now() + i, // prevent duplicate ID
+                        baseId: picked.name + '_' + picked.rank,
+                        starRank: earnedStars 
+                    });
+                }
+
+                showResult(cardsToSave);
                 
                 // 인벤토리에 추가
-                addToInventory(cardToSave);
+                cardsToSave.forEach(c => addToInventory(c));
                 
                 // 버튼 복구
                 btnSummon.disabled = false;
-                btnSummon.innerText = "무한의 소환 수행";
+                btnSummon.innerText = "1회 소환";
+                if (btnSummon5) {
+                    btnSummon5.disabled = false;
+                    btnSummon5.innerText = "5연속 소환";
+                }
             }, 800);
         }, 1500);
     };
@@ -94,22 +109,27 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('grx_inventory', JSON.stringify(inventory));
     };
 
-    const showResult = (member, instant = false) => {
-        let starsHtml = '';
-        const rankValue = member.starRank || 1;
-        for(let i=0; i<rankValue; i++) starsHtml += '★';
+    const showResult = (members, instant = false) => {
+        let htmlStr = '';
+        members.forEach(member => {
+            let starsHtml = '';
+            const rankValue = member.starRank || 1;
+            for(let i=0; i<rankValue; i++) starsHtml += '★';
 
-        summonResult.innerHTML = `
-            <div class="summon-card ${member.rarityClass}" style="box-shadow: ${rankValue >= 4 ? '0 0 30px #ff1a4a, inset 0 0 20px #ff1a4a' : (rankValue >= 3 ? '0 0 20px #ffd700' : 'none')};">
-                <img src="${member.img}" class="card-img" alt="${member.name}">
-                <div class="card-body">
-                    <div style="color:${rankValue >= 4 ? '#ff1a4a' : '#ffd700'}; font-size:1.5rem; text-shadow:0 0 10px rgba(0,0,0,0.8); margin-bottom:10px;">${starsHtml}</div>
-                    <div class="card-rank">${member.rank}</div>
-                    <div class="card-name">${member.name}</div>
-                    <div class="card-fortune">"${member.fortune}"</div>
+            htmlStr += `
+                <div class="summon-card ${member.rarityClass}" style="box-shadow: ${rankValue >= 4 ? '0 0 30px #ff1a4a, inset 0 0 20px #ff1a4a' : (rankValue >= 3 ? '0 0 20px #ffd700' : 'none')};">
+                    <img src="${member.img}" class="card-img" alt="${member.name}">
+                    <div class="card-body">
+                        <div style="color:${rankValue >= 4 ? '#ff1a4a' : '#ffd700'}; font-size:1.5rem; text-shadow:0 0 10px rgba(0,0,0,0.8); margin-bottom:10px;">${starsHtml}</div>
+                        <div class="card-rank">${member.rank}</div>
+                        <div class="card-name">${member.name}</div>
+                        <div class="card-fortune">"${member.fortune}"</div>
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
+        });
+
+        summonResult.innerHTML = htmlStr;
         
         if (instant) {
             gachaGate.style.display = 'none';
@@ -121,8 +141,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    btnSummon.addEventListener('click', performSummon);
-    gachaGate.addEventListener('click', performSummon);
+    btnSummon.addEventListener('click', () => performSummon(1));
+    if (btnSummon5) btnSummon5.addEventListener('click', () => performSummon(5));
+    gachaGate.addEventListener('click', () => performSummon(1));
 });
 
 // 앰비언트 파티클 효과

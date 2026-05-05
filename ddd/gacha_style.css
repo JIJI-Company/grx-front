@@ -13,8 +13,9 @@
 
 .summon-altar {
     position: relative;
-    width: 600px;
-    height: 700px;
+    width: 100%;
+    max-width: 1000px;
+    min-height: 700px;
     margin: 60px auto 0;
     display: flex;
     flex-direction: column;
@@ -114,8 +115,13 @@
 
 /* 🎴 소환 결과 카드 (Result Card) */
 .summon-result-container {
-    width: 320px;
-    height: 480px;
+    width: 100%;
+    min-height: 480px;
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
     position: relative;
     z-index: 50;
     perspective: 1000px;
@@ -130,7 +136,7 @@
 }
 
 .summon-card {
-    width: 100%; height: 100%;
+    width: 320px; height: 480px;
     background: #111;
     border: 4px solid #fff;
     border-radius: 12px;
@@ -138,6 +144,14 @@
     box-shadow: 0 0 50px rgba(0,0,0,0.8);
     display: flex; flex-direction: column;
 }
+
+/* For multi draw */
+.summon-result-container.multi .summon-card {
+    width: 180px; height: 270px;
+}
+.summon-result-container.multi .card-name { font-size: 1.2rem; margin-bottom: 5px; }
+.summon-result-container.multi .card-fortune { display: none; }
+.summon-result-container.multi .card-body { padding: 10px; }
 
 /* 레어도 이펙트 (Rarity Glow) */
 .rarity-ssr { border-color: #ffd700; box-shadow: 0 0 60px #ffd70088; }

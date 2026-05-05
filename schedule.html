@@ -275,6 +275,10 @@
             let allMembers = (Array.isArray(liveResponse) ? liveResponse : (liveResponse?.Live || []))
                                .filter(m => (m.name && String(m.name).trim()) || (m.id && String(m.id).trim()));
             
+            // 나간 멤버(구본좌 등)를 시트 데이터와 무관하게 화면에서 강제 제외 처리
+            const excludedMembers = ["구본좌"];
+            allMembers = allMembers.filter(m => !excludedMembers.includes(m.name) && !excludedMembers.includes(m.id));
+            
             // 신규 멤버 등 Live 시트에 없을 수 있는 멤버 강제 추가
             const extraMembers = [
               { name: "서라0", profileImg: "img/서라0.jpg" },
@@ -291,7 +295,7 @@
             // 스케줄에는 있지만 allMembers에 없는 멤버도 추가 (예외 처리)
             rawSchedules.forEach(s => {
                const mName = s.Member || s.member;
-               if(mName && !allMembers.find(m => (m.name === mName || m.id === mName))) {
+               if(mName && !excludedMembers.includes(mName) && !allMembers.find(m => (m.name === mName || m.id === mName))) {
                    allMembers.push({ name: mName, profileImg: `img/${mName}.png` });
                }
             });
