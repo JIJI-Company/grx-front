@@ -8,36 +8,50 @@ document.addEventListener('DOMContentLoaded', () => {
     const targetInfo = document.getElementById('fusionTargetInfo');
     
     const btnSortStar = document.getElementById('btnSortStar');
-    const btnSortMember = document.getElementById('btnSortMember');
+    const memberFilter = document.getElementById('memberFilter');
 
     let inventory = JSON.parse(localStorage.getItem('grx_inventory')) || [];
     let selectedCards = [];
-    let currentSortMode = 'star'; // 'star' or 'member'
+    let currentFilterMember = '';
 
-    if (btnSortStar && btnSortMember) {
+    const updateMemberFilterOptions = () => {
+        if (!memberFilter) return;
+        const uniqueMembers = [...new Set(inventory.map(item => item.name))].sort();
+        const currentVal = memberFilter.value;
+        memberFilter.innerHTML = '<option value="">👤 멤버별 보기</option>';
+        uniqueMembers.forEach(name => {
+            const opt = document.createElement('option');
+            opt.value = name;
+            opt.innerText = name;
+            if (name === currentVal) opt.selected = true;
+            memberFilter.appendChild(opt);
+        });
+    };
+    updateMemberFilterOptions();
+
+    if (btnSortStar) {
         btnSortStar.onclick = () => {
-            currentSortMode = 'star';
+            currentFilterMember = '';
+            if(memberFilter) memberFilter.value = '';
             btnSortStar.style.background = 'rgba(255, 26, 74, 0.2)';
-            btnSortStar.style.color = '#fff';
             btnSortStar.style.borderColor = '#ff1a4a';
-            
-            btnSortMember.style.background = 'transparent';
-            btnSortMember.style.color = '#777';
-            btnSortMember.style.borderColor = '#333';
-            
+            btnSortStar.style.color = '#fff';
             renderCollection();
         };
-        
-        btnSortMember.onclick = () => {
-            currentSortMode = 'member';
-            btnSortMember.style.background = 'rgba(255, 26, 74, 0.2)';
-            btnSortMember.style.color = '#fff';
-            btnSortMember.style.borderColor = '#ff1a4a';
-            
-            btnSortStar.style.background = 'transparent';
-            btnSortStar.style.color = '#777';
-            btnSortStar.style.borderColor = '#333';
-            
+    }
+
+    if (memberFilter) {
+        memberFilter.onchange = (e) => {
+            currentFilterMember = e.target.value;
+            if (currentFilterMember) {
+                btnSortStar.style.background = 'transparent';
+                btnSortStar.style.borderColor = '#333';
+                btnSortStar.style.color = '#777';
+            } else {
+                btnSortStar.style.background = 'rgba(255, 26, 74, 0.2)';
+                btnSortStar.style.borderColor = '#ff1a4a';
+                btnSortStar.style.color = '#fff';
+            }
             renderCollection();
         };
     }
@@ -50,21 +64,20 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (currentSortMode === 'star') {
-            inventory.sort((a, b) => {
-                const rankDiff = (b.starRank || 1) - (a.starRank || 1);
-                if (rankDiff !== 0) return rankDiff;
-                return (a.name || '').localeCompare(b.name || '');
-            });
-        } else {
-            inventory.sort((a, b) => {
-                const nameCompare = (a.name || '').localeCompare(b.name || '');
-                if (nameCompare !== 0) return nameCompare;
-                return (b.starRank || 1) - (a.starRank || 1);
-            });
+        let displayList = [...inventory];
+        
+        if (currentFilterMember) {
+            displayList = displayList.filter(c => c.name === currentFilterMember);
         }
 
-        inventory.forEach(card => {
+        // 항상 성급 높은 순, 이름 순 정렬
+        displayList.sort((a, b) => {
+            const rankDiff = (b.starRank || 1) - (a.starRank || 1);
+            if (rankDiff !== 0) return rankDiff;
+            return (a.name || '').localeCompare(b.name || '');
+        });
+
+        displayList.forEach(card => {
             const rank = card.starRank || 1;
             const cardEl = document.createElement('div');
             cardEl.className = `inventory-card star-${rank}`;
@@ -123,7 +136,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     btnFusion.disabled = true;
                 } else if (c1.baseId === c2.baseId && (c1.starRank || 1) === (c2.starRank || 1)) {
                     const nextStar = (c1.starRank || 1) + 1;
-                    targetInfo.innerText = `결과 예정: ${nextStar}성 [${c1.name}]`;
+                    const probs = {2: 100, 3: 80, 4: 60, 5: 50, 6: 40};
+                    const prob = probs[nextStar] || 100;
+                    targetInfo.innerHTML = `결과 예정: ${nextStar}성 [${c1.name}] <span style="color:#ffd700; margin-left:10px;">(성공 확률: ${prob}%)</span>`;
                     targetInfo.style.color = '#ff1a4a';
                     btnFusion.disabled = false;
                 } else {
@@ -162,6 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             selectedCards = [];
             updateFusionUI();
+            updateMemberFilterOptions();
             renderCollection();
         };
     }
@@ -172,31 +188,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const [c1, c2] = selectedCards;
         const nextStar = (c1.starRank || 1) + 1;
+        const probs = {2: 100, 3: 80, 4: 60, 5: 50, 6: 40};
+        const prob = probs[nextStar] || 100;
         
         // 1. 인벤토리에서 제거
         inventory = inventory.filter(item => item.id !== c1.id && item.id !== c2.id);
 
-        // 2. 신규 승급 카드 생성
-        const upgradedCard = {
-            ...c1,
-            id: Date.now(),
-            starRank: nextStar,
-            fortune: `✨ [${nextStar}성 효과] ` + c1.fortune
-        };
+        const isSuccess = Math.random() * 100 <= prob;
 
-        inventory.push(upgradedCard);
-        localStorage.setItem('grx_inventory', JSON.stringify(inventory));
+        if (isSuccess) {
+            // 2. 신규 승급 카드 생성
+            const upgradedCard = {
+                ...c1,
+                id: Date.now(),
+                starRank: nextStar,
+                fortune: `✨ [${nextStar}성 효과] ` + c1.fortune
+            };
+            inventory.push(upgradedCard);
+            localStorage.setItem('grx_inventory', JSON.stringify(inventory));
 
-        // 3. UI 업데이트 및 연출
-        createFusionExplosion(nextStar);
-        selectedCards = [];
-        updateFusionUI();
-        renderCollection();
-        
-        if (nextStar === 5) {
-            alert(`축하합니다! 전설의 5성 [${c1.name}] 카드를 획득하셨습니다!`);
+            // 3. UI 업데이트 및 연출
+            createFusionExplosion(nextStar);
+            selectedCards = [];
+            updateFusionUI();
+            updateMemberFilterOptions();
+            renderCollection();
+            
+            if (nextStar === 5) {
+                alert(`대성공! 전설의 5성 [${c1.name}] 카드를 획득하셨습니다!`);
+            } else {
+                alert(`강화 성공! ${c1.name} 카드가 ${nextStar}성으로 승급되었습니다!`);
+            }
         } else {
-            alert(`${c1.name} 카드가 ${nextStar}성으로 승급되었습니다!`);
+            // 실패 시 본체(c1)만 남기고 c2는 파괴
+            inventory.push(c1);
+            localStorage.setItem('grx_inventory', JSON.stringify(inventory));
+            
+            // 흔들림 연출 (실패)
+            document.body.style.animation = 'shake 0.5s ease-in-out';
+            setTimeout(() => document.body.style.animation = '', 500);
+
+            selectedCards = [];
+            updateFusionUI();
+            updateMemberFilterOptions();
+            renderCollection();
+
+            alert(`강화에 실패했습니다... 재료 카드가 소멸되었습니다.`);
         }
     };
 

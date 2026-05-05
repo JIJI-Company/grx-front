@@ -150,10 +150,17 @@
     <section class="collection-section">
       <div class="gacha-header">
         <h1 class="archive-title">MY COLLECTION</h1>
-        <p class="archive-subtitle">당신이 소환한 혈귀들의 목록입니다. 같은 혈귀를 모아 각성시키세요.</p>
+        <p class="archive-subtitle">
+          당신이 소환한 혈귀들의 목록입니다. 같은 등급의 카드를 2장 모아 각성시키세요.<br>
+          <span style="font-size: 0.85rem; color: #ff8fa0; margin-top: 10px; display: inline-block;">
+            [각성 확률] 2성: 100% | 3성: 80% | 4성: 60% | 5성(전설): 50% (실패 시 재료 카드 1장 소멸)
+          </span>
+        </p>
         <div class="sort-controls" style="margin-top: 30px; display: flex; justify-content: center; gap: 15px;">
-          <button id="btnSortStar" class="btn-secondary-gacha" style="margin-top: 0; background: rgba(255, 26, 74, 0.2); color: #fff; border-color: #ff1a4a;">⭐ 성급 순 정렬</button>
-          <button id="btnSortMember" class="btn-secondary-gacha" style="margin-top: 0;">👤 멤버별 정렬</button>
+          <button id="btnSortStar" class="btn-secondary-gacha" style="margin-top: 0; background: rgba(255, 26, 74, 0.2); color: #fff; border-color: #ff1a4a;">⭐ 전체 보기</button>
+          <select id="memberFilter" class="btn-secondary-gacha" style="margin-top: 0; background: rgba(0,0,0,0.8); color: #fff; padding: 10px 20px; border: 1px solid #333; outline: none; cursor: pointer; font-size: 1rem; border-radius: 4px;">
+            <option value="">👤 멤버별 보기</option>
+          </select>
         </div>
       </div>
 

@@ -143,7 +143,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnSummon.addEventListener('click', () => performSummon(1));
     if (btnSummon5) btnSummon5.addEventListener('click', () => performSummon(5));
-    gachaGate.addEventListener('click', () => performSummon(1));
 });
 
 // 앰비언트 파티클 효과
