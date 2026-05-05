@@ -198,7 +198,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const selectedIds = selectedCards.map(c => c.id);
             inventory = inventory.filter(item => !selectedIds.includes(item.id));
-            localStorage.setItem('grx_inventory', JSON.stringify(inventory));
+            
+            const dataToSave = { items: inventory, lastUpdated: Date.now() };
+            localStorage.setItem('grx_inventory_v2', JSON.stringify(dataToSave));
             
             selectedCards = [];
             updateFusionUI();
@@ -230,7 +232,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 fortune: `✨ [${nextStar}성 효과] ` + c1.fortune
             };
             inventory.push(upgradedCard);
-            localStorage.setItem('grx_inventory', JSON.stringify(inventory));
+            const dataToSave = { items: inventory, lastUpdated: Date.now() };
+            localStorage.setItem('grx_inventory_v2', JSON.stringify(dataToSave));
 
             // 3. UI 업데이트 및 연출
             createFusionExplosion(nextStar);
@@ -247,7 +250,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             // 실패 시 본체(c1)만 남기고 c2는 파괴
             inventory.push(c1);
-            localStorage.setItem('grx_inventory', JSON.stringify(inventory));
+            const dataToSave = { items: inventory, lastUpdated: Date.now() };
+            localStorage.setItem('grx_inventory_v2', JSON.stringify(dataToSave));
             
             // 흔들림 연출 (실패)
             document.body.style.animation = 'shake 0.5s ease-in-out';
