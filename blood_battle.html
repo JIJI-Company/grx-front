@@ -115,17 +115,22 @@
     }
 
     .header h1 {
-      font-family: 'Syncopate', sans-serif;
-      font-size: 5.5rem;
+      font-family: 'Syncopate', 'Noto Sans KR', sans-serif;
+      font-size: 5rem;
       font-weight: 900;
-      letter-spacing: -2px;
-      background: linear-gradient(135deg, #fff 0%, #a0a0a0 45%, #ffffff 50%, #707070 55%, #fff 100%);
+      letter-spacing: 15px;
+      background: linear-gradient(180deg, #fff 0%, #ff1744 50%, #5d0000 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
       text-transform: uppercase;
-      filter: drop-shadow(0 0 15px rgba(255,255,255,0.3));
-      line-height: 1;
+      filter: drop-shadow(0 0 15px rgba(255, 23, 68, 0.4));
+      animation: titleGlow 4s infinite alternate;
+    }
+
+    @keyframes titleGlow {
+      0% { filter: drop-shadow(0 0 10px rgba(255, 23, 68, 0.3)); }
+      100% { filter: drop-shadow(0 0 25px rgba(255, 23, 68, 0.7)); }
     }
 
     .header p {
@@ -537,24 +542,46 @@
     }
 
     function cheer(faction) {
-      pendingVotes[faction] += 10; updateBars();
+      const today = new Date().toDateString();
+      const lastVoteDate = localStorage.getItem('lastVoteDate');
+      
+      if (lastVoteDate === today) {
+        alert('오늘의 피는 이미 바쳤습니다. 내일 다시 오십시오. 🌑');
+        return;
+      }
+
       document.body.style.transform = `translate(${Math.random()*4-2}px, ${Math.random()*4-2}px)`;
       setTimeout(() => { document.body.style.transform = 'translate(0,0)'; }, 50);
-      if (batchTimer) clearTimeout(batchTimer);
-      batchTimer = setTimeout(() => { sendVotesToServer(); }, 3000);
+
+      pendingVotes[faction] += 1;
+      updateBars();
+      
+      localStorage.setItem('lastVoteDate', today);
+      sendVotesToServer();
     }
     
     async function sendVotesToServer() {
       if (pendingVotes.ya === 0 && pendingVotes.ran === 0 && pendingVotes.mu === 0) return;
       const p = { ...pendingVotes };
+      
       votes.ya += p.ya; votes.ran += p.ran; votes.mu += p.mu;
       pendingVotes = { ya: 0, ran: 0, mu: 0 };
+      updateBars();
+
+      console.log('🔥 서버로 투표 전송 시도:', p);
       try {
         const query = `action=vote&ya=${p.ya}&ran=${p.ran}&mu=${p.mu}&sheet=BloodBattle`;
         const response = await fetch(`/.netlify/functions/gas-proxy?${query}`);
         const result = await response.json();
-        if (result && result.totalVotes) { votes = result.totalVotes; updateBars(); }
-      } catch (err) { console.warn('전송 실패:', err.message); }
+        
+        if (result && result.totalVotes) {
+          votes = result.totalVotes;
+          updateBars();
+          console.log('✅ 서버 업데이트 완료:', votes);
+        }
+      } catch (err) { 
+        console.warn('전송 실패 (로컬 데이터 유지):', err.message); 
+      }
     }
     
     async function fetchInitialVotes() {
