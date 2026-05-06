@@ -47,7 +47,7 @@
           <nav id="navbar">
       <a href="index.html" class="logo glow-title">G-CASTLE</a>
       <div class="nav-links">
-        <a href="live.html">LIVE</a><a href="members.html">MEMBERS</a><a href="history.html">HISTORY</a><a href="times.html">TIMES</a><a href="schedule.html">SCHEDULE</a><a href="ddd/gacha.html">🧪 TEST</a>
+        <a href="live.html">LIVE</a><a href="members.html">MEMBERS</a><a href="history.html">HISTORY</a><a href="times.html">TIMES</a><a href="schedule.html">SCHEDULE</a><a href="blood_battle.html">⚔️ BLOOD</a><a href="ddd/gacha.html">🧪 TEST</a>
       </div>
     </nav>
 
@@ -282,6 +282,76 @@
     <script src="common/config.js"></script>
     <script src="common/dataService.js"></script>
     <script src="script.js"></script>
+    <!-- 교체 혈전 플로팅 배너 -->
+    <style>
+      .blood-battle-floating-widget {
+        position: fixed;
+        top: 50%;
+        right: 0;
+        transform: translateY(-50%);
+        width: 140px;
+        border-radius: 15px 0 0 15px;
+        overflow: hidden;
+        box-shadow: -5px 0 25px rgba(255, 23, 68, 0.5);
+        z-index: 9999;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border: 2px solid rgba(255, 23, 68, 0.6);
+        border-right: none;
+        background: #0a0a0a;
+      }
+      .blood-battle-floating-widget:hover {
+        width: 160px;
+        box-shadow: -10px 0 40px rgba(255, 23, 68, 0.8);
+        border-color: #ff1744;
+      }
+      .blood-battle-floating-widget img {
+        width: 100%;
+        height: auto;
+        display: block;
+        filter: contrast(1.15) saturate(1.2);
+      }
+      .bb-widget-text {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: linear-gradient(transparent, rgba(139, 0, 0, 0.95));
+        color: #fff;
+        text-align: center;
+        padding: 25px 0 12px;
+        font-family: 'Noto Serif KR', serif;
+        font-weight: 900;
+        font-size: 1.05rem;
+        letter-spacing: 1px;
+        text-shadow: 0 0 10px #ff1744;
+      }
+      .bb-widget-close {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        background: rgba(0,0,0,0.6);
+        color: #fff;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 22px;
+        font-size: 11px;
+        border: 1px solid #555;
+        z-index: 10;
+        transition: background 0.3s;
+      }
+      .bb-widget-close:hover {
+        background: #ff1744;
+      }
+    </style>
+    <div class="blood-battle-floating-widget" id="bbWidget" onclick="location.href='blood_battle.html'">
+      <div class="bb-widget-close" onclick="event.stopPropagation(); document.getElementById('bbWidget').style.display='none';">X</div>
+      <img src="img/blood_battle_banner.png" alt="교체 혈전 입장">
+      <div class="bb-widget-text">교체 혈전 입장</div>
+    </div>
+
   </body>
 </html>
 

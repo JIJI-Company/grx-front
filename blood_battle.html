@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>교체 혈전 - 십이귀월</title>
+  <style>
+    /* 귀멸의 칼날 (다크 판타지 / 동양풍) 테마 */
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700;900&display=swap');
+    
+    body {
+      margin: 0; padding: 0;
+      background: #050505 url('https://www.transparenttextures.com/patterns/black-scales.png');
+      color: #fff;
+      font-family: 'Noto Serif KR', serif;
+      overflow-x: hidden;
+    }
+    
+    /* 세력 게이지 바 (Tug of war) */
+    .tug-container {
+      width: 100%;
+      height: 15px;
+      display: flex;
+      background: #222;
+      box-shadow: 0 0 15px rgba(0,0,0,0.8);
+      position: relative;
+      z-index: 10;
+    }
+    .tug-bar {
+      height: 100%;
+      transition: width 0.3s ease-out;
+    }
+    .tug-ya { background: #aa00ff; box-shadow: 0 0 10px #aa00ff; }
+    .tug-ran { background: #d50000; box-shadow: 0 0 10px #d50000; }
+    .tug-mu { background: #2962ff; box-shadow: 0 0 10px #2962ff; }
+    
+    /* 핏빛 헤더 */
+    .header {
+      text-align: center;
+      padding: 60px 0 40px;
+      background: linear-gradient(to bottom, rgba(139, 0, 0, 0.8), rgba(0,0,0,0));
+      border-bottom: 1px solid rgba(255, 23, 68, 0.3);
+      position: relative;
+    }
+    
+    .header h1 {
+      font-size: 5rem;
+      margin: 0;
+      color: #ff1744;
+      background: -webkit-linear-gradient(45deg, #ff1744, #8b0000);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 30px rgba(255, 23, 68, 0.6);
+      letter-spacing: 20px;
+      font-weight: 900;
+    }
+    .header p {
+      color: #ff8a80;
+      font-size: 1.2rem;
+      letter-spacing: 5px;
+      margin-top: 10px;
+    }
+
+    /* 전장 컨테이너 */
+    .battle-container {
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      max-width: 1200px;
+      margin: 60px auto;
+      gap: 20px;
+      padding: 0 20px;
+    }
+
+    /* 진영(라인) 카드 - 글래스모피즘 & 고급스러운 테두리 */
+    .faction-card {
+      flex: 1;
+      background: rgba(20, 20, 20, 0.6);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 15px;
+      padding: 40px 20px;
+      text-align: center;
+      position: relative;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    /* 각 라인별 은은한 배경 그라데이션 */
+    .faction-ya { background: linear-gradient(135deg, rgba(20,20,20,0.7) 0%, rgba(170,0,255,0.15) 100%); }
+    .faction-ran { background: linear-gradient(135deg, rgba(20,20,20,0.7) 0%, rgba(213,0,0,0.15) 100%); }
+    .faction-mu { background: linear-gradient(135deg, rgba(20,20,20,0.7) 0%, rgba(41,98,255,0.15) 100%); }
+
+    /* 상단 포인트 컬러 */
+    .faction-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 6px;
+    }
+    .faction-ya::before { background: #aa00ff; } /* 야라인: 보라색 */
+    .faction-ran::before { background: #d50000; } /* 란라인: 붉은색 */
+    .faction-mu::before { background: #2962ff; } /* 뮤라인: 푸른색 */
+
+    .faction-card:hover {
+      transform: translateY(-15px);
+      border-color: #555;
+    }
+
+    /* 호버 시 발광 효과 */
+    .faction-ya:hover { box-shadow: 0 15px 40px rgba(170, 0, 255, 0.3); border-color: #aa00ff; }
+    .faction-ran:hover { box-shadow: 0 15px 40px rgba(213, 0, 0, 0.3); border-color: #d50000; }
+    .faction-mu:hover { box-shadow: 0 15px 40px rgba(41, 98, 255, 0.3); border-color: #2962ff; }
+
+    /* 라인 이름 */
+    .faction-title {
+      font-size: 3rem;
+      margin-bottom: 30px;
+      text-shadow: 2px 2px 5px rgba(0,0,0,0.9);
+      letter-spacing: 3px;
+    }
+    .faction-ya .faction-title { color: #e040fb; }
+    .faction-ran .faction-title { color: #ff5252; }
+    .faction-mu .faction-title { color: #82b1ff; }
+
+    /* 출전자 리스트 */
+    .member-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      flex-grow: 1;
+      width: 100%;
+    }
+
+    .member-list li {
+      background: rgba(0, 0, 0, 0.4);
+      margin-bottom: 15px;
+      padding: 18px 20px;
+      font-size: 1.3rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-left: 4px solid transparent;
+      transition: all 0.3s;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 15px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    
+    /* 카드 반짝임 (Shine) 효과 */
+    .member-list li::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 50%; height: 100%;
+      background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent);
+      transform: skewX(-20deg);
+      transition: all 0.6s ease;
+    }
+    .member-list li:hover::after { left: 200%; }
+
+    .faction-ya .member-list li:hover { border-left-color: #e040fb; background: rgba(170, 0, 255, 0.2); transform: translateX(10px); box-shadow: 0 8px 20px rgba(170,0,255,0.3); }
+    .faction-ran .member-list li:hover { border-left-color: #ff5252; background: rgba(213, 0, 0, 0.2); transform: translateX(10px); box-shadow: 0 8px 20px rgba(213,0,0,0.3); }
+    .faction-mu .member-list li:hover { border-left-color: #82b1ff; background: rgba(41, 98, 255, 0.2); transform: translateX(10px); box-shadow: 0 8px 20px rgba(41,98,255,0.3); }
+
+    /* VS 뱃지 */
+    .vs-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: #ff1744;
+      font-family: 'Arial', sans-serif;
+      text-shadow: 0 0 15px #ff1744, 0 0 30px #d50000;
+      animation: heartbeat 1.5s infinite;
+      padding: 0 10px;
+    }
+
+    @keyframes heartbeat {
+      0% { transform: scale(1); opacity: 0.8; }
+      15% { transform: scale(1.3); opacity: 1; text-shadow: 0 0 30px #ff1744, 0 0 10px #fff; }
+      30% { transform: scale(1); opacity: 0.8; }
+      45% { transform: scale(1.15); opacity: 0.9; }
+      60% { transform: scale(1); opacity: 0.8; }
+    }
+
+    /* 수장 프로필 이미지 */
+    .leader-img {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 25px;
+      border: 4px solid #333;
+      box-shadow: 0 0 30px rgba(0,0,0,0.8);
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      z-index: 2;
+    }
+    .faction-ya:hover .leader-img { border-color: #aa00ff; box-shadow: 0 0 40px rgba(170,0,255,0.6); transform: scale(1.1) rotate(5deg); }
+    .faction-ran:hover .leader-img { border-color: #d50000; box-shadow: 0 0 40px rgba(213,0,0,0.6); transform: scale(1.1) rotate(-5deg); }
+    .faction-mu:hover .leader-img { border-color: #2962ff; box-shadow: 0 0 40px rgba(41,98,255,0.6); transform: scale(1.1) rotate(5deg); }
+
+    /* 배경 입자 효과 */
+    #particles {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .particle {
+      position: absolute;
+      background: #fff;
+      border-radius: 50%;
+      opacity: 0.5;
+      animation: float 10s infinite linear;
+    }
+    @keyframes float {
+      0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+    }
+
+    /* 안개 효과 */
+    .fog {
+      position: fixed;
+      top: 0; left: 0; width: 200%; height: 100%;
+      background: url('https://www.transparenttextures.com/patterns/fog.png');
+      opacity: 0.15;
+      z-index: 1;
+      pointer-events: none;
+      animation: fogMove 60s infinite linear;
+    }
+    @keyframes fogMove {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    /* 뒤로가기 버튼 */
+    .nav-buttons {
+      text-align: center;
+      margin-top: 40px;
+      padding-bottom: 80px;
+    }
+
+    .nav-btn {
+      background: rgba(0,0,0,0.5);
+      color: #aaa;
+      border: 1px solid #555;
+      padding: 12px 40px;
+      font-size: 1.2rem;
+      font-family: 'Noto Serif KR', serif;
+      cursor: pointer;
+      border-radius: 30px;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-block;
+      letter-spacing: 2px;
+    }
+
+    .nav-btn:hover {
+      border-color: #fff;
+      color: #fff;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+      background: transparent;
+    }
+
+    /* 장식용 혈흔 */
+    .blood-bg {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: radial-gradient(circle at 10% 20%, rgba(139,0,0,0.1) 0%, transparent 40%),
+                  radial-gradient(circle at 90% 80%, rgba(139,0,0,0.1) 0%, transparent 40%);
+      pointer-events: none;
+      z-index: -1;
+    }
+    /* 피 바치기 버튼 */
+    .cheer-btn {
+      margin-top: 20px;
+      background: rgba(0,0,0,0.8);
+      border: 1px solid #555;
+      color: #fff;
+      padding: 15px 20px;
+      font-size: 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'Noto Serif KR', serif;
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+    .faction-ya .cheer-btn:hover { background: #aa00ff; border-color: #aa00ff; box-shadow: 0 0 15px #aa00ff; }
+    .faction-ran .cheer-btn:hover { background: #d50000; border-color: #d50000; box-shadow: 0 0 15px #d50000; }
+    .faction-mu .cheer-btn:hover { background: #2962ff; border-color: #2962ff; box-shadow: 0 0 15px #2962ff; }
+    .cheer-btn:active { transform: scale(0.95); }
+
+    /* 모달 스타일 */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85);
+      z-index: 10000;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(5px);
+    }
+    .modal-content {
+      background: #111;
+      border: 2px solid #555;
+      border-radius: 15px;
+      padding: 30px;
+      width: 400px;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 0 40px rgba(255,23,68,0.3);
+      animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes modalPop {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .close-modal {
+      position: absolute;
+      top: 15px; right: 25px;
+      font-size: 30px;
+      color: #aaa;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    .close-modal:hover { color: #fff; }
+    
+    .modal-name { font-size: 2.5rem; margin: 10px 0; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+    .skill-text { color: #ff5252; font-weight: bold; margin-bottom: 20px; font-size: 1.2rem; }
+    .chart-container { position: relative; width: 100%; height: 300px; margin: 0 auto; }
+    .stats-text { margin-top: 20px; font-size: 1.2rem; color: #ccc; }
+
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  
+  <div class="tug-container">
+    <div class="tug-bar tug-ya" id="barYa" style="width: 33.33%"></div>
+    <div class="tug-bar tug-ran" id="barRan" style="width: 33.33%"></div>
+    <div class="tug-bar tug-mu" id="barMu" style="width: 33.33%"></div>
+  </div>
+  
+  <div class="blood-bg"></div>
+  <div class="fog"></div>
+  <div id="particles"></div>
+
+  <div class="header">
+    <h1>交 代 血 戰</h1>
+    <p>교 체 혈 전</p>
+  </div>
+
+  <div class="battle-container">
+    
+    <!-- 야라인 -->
+    <div class="faction-card faction-ya">
+      <img src="img/yamuzi_purple.png" alt="야무지" class="leader-img">
+      <div class="faction-title">야한성</div>
+      <ul class="member-list">
+        <li onclick="openModal('야무지', '야라인', '혈귀술: 심연의 보랏빛', [90, 85, 70, 95, 80, 88])">🩸 야무지</li>
+        <li onclick="openModal('야라인 1', '야라인', '혈귀술: 어둠 베기', [70, 75, 60, 80, 65, 70])">⚔️ 야라인 1</li>
+        <li onclick="openModal('야라인 2', '야라인', '혈귀술: 맹독 찌르기', [65, 80, 50, 75, 85, 60])">⚔️ 야라인 2</li>
+      </ul>
+      <button class="cheer-btn" onclick="cheer('ya')">🩸 피 바치기 (응원)</button>
+    </div>
+
+    <div class="vs-badge">VS</div>
+
+    <!-- 란라인 -->
+    <div class="faction-card faction-ran">
+      <img src="img/randa_red.png" alt="란다" class="leader-img">
+      <div class="faction-title">란한성</div>
+      <ul class="member-list">
+        <li onclick="openModal('란다', '란라인', '혈귀술: 핏빛 폭풍', [85, 95, 80, 85, 75, 90])">🩸 란다</li>
+        <li onclick="openModal('란라인 1', '란라인', '혈귀술: 용암 분출', [80, 85, 70, 75, 60, 80])">⚔️ 란라인 1</li>
+        <li onclick="openModal('란라인 2', '란라인', '혈귀술: 혈사슬', [75, 70, 85, 80, 70, 75])">⚔️ 란라인 2</li>
+      </ul>
+      <button class="cheer-btn" onclick="cheer('ran')">🩸 피 바치기 (응원)</button>
+    </div>
+
+    <div class="vs-badge">VS</div>
+
+    <!-- 뮤라인 -->
+    <div class="faction-card faction-mu">
+      <img src="img/damu_blue.png" alt="다뮤" class="leader-img">
+      <div class="faction-title">뮤한성</div>
+      <ul class="member-list">
+        <li onclick="openModal('다뮤', '뮤라인', '혈귀술: 빙결의 춤', [80, 80, 95, 85, 90, 85])">🩸 다뮤</li>
+        <li onclick="openModal('뮤라인 1', '뮤라인', '혈귀술: 서리 칼날', [70, 75, 85, 70, 80, 75])">⚔️ 뮤라인 1</li>
+        <li onclick="openModal('뮤라인 2', '뮤라인', '혈귀술: 환영수', [65, 70, 90, 80, 85, 70])">⚔️ 뮤라인 2</li>
+      </ul>
+      <button class="cheer-btn" onclick="cheer('mu')">🩸 피 바치기 (응원)</button>
+    </div>
+
+  </div>
+
+  <div class="nav-buttons">
+    <a href="index.html" class="nav-btn">아지트로 귀환</a>
+  </div>
+
+  <!-- 멤버 상세 프로필 모달 -->
+  <div id="profileModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" onclick="closeModal()">&times;</span>
+      <h2 id="modalName" class="modal-name">이름</h2>
+      <p id="modalSkill" class="skill-text">혈귀술: ???</p>
+      <div class="chart-container">
+        <canvas id="statChart"></canvas>
+      </div>
+      <div id="modalStats" class="stats-text">전적: -</div>
+    </div>
+  </div>
+
+  <script>
+    // 배경 입자 생성기
+    function createParticles() {
+      const container = document.getElementById('particles');
+      const colors = ['#ff1744', '#aa00ff', '#2962ff', '#ffffff'];
+      
+      for (let i = 0; i < 50; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        const size = Math.random() * 4 + 1;
+        p.style.width = size + 'px';
+        p.style.height = size + 'px';
+        p.style.left = Math.random() * 100 + 'vw';
+        p.style.animationDuration = (Math.random() * 10 + 5) + 's';
+        p.style.animationDelay = (Math.random() * 10) + 's';
+        p.style.background = colors[Math.floor(Math.random() * colors.length)];
+        p.style.boxShadow = `0 0 10px ${p.style.background}`;
+        container.appendChild(p);
+      }
+    }
+    createParticles();
+
+    // --- 차트 및 모달 로직 ---
+    let myChart = null;
+
+    function openModal(name, faction, skill, dataArray) {
+      document.getElementById('profileModal').style.display = 'flex';
+      document.getElementById('modalName').innerText = name;
+      document.getElementById('modalSkill').innerText = skill;
+      document.getElementById('modalStats').innerText = `전적: ${Math.floor(Math.random()*50 + 10)}승 ${Math.floor(Math.random()*30)}패`;
+      
+      let color = '#ffffff';
+      if(faction === '야라인') color = '#aa00ff';
+      if(faction === '란라인') color = '#ff5252';
+      if(faction === '뮤라인') color = '#82b1ff';
+
+      document.querySelector('.modal-content').style.borderColor = color;
+
+      const ctx = document.getElementById('statChart').getContext('2d');
+      if (myChart) myChart.destroy(); // 기존 차트 파괴
+
+      myChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+          labels: ['체력', '공격력', '속도', '기술', '지능', '잔혹성'],
+          datasets: [{
+            label: '능력치',
+            data: dataArray,
+            backgroundColor: color + '40', // 40 is hex opacity
+            borderColor: color,
+            pointBackgroundColor: color,
+            borderWidth: 2
+          }]
+        },
+        options: {
+          scales: {
+            r: {
+              angleLines: { color: 'rgba(255,255,255,0.2)' },
+              grid: { color: 'rgba(255,255,255,0.2)' },
+              pointLabels: { color: '#ccc', font: { size: 14, family: 'Noto Serif KR' } },
+              ticks: { display: false, min: 0, max: 100 }
+            }
+          },
+          plugins: {
+            legend: { display: false }
+          }
+        }
+      });
+    }
+
+    function closeModal() {
+      document.getElementById('profileModal').style.display = 'none';
+    }
+
+    // 모달 배경 클릭 시 닫기
+    window.onclick = function(event) {
+      const modal = document.getElementById('profileModal');
+      if (event.target == modal) {
+        closeModal();
+      }
+    }
+
+    // --- 응원 (Tug of war) 로직 (모아 쏘기 배치 처리) ---
+    // 전체 누적 투표수 (서버에서 받아온다고 가정)
+    let votes = { ya: 100, ran: 100, mu: 100 };
+    
+    // 내가 지금 막 누른 표 (3초 동안 모음)
+    let pendingVotes = { ya: 0, ran: 0, mu: 0 };
+    let batchTimer = null;
+
+    function updateBars() {
+      const total = votes.ya + votes.ran + votes.mu + pendingVotes.ya + pendingVotes.ran + pendingVotes.mu;
+      const pctYa = total === 0 ? 33.3 : ((votes.ya + pendingVotes.ya) / total * 100);
+      const pctRan = total === 0 ? 33.3 : ((votes.ran + pendingVotes.ran) / total * 100);
+      const pctMu = total === 0 ? 33.3 : ((votes.mu + pendingVotes.mu) / total * 100);
+
+      document.getElementById('barYa').style.width = pctYa + '%';
+      document.getElementById('barRan').style.width = pctRan + '%';
+      document.getElementById('barMu').style.width = pctMu + '%';
+
+      // --- 트렌디한 디자인 효과: 점유율에 따른 진영 카드 시각 효과 극대화 ---
+      const updateCardEffect = (factionClass, pct) => {
+        const card = document.querySelector(`.faction-${factionClass}`);
+        if (!card) return;
+        
+        // 33.3% 기준 점유율에 따른 변동폭 계산
+        const diff = pct - 33.3;
+        
+        if (pct <= 20) {
+          // 궤멸 위기: 거의 투명하고 작아짐
+          card.style.opacity = "0.3";
+          card.style.filter = "grayscale(1) brightness(0.5)";
+          card.style.transform = "scale(0.85)";
+          card.style.boxShadow = "none";
+        } else if (pct <= 30) {
+          // 열세: 투명해지고 흑백 처리
+          card.style.opacity = "0.6";
+          card.style.filter = "grayscale(0.5) brightness(0.8)";
+          card.style.transform = "scale(0.93)";
+          card.style.boxShadow = "0 10px 20px rgba(0,0,0,0.3)";
+        } else if (pct >= 45) {
+          // 압도적 우세: 크게 부풀고 강한 발광
+          card.style.opacity = "1";
+          card.style.filter = "brightness(1.3) contrast(1.1)";
+          card.style.transform = `scale(${1 + (diff / 100)})`; // 최대 약 1.15~1.2배
+          
+          let glowColor = '';
+          if (factionClass === 'ya') glowColor = 'rgba(170,0,255,0.8)';
+          if (factionClass === 'ran') glowColor = 'rgba(213,0,0,0.8)';
+          if (factionClass === 'mu') glowColor = 'rgba(41,98,255,0.8)';
+          
+          card.style.boxShadow = `0 0 ${20 + (diff * 2)}px ${glowColor}, 0 20px 40px rgba(0,0,0,0.5)`;
+        } else if (pct >= 37) {
+          // 약간 우세: 조금 커지고 밝아짐
+          card.style.opacity = "1";
+          card.style.filter = "brightness(1.1)";
+          card.style.transform = `scale(${1 + (diff / 150)})`;
+          card.style.boxShadow = "0 15px 30px rgba(255,255,255,0.1), 0 20px 40px rgba(0,0,0,0.5)";
+        } else {
+          // 팽팽한 상태 (30% ~ 37%)
+          card.style.opacity = "1";
+          card.style.filter = "none";
+          card.style.transform = "scale(1)";
+          card.style.boxShadow = "0 20px 40px rgba(0,0,0,0.5)";
+        }
+      };
+
+      updateCardEffect('ya', pctYa);
+      updateCardEffect('ran', pctRan);
+      updateCardEffect('mu', pctMu);
+    }
+
+    function cheer(faction) {
+      // 로컬에 먼저 임시로 1표(10점) 더하기
+      pendingVotes[faction] += 10;
+      updateBars();
+      
+      // 클릭 타격감 (화면 진동)
+      document.body.style.transform = `translate(${Math.random()*4-2}px, ${Math.random()*4-2}px)`;
+      setTimeout(() => { document.body.style.transform = 'translate(0,0)'; }, 50);
+
+      // 모아 쏘기 타이머 갱신 (클릭 후 3초간 아무 입력 없으면 서버로 전송)
+      if (batchTimer) clearTimeout(batchTimer);
+      
+      batchTimer = setTimeout(() => {
+        sendVotesToServer();
+      }, 3000);
+    }
+    
+    async function sendVotesToServer() {
+      if (pendingVotes.ya === 0 && pendingVotes.ran === 0 && pendingVotes.mu === 0) return;
+
+      const p = { ...pendingVotes };
+      
+      // 로컬 합산 및 초기화
+      votes.ya += p.ya;
+      votes.ran += p.ran;
+      votes.mu += p.mu;
+      pendingVotes = { ya: 0, ran: 0, mu: 0 };
+
+      console.log('🔥 서버로 투표 전송 (GET):', p);
+
+      try {
+        // 더 안정적인 GET 방식으로 전송 파라미터 구성
+        const query = `action=vote&ya=${p.ya}&ran=${p.ran}&mu=${p.mu}&sheet=BloodBattle`;
+        const response = await fetch(`/.netlify/functions/gas-proxy?${query}`);
+        
+        const result = await response.json();
+        // 최신 투표수 반영 (서버에서 반환된 값이 있으면)
+        if (result && result.totalVotes) {
+          votes = result.totalVotes;
+          updateBars();
+        }
+      } catch (err) {
+        console.warn('투표 전송 실패:', err.message);
+      }
+    }
+    
+    // 초기 게이지 설정
+    async function fetchInitialVotes() {
+      try {
+        const response = await fetch('/.netlify/functions/gas-proxy?sheet=BloodBattle');
+        const result = await response.json();
+        
+        // 시트 이름(BloodBattle) 키로 데이터가 들어있는 경우 처리
+        const data = result.BloodBattle || result;
+        
+        if (Array.isArray(data) && data.length > 0) {
+          const serverVotes = data[0];
+          votes.ya = Number(serverVotes['야라인']) || 100;
+          votes.ran = Number(serverVotes['란라인']) || 100;
+          votes.mu = Number(serverVotes['뮤라인']) || 100;
+          updateBars();
+          console.log('✅ 서버 데이터 동기화 완료:', votes);
+        }
+      } catch (err) {
+        console.warn('초기 투표수 로드 실패:', err.message);
+      }
+    }
+    
+    fetchInitialVotes();
+    updateBars();
+
+  </script>
+</body>
+</html>

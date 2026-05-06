@@ -17,10 +17,27 @@ export default async (req, context) => {
 
   // 갤러리/일반 시트 타겟 URL 결정
   let targetUrl = (sheet === 'Gallery' || type === 'gallery') ? GALLERY_GAS_URL : GAS_URL;
-  const finalUrl = `${targetUrl}?sheet=${sheet}&token=${API_TOKEN}`;
+
+  // 클라이언트가 보낸 모든 파라미터를 유지한 채로 token만 추가
+  const newParams = new URLSearchParams(searchParams);
+  newParams.set('token', API_TOKEN);
+  const finalUrl = `${targetUrl}?${newParams.toString()}`;
 
   try {
-    const response = await fetch(finalUrl);
+    const fetchOptions = {
+      method: req.method,
+      headers: {
+        'Accept': 'application/json'
+      }
+    };
+
+    // POST 요청일 경우 본문(Body) 추가
+    if (req.method === 'POST') {
+      fetchOptions.body = await req.text();
+      fetchOptions.headers['Content-Type'] = 'application/json';
+    }
+
+    const response = await fetch(finalUrl, fetchOptions);
     if (!response.ok) throw new Error(`GAS returned ${response.status}`);
     
     const data = await response.json();

@@ -32,11 +32,9 @@
        ========================================= */
     #intro-gate {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: #FFC107; z-index: 99999;
+      background: #f5f2e9; z-index: 99999; /* 캐릭터 배경색과 일치시킴 */
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       transition: opacity 0.5s ease;
-      background-image: radial-gradient(#FF9800 2px, transparent 2px);
-      background-size: 20px 20px;
       cursor: pointer;
     }
 
@@ -52,7 +50,7 @@
     }
 
     .intro-title {
-      font-size: 3rem; color: #fff; text-shadow: 3px 3px 0 #FF5722;
+      font-size: 3rem; color: #5D4037; text-shadow: 2px 2px 0 #fff;
       margin-bottom: 30px; animation: wobble 2s infinite; pointer-events: none;
     }
 
@@ -61,12 +59,12 @@
       50% { transform: rotate(3deg); }
     }
 
-    /* 임시 공룡 이미지 (나중에 유저가 바꿀 수 있음) */
+    /* 새 캐릭터 이미지 적용 */
     .dino-img {
-      width: 400px; height: 400px;
-      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%23FF5722"/><circle cx="35" cy="35" r="8" fill="white"/><circle cx="65" cy="35" r="8" fill="white"/><circle cx="35" cy="35" r="3" fill="black"/><circle cx="65" cy="35" r="3" fill="black"/><path d="M 20 60 Q 50 100 80 60 Z" fill="%23000"/></svg>') no-repeat center;
+      width: 500px; height: 500px;
+      background: url('rika/likamouce.png') no-repeat center;
       background-size: contain;
-      filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
+      filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1));
     }
 
     /* =========================================
@@ -99,7 +97,7 @@
       cursor: grab;
       width: 200px;
       height: 200px; /* 사진 크기: 정사각형 */
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: transform 0.2s, box-shadow 0.2s, width 0.3s, height 0.3s;
       z-index: 10;
     }
     .polaroid:active { cursor: grabbing; box-shadow: 8px 15px 30px rgba(0,0,0,0.25); }
@@ -215,12 +213,169 @@
     }
     .tv-btn:active { transform: translateY(5px); box-shadow: none; }
 
+    /* =========================================
+       [디자인 고도화] 포스트잇 TMI 애니메이션
+       ========================================= */
+    .sticky-note {
+      height: 250px; /* 기본 높이 고정 */
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .sticky-note.open {
+      height: 480px;
+      width: 280px;
+      transform: rotate(0deg) scale(1.05);
+      z-index: 50;
+      box-shadow: 10px 15px 30px rgba(0,0,0,0.15);
+    }
+    .tmi-section {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 2px dashed #FFCC80;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      text-align: left;
+    }
+    .sticky-note.open .tmi-section {
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: 0.1s;
+    }
+    .tmi-item {
+      margin-bottom: 8px;
+      font-size: 1rem;
+      line-height: 1.4;
+      color: #5D4037;
+      background: rgba(255,255,255,0.5);
+      padding: 8px 12px;
+      border-radius: 8px;
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.03);
+    }
+    .tmi-title-badge {
+      display: inline-block;
+      background: #FF9800;
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      margin-bottom: 12px;
+      box-shadow: 1px 2px 5px rgba(0,0,0,0.1);
+    }
+
+    /* =========================================
+       [디자인 고도화] 다꾸 스타일 재생 스티커
+       ========================================= */
+    .play-sticker {
+      position: absolute;
+      bottom: 20px;
+      right: 15px;
+      width: 45px;
+      height: 45px;
+      background: #FFF9C4;
+      border: 3px dashed #FF9800;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 2px 4px 10px rgba(0,0,0,0.15);
+      cursor: pointer;
+      z-index: 20;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .play-sticker::after {
+      content: '';
+      width: 0; height: 0;
+      border-top: 8px solid transparent;
+      border-bottom: 8px solid transparent;
+      border-left: 12px solid #FF5722;
+      margin-left: 4px; /* 시각적 중앙 정렬 */
+    }
+    .play-sticker:hover {
+      background: #FF5722;
+      border-color: #fff;
+      transform: scale(1.15) rotate(10deg);
+      box-shadow: 3px 6px 15px rgba(255, 87, 34, 0.4);
+    }
+    .play-sticker:hover::after { border-left-color: #fff; }
+    .play-sticker:active { transform: scale(0.95); }
+    
+    /* =========================================
+       [물리 버튼] 왕 큰 크앙 버튼
+       ========================================= */
+    .big-roar-btn {
+      position: absolute;
+      bottom: 50px;
+      left: 60px;
+      width: 120px;
+      height: 120px;
+      background: radial-gradient(circle at 30% 30%, #ff8a65, #e64a19);
+      border-radius: 50%;
+      box-shadow: 
+        0 15px 0 #bf360c,
+        0 20px 20px rgba(0,0,0,0.4),
+        inset 0 8px 15px rgba(255,255,255,0.4);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2rem;
+      color: white;
+      text-shadow: 1px 2px 3px rgba(0,0,0,0.3);
+      font-family: 'Jua', sans-serif;
+      cursor: pointer;
+      z-index: 30;
+      transition: all 0.1s;
+      user-select: none;
+    }
+    .big-roar-btn:active {
+      transform: translateY(15px);
+      box-shadow: 
+        0 0 0 #bf360c,
+        0 5px 10px rgba(0,0,0,0.4),
+        inset 0 8px 15px rgba(255,255,255,0.4);
+    }
+
+    /* 크앙 팝업 사진 */
+    #roarPopup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    #roarPopup.show {
+      transform: translate(-50%, -50%) scale(1.5);
+      opacity: 1;
+      animation: shake 0.4s infinite;
+    }
+    @keyframes shake {
+      0%, 100% { margin-left: 0; }
+      25% { margin-left: -15px; margin-top: -10px; }
+      75% { margin-left: 15px; margin-top: 10px; }
+    }
+    #roarPopup img {
+      width: 250px;
+      filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5));
+    }
+
+    .polaroid img { filter: sepia(0.1) contrast(1.05); } /* 폴라로이드 감성 필터 */
+
   </style>
 </head>
 <body>
 
   <!-- 크앙 사운드 -->
   <audio id="roarSound" preload="auto">
+    <source src="https://cdn.freesound.org/previews/434/434463_8857218-lq.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- 폴라로이드 전용 사운드 (나중에 여기에 원하는 소리 파일 경로를 넣으세요!) -->
+  <audio id="polaroidSound" preload="auto">
+    <!-- 예시: <source src="audio/kuang.mp3" type="audio/mpeg"> -->
     <source src="https://cdn.freesound.org/previews/434/434463_8857218-lq.mp3" type="audio/mpeg">
   </audio>
 
@@ -242,12 +397,21 @@
     <div class="doodle doodle-3">✨</div>
 
     <!-- [A] 통계 포스트잇 -->
-    <div class="sticky-note" id="stickyNote">
+    <div class="sticky-note" id="stickyNote" onclick="this.classList.toggle('open')">
       <img src="img/lika.png" alt="리카" class="profile-img" onerror="this.src='img/ggu_title.jpg'">
       <h1>LIKA <span class="live-badge" id="liveBadge">ON AIR</span></h1>
       <div class="stat-line">팬클럽: <strong id="fanCount">---</strong>명</div>
       <div class="stat-line">총조회수: <strong id="totalViews">---</strong>회</div>
-      <p style="color:#A1887F; font-size:1rem; margin-top:10px;">귀여운 상현 5 항아리의 혈귀!</p>
+      <p class="stat-msg" style="color:#A1887F; font-size:0.95rem; margin-top:10px;">👇 터치해서 TMI 보기!</p>
+
+      <!-- TMI 섹션 (클릭 시 펼쳐짐) -->
+      <div class="tmi-section">
+        <div class="tmi-title-badge">✨ 리카's TMI 노트</div>
+        <div class="tmi-item">🏺 <b>종족:</b> 상현 5 항아리의 혈귀</div>
+        <div class="tmi-item">📺 <b>취향:</b> 연프(연애프로그램) & 애니 광팬!</div>
+        <div class="tmi-item">🥦 <b>불호:</b> 야채와 벌레는 극혐해요...</div>
+        <div class="tmi-item">🎨 <b>특징:</b> 귀여운 다꾸 감성 마스터</div>
+      </div>
     </div>
 
     <!-- [B] VOD 레트로 TV -->
@@ -269,28 +433,86 @@
       top, left 퍼센트를 조절해서 위치를 흩뿌리고, transform: rotate 로 각도를 주세요.
       data-text 에는 사진 밑에 적힐 짧은 메모를 쓰시면 됩니다!
     -->
-    <div class="polaroid" data-text="우왕~!" style="top: 50%; left: 10%; transform: rotate(-10deg);">
-      <img src="img/lika.png" alt="사진1">
+    <div class="polaroid" data-text="어떡하지~" style="top: 50%; left: 10%; transform: rotate(-10deg);">
+      <img src="https://iflv14.sooplive.com/clip/20260501/563/3b2130e3-0bf9-401c-810d-a93bb9ed0abe/39774563_r.jpg" alt="사진1">
+      <div class="play-sticker" title="영상 보기" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()" onclick="playInlineVideo(this, 'https://vod.sooplive.com/player/194416999')"></div>
     </div>
     
-    <div class="polaroid" data-text="귀여워💛" style="top: 20%; left: 40%; transform: rotate(15deg);">
-      <img src="https://via.placeholder.com/800x800/FFD54F/5D4037?text=사진을+넣어주세요!" alt="사진2">
+    <div class="polaroid" data-text="밤의무희" style="top: 20%; left: 40%; transform: rotate(15deg);">
+      <img src="https://iflv14.sooplive.com/clip/20260501/021/1aeaa4ca-54f5-4b69-962f-8a37f8066790/39770021_r.jpg" alt="사진2">
+      <div class="play-sticker" title="영상 보기" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()" onclick="playInlineVideo(this, 'https://vod.sooplive.com/player/194403779')"></div>
     </div>
     
-    <div class="polaroid" data-text="크앙🦖" style="top: 60%; left: 35%; transform: rotate(-5deg);">
-      <img src="https://via.placeholder.com/800x800/FFD54F/5D4037?text=사진을+넣어주세요!" alt="사진3">
+    <div class="polaroid" data-text="범퍼크앙🦖" style="top: 60%; left: 35%; transform: rotate(-5deg);">
+      <img src="https://iflv14.sooplive.com/clip/20260503/977/816708b9-5ef9-4aa6-8b8d-1e88821cfd00/18300977_v.jpg" alt="사진3">
+      <div class="play-sticker" title="영상 보기" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()" onclick="playInlineVideo(this, 'https://vod.sooplive.com/player/194614089/catch')"></div>
     </div>
     
     <div class="polaroid" data-text="최고야✨" style="top: 40%; left: 65%; transform: rotate(8deg);">
       <img src="https://via.placeholder.com/800x800/FFD54F/5D4037?text=사진을+넣어주세요!" alt="사진4">
+      <div class="play-sticker" title="영상 보기" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()" onclick="playInlineVideo(this, 'https://vod.sooplive.com/player/194416999')"></div>
+    </div>
+
+    <!-- [D] 왕 큰 크앙 버튼 (사운드 보드 장난감 느낌) -->
+    <div class="big-roar-btn" onclick="playPolaroidSound()">크앙!🦖</div>
+
+    <!-- 깜짝 등장 크앙 팝업 사진 -->
+    <div id="roarPopup">
+      <img src="rika/likamouce.png" alt="크앙 팝업">
     </div>
 
   </div>
 
   <script>
-    // 숫자에 콤마 찍기
+    // 숫자 콤마 (기존 유지)
     function formatNum(num) {
       return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    // 폴라로이드 소리 재생 함수
+    function playPolaroidSound() {
+      const sound = document.getElementById('polaroidSound');
+      if (sound) {
+        sound.currentTime = 0;
+        sound.volume = 0.8;
+        sound.play().catch(e => console.log('소리 재생 실패:', e));
+        
+        // 크앙 사진 팝업 띄우기
+        const popup = document.getElementById('roarPopup');
+        if (popup) {
+          popup.classList.add('show');
+          
+          // 1.5초 뒤에 팝업 사라짐
+          setTimeout(() => {
+            popup.classList.remove('show');
+          }, 1500);
+        }
+      }
+    }
+
+    // 폴라로이드 내 인라인 영상 재생
+    function playInlineVideo(btn, url) {
+      const polaroid = btn.closest('.polaroid');
+      const img = polaroid.querySelector('img');
+      
+      if (img) {
+        const iframe = document.createElement('iframe');
+        iframe.src = url + "?autoplay=1"; // 자동 재생 시도
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        iframe.style.background = '#000';
+        iframe.setAttribute('allowfullscreen', 'true');
+        iframe.setAttribute('allow', 'autoplay');
+        
+        polaroid.insertBefore(iframe, img);
+        img.remove();
+        btn.remove();
+        
+        // 동영상 16:9 원래 비율에 맞춰 폴라로이드 크기 확장
+        polaroid.style.width = '350px';
+        polaroid.style.height = '197px'; // 350의 16:9 비율
+      }
     }
 
     // =========================================
