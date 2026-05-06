@@ -1,10 +1,8 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
+<html lang="ko"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>교체 혈전 - 십이귀월</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&family=Syncopate:wght@400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&amp;family=Syncopate:wght@400;700&amp;family=Noto+Sans+KR:wght@300;400;700&amp;display=swap" rel="stylesheet">
   <style>
     :root {
       --ya-color: #aa00ff;
@@ -355,9 +353,15 @@
     </div>
 
     <div class="gauge-wrapper">
-      <div id="barYa" class="gauge-segment seg-ya"><span class="gauge-label">YA</span></div>
-      <div id="barRan" class="gauge-segment seg-ran"><span class="gauge-label">RAN</span></div>
-      <div id="barMu" class="gauge-segment seg-mu"><span class="gauge-label">MU</span></div>
+      <div id="barYa" class="gauge-segment seg-ya">
+        <span class="gauge-label">YA</span>
+      </div>
+      <div id="barRan" class="gauge-segment seg-ran">
+        <span class="gauge-label">RAN</span>
+      </div>
+      <div id="barMu" class="gauge-segment seg-mu">
+        <span class="gauge-label">MU</span>
+      </div>
     </div>
 
     <div class="battle-container">
@@ -405,9 +409,21 @@
             <img src="img/damu_demon.png" alt="">
             <span>⚔️ 다뮤</span>
           </li>
-          <li onclick="openModal('뮤라인 1', 'img/damu_demon.png', '혈귀술: 서리 칼날', [70, 75, 85, 70, 80, 75])">
-            <img src="img/damu_demon.png" alt="">
-            <span>⚔️ 뮤라인 1</span>
+          <li onclick="openModal('밈먀', 'img/mimmya_blue.png', '혈귀술: 환각의 보라색 나비', [75, 80, 85, 78, 82, 88])">
+            <img src="img/mimmya_blue.png" alt="">
+            <span>⚔️ 밈먀</span>
+          </li>
+          <li onclick="openModal('바먀', 'img/baamya_blue.png', '혈귀술: 밤의 장막 베기', [85, 78, 70, 88, 75, 72])">
+            <img src="img/baamya_blue.png" alt="">
+            <span>⚔️ 바먀</span>
+          </li>
+          <li onclick="openModal('옥독', 'img/okdok_blue.png', '혈귀술: 심연의 독침', [82, 85, 90, 75, 92, 80])">
+            <img src="img/okdok_blue.png" alt="">
+            <span>⚔️ 옥독</span>
+          </li>
+          <li onclick="openModal('초귀요미', 'img/cho_cutie_blue.png', '혈귀술: 치명적인 귀여움', [65, 70, 75, 60, 68, 99])">
+            <img src="img/cho_cutie_blue.png" alt="">
+            <span>⚔️ 초귀요미</span>
           </li>
         </ul>
         <button class="cheer-btn" onclick="cheer('mu')">피 바치기</button>
@@ -415,7 +431,7 @@
     </div>
 
     <div style="text-align: center; margin-top: 60px;">
-      <a href="index.html" style="color: rgba(255,255,255,0.3); text-decoration: none; font-family: 'Syncopate'; font-size: 0.9rem; letter-spacing: 5px;">BACK TO HIDEAWAY</a>
+      <a href="/" style="color: rgba(255,255,255,0.3); text-decoration: none; font-family: 'Syncopate'; font-size: 0.9rem; letter-spacing: 5px;">BACK TO HIDEAWAY</a>
     </div>
   </div>
 
@@ -437,9 +453,9 @@
   </div>
 
   <script>
+    // 파티클 생성 로직
     function createParticles() {
       const container = document.getElementById('particles');
-      if (!container) return;
       const colors = ['#ff1744', '#aa00ff', '#2962ff', '#ffffff'];
       for (let i = 0; i < 50; i++) {
         const p = document.createElement('div');
@@ -459,13 +475,7 @@
       }
     }
     const style = document.createElement('style');
-    style.innerHTML = `
-      @keyframes float {
-        0% { transform: translateY(0) rotate(0deg); }
-        50% { transform: translateY(-20px) translateX(10px); }
-        100% { transform: translateY(0) rotate(360deg); }
-      }
-    `;
+    style.innerHTML = `@keyframes float { 0% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-20px) translateX(10px); } 100% { transform: translateY(0) rotate(360deg); } }`;
     document.head.appendChild(style);
     
     var myChart = null;
@@ -511,7 +521,6 @@
 
     let votes = { ya: 100, ran: 100, mu: 100 };
     let pendingVotes = { ya: 0, ran: 0, mu: 0 };
-    let batchTimer = null;
 
     function updateBars() {
       const total = votes.ya + votes.ran + votes.mu + pendingVotes.ya + pendingVotes.ran + pendingVotes.mu;
@@ -544,18 +553,9 @@
     function cheer(faction) {
       const today = new Date().toDateString();
       const lastVoteDate = localStorage.getItem('lastVoteDate');
-      
-      if (lastVoteDate === today) {
-        alert('오늘의 피는 이미 바쳤습니다. 내일 다시 오십시오. 🌑');
-        return;
-      }
-
-      document.body.style.transform = `translate(${Math.random()*4-2}px, ${Math.random()*4-2}px)`;
-      setTimeout(() => { document.body.style.transform = 'translate(0,0)'; }, 50);
-
+      if (lastVoteDate === today) { alert('오늘의 피는 이미 바쳤습니다. 내일 다시 오십시오. 🌑'); return; }
       pendingVotes[faction] += 1;
       updateBars();
-      
       localStorage.setItem('lastVoteDate', today);
       sendVotesToServer();
     }
@@ -563,25 +563,15 @@
     async function sendVotesToServer() {
       if (pendingVotes.ya === 0 && pendingVotes.ran === 0 && pendingVotes.mu === 0) return;
       const p = { ...pendingVotes };
-      
       votes.ya += p.ya; votes.ran += p.ran; votes.mu += p.mu;
       pendingVotes = { ya: 0, ran: 0, mu: 0 };
       updateBars();
-
-      console.log('🔥 서버로 투표 전송 시도:', p);
       try {
         const query = `action=vote&ya=${p.ya}&ran=${p.ran}&mu=${p.mu}&sheet=BloodBattle`;
         const response = await fetch(`/.netlify/functions/gas-proxy?${query}`);
         const result = await response.json();
-        
-        if (result && result.totalVotes) {
-          votes = result.totalVotes;
-          updateBars();
-          console.log('✅ 서버 업데이트 완료:', votes);
-        }
-      } catch (err) { 
-        console.warn('전송 실패 (로컬 데이터 유지):', err.message); 
-      }
+        if (result && result.totalVotes) { votes = result.totalVotes; updateBars(); }
+      } catch (err) { console.warn('전송 실패:', err.message); }
     }
     
     async function fetchInitialVotes() {
@@ -599,12 +589,11 @@
             setTimeout(() => card.classList.add('loaded'), idx * 200);
           });
         }
-      } catch (err) {
-        console.warn('로드 실패:', err.message);
+      } catch (err) { 
         document.querySelectorAll('.faction-card').forEach(card => card.classList.add('loaded'));
       }
     }
     fetchInitialVotes(); updateBars();
+    setInterval(fetchInitialVotes, 5000);
   </script>
-</body>
-</html>
+</body></html>

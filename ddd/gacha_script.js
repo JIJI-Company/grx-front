@@ -33,98 +33,65 @@ document.addEventListener('DOMContentLoaded', () => {
     const summonResult = document.getElementById('summonResult');
     const particlesContainer = document.getElementById('particles');
 
-    // ── 소환 로직 ──
     const performSummon = (count = 1) => {
         if (btnSummon.disabled) return;
-        
-        // 이전 결과 초기화
         summonResult.classList.remove('show', 'instant', 'multi');
         if (count > 1) summonResult.classList.add('multi');
-
-        gachaGate.classList.remove('opened');
-        gachaGate.style.display = 'block';
-
-        btnSummon.disabled = true;
-        if (btnSummon5) btnSummon5.disabled = true;
-
-        btnSummon.innerText = "소환 중...";
-        if (btnSummon5) btnSummon5.innerText = "소환 중...";
-        gachaGate.classList.add('shaking'); // 문 진동
-
-        // 2. 연출 타임라인
+        gachaGate.classList.remove('opened'); gachaGate.style.display = 'block';
+        btnSummon.disabled = true; if (btnSummon5) btnSummon5.disabled = true;
+        btnSummon.innerText = "소환 중..."; if (btnSummon5) btnSummon5.innerText = "소환 중...";
+        gachaGate.classList.add('shaking');
         setTimeout(() => {
-            gachaGate.classList.remove('shaking');
-            gachaGate.classList.add('opened'); // 문 열림
+            gachaGate.classList.remove('shaking'); gachaGate.classList.add('opened');
             createExplosion(window.innerWidth / 2, window.innerHeight / 2, 50);
-
             setTimeout(() => {
                 const cardsToSave = [];
-
                 for (let i = 0; i < count; i++) {
-                    // 1. 랜덤 확률 결정
                     const rand = Math.random() * 100;
-                    let selectedRarity = 'r';
-                    let rarityClass = '';
-
-                    if (rand < 5) { selectedRarity = 'ssr'; rarityClass = 'rarity-ssr'; }
-                    else if (rand < 30) { selectedRarity = 'sr'; rarityClass = 'rarity-sr'; }
-                    
+                    let selectedRarity = 'r'; let rarityClass = '';
+                    if (rand < 33.3) { selectedRarity = 'ssr'; rarityClass = 'rarity-ssr'; }
+                    else if (rand < 66.6) { selectedRarity = 'sr'; rarityClass = 'rarity-sr'; }
                     const pool = summonPool[selectedRarity];
                     const picked = pool[Math.floor(Math.random() * pool.length)];
                     picked.rarityClass = rarityClass;
 
-                    // 확률 로직: 1성(70%), 2성(20%), 3성(8%), 4성(2%)
+                    // 성급 확률 복구: 1성(70%), 2성(20%), 3성(8%), 4성(2%)
                     const randStar = Math.random() * 100;
                     let earnedStars = 1;
                     if (randStar < 2) earnedStars = 4;
                     else if (randStar < 10) earnedStars = 3;
                     else if (randStar < 30) earnedStars = 2;
 
-                    // 고유 ID 부여 (합성을 위해)
                     cardsToSave.push({ 
-                        ...picked, 
-                        id: Date.now() + i, // prevent duplicate ID
+                        ...picked, id: Date.now() + i, 
                         baseId: picked.name + '_' + picked.rank,
                         starRank: earnedStars 
                     });
                 }
-
                 showResult(cardsToSave);
-                
-                // 인벤토리에 추가
                 cardsToSave.forEach(c => addToInventory(c));
-                
-                // 버튼 복구
-                btnSummon.disabled = false;
-                btnSummon.innerText = "1회 소환";
-                if (btnSummon5) {
-                    btnSummon5.disabled = false;
-                    btnSummon5.innerText = "5연속 소환";
-                }
+                btnSummon.disabled = false; btnSummon.innerText = "1회 소환";
+                if (btnSummon5) { btnSummon5.disabled = false; btnSummon5.innerText = "5연속 소환"; }
             }, 800);
         }, 1500);
     };
 
-    // ── 인벤토리 저장 로직 ──
     const addToInventory = (card) => {
         let data = JSON.parse(localStorage.getItem('grx_inventory_v2')) || { items: [], lastUpdated: Date.now() };
-        data.items.push(card);
-        data.lastUpdated = Date.now(); // 저장할 때마다 시간 갱신
+        data.items.push(card); data.lastUpdated = Date.now();
         localStorage.setItem('grx_inventory_v2', JSON.stringify(data));
     };
 
     const showResult = (members, instant = false) => {
         let htmlStr = '';
         members.forEach(member => {
-            let starsHtml = '';
-            const rankValue = member.starRank || 1;
+            let starsHtml = ''; const rankValue = member.starRank || 1;
             for(let i=0; i<rankValue; i++) starsHtml += '★';
-
             htmlStr += `
-                <div class="summon-card ${member.rarityClass}" style="box-shadow: ${rankValue >= 4 ? '0 0 30px #ff1a4a, inset 0 0 20px #ff1a4a' : (rankValue >= 3 ? '0 0 20px #ffd700' : 'none')};">
+                <div class="summon-card ${member.rarityClass}" style="box-shadow: ${rankValue >= 5 ? '0 0 30px #ff1a4a, inset 0 0 20px #ff1a4a' : (rankValue >= 3 ? '0 0 20px #ffd700' : 'none')};">
                     <img src="${member.img}" class="card-img" alt="${member.name}">
                     <div class="card-body">
-                        <div style="color:${rankValue >= 4 ? '#ff1a4a' : '#ffd700'}; font-size:1.5rem; text-shadow:0 0 10px rgba(0,0,0,0.8); margin-bottom:10px;">${starsHtml}</div>
+                        <div style="color:${rankValue >= 5 ? '#ff1a4a' : '#ffd700'}; font-size:1.5rem; text-shadow:0 0 10px rgba(0,0,0,0.8); margin-bottom:10px;">${starsHtml}</div>
                         <div class="card-rank">${member.rank}</div>
                         <div class="card-name">${member.name}</div>
                         <div class="card-fortune">"${member.fortune}"</div>
@@ -132,39 +99,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
         });
-
         summonResult.innerHTML = htmlStr;
-        
-        if (instant) {
-            gachaGate.style.display = 'none';
-            summonResult.classList.add('show', 'instant');
-            summonResult.style.opacity = '1';
-            summonResult.style.transform = 'scale(1)';
-        } else {
-            summonResult.classList.add('show');
-        }
+        if (instant) { gachaGate.style.display = 'none'; summonResult.classList.add('show', 'instant'); summonResult.style.opacity = '1'; summonResult.style.transform = 'scale(1)'; }
+        else { summonResult.classList.add('show'); }
     };
-
     btnSummon.addEventListener('click', () => performSummon(1));
     if (btnSummon5) btnSummon5.addEventListener('click', () => performSummon(5));
 });
 
-// 앰비언트 파티클 효과
 function createExplosion(x, y, count=15) {
-  const container = document.getElementById('particles');
-  if(!container) return;
+  const container = document.getElementById('particles'); if(!container) return;
   for(let i=0; i<count; i++) {
-    const spark = document.createElement('div');
-    spark.classList.add('spark');
-    const angle = Math.random() * Math.PI * 2;
-    const distance = 50 + Math.random() * 150;
-    const dx = Math.cos(angle) * distance;
-    const dy = Math.sin(angle) * distance;
-    spark.style.left = x + 'px';
-    spark.style.top = y + 'px';
-    spark.style.setProperty('--dx', `${dx}px`);
-    spark.style.setProperty('--dy', `${dy}px`);
-    container.appendChild(spark);
-    setTimeout(() => spark.remove(), 1000);
+    const spark = document.createElement('div'); spark.classList.add('spark');
+    const angle = Math.random() * Math.PI * 2; const distance = 50 + Math.random() * 150;
+    const dx = Math.cos(angle) * distance; const dy = Math.sin(angle) * distance;
+    spark.style.left = x + 'px'; spark.style.top = y + 'px';
+    spark.style.setProperty('--dx', `${dx}px`); spark.style.setProperty('--dy', `${dy}px`);
+    container.appendChild(spark); setTimeout(() => spark.remove(), 1000);
   }
 }
