@@ -142,6 +142,6 @@
         const result = await res.json(); if (result && result.totalVotes) { votes = result.totalVotes; updateBars(); }
       } catch (err) { console.warn(err.message); }
     }
-    fetchInitialVotes(); setInterval(fetchInitialVotes, 5000);
+    fetchInitialVotes(); setInterval(fetchInitialVotes, 20000);
   </script>
 </body></html>

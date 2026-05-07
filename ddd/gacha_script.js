@@ -45,17 +45,20 @@ document.addEventListener('DOMContentLoaded', () => {
             gachaGate.classList.remove('shaking'); gachaGate.classList.add('opened');
             createExplosion(window.innerWidth / 2, window.innerHeight / 2, 50);
             setTimeout(() => {
-                const cardsToSave = [];
-                for (let i = 0; i < count; i++) {
-                    const rand = Math.random() * 100;
-                    let selectedRarity = 'r'; let rarityClass = '';
-                    if (rand < 33.3) { selectedRarity = 'ssr'; rarityClass = 'rarity-ssr'; }
-                    else if (rand < 66.6) { selectedRarity = 'sr'; rarityClass = 'rarity-sr'; }
-                    const pool = summonPool[selectedRarity];
-                    const picked = pool[Math.floor(Math.random() * pool.length)];
-                    picked.rarityClass = rarityClass;
+                const allMembers = [];
+                Object.keys(summonPool).forEach(rarity => {
+                    summonPool[rarity].forEach(member => {
+                        allMembers.push({ ...member, rarity });
+                    });
+                });
 
-                    // 성급 확률 복구: 1성(70%), 2성(20%), 3성(8%), 4성(2%)
+                for (let i = 0; i < count; i++) {
+                    // 1. 모든 멤버 중 동일 확률로 선택 (1/전체인원)
+                    const pickedBase = allMembers[Math.floor(Math.random() * allMembers.length)];
+                    const picked = { ...pickedBase };
+                    picked.rarityClass = `rarity-${picked.rarity}`;
+
+                    // 2. 성급 확률 복구 (1성 70%, 2성 20%, 3성 8%, 4성 2%)
                     const randStar = Math.random() * 100;
                     let earnedStars = 1;
                     if (randStar < 2) earnedStars = 4;

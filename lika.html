@@ -223,8 +223,8 @@
       cursor: pointer;
     }
     .sticky-note.open {
-      height: 480px;
-      width: 280px;
+      height: 650px; /* 높이 확장 */
+      width: 320px;  /* 너비 확장 */
       transform: rotate(0deg) scale(1.05);
       z-index: 50;
       box-shadow: 10px 15px 30px rgba(0,0,0,0.15);
@@ -237,7 +237,13 @@
       transform: translateY(20px);
       transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
       text-align: left;
+      overflow-y: auto; /* 내용이 많으므로 스크롤 허용 */
+      max-height: 450px;
+      padding-right: 5px;
     }
+    .tmi-section::-webkit-scrollbar { width: 4px; }
+    .tmi-section::-webkit-scrollbar-thumb { background: #FFCC80; border-radius: 10px; }
+
     .sticky-note.open .tmi-section {
       opacity: 1;
       transform: translateY(0);
@@ -245,13 +251,14 @@
     }
     .tmi-item {
       margin-bottom: 8px;
-      font-size: 1rem;
-      line-height: 1.4;
+      font-size: 0.95rem;
+      line-height: 1.5;
       color: #5D4037;
-      background: rgba(255,255,255,0.5);
-      padding: 8px 12px;
-      border-radius: 8px;
-      box-shadow: inset 0 0 5px rgba(0,0,0,0.03);
+      background: rgba(255,255,255,0.6);
+      padding: 10px 12px;
+      border-radius: 12px;
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.02);
+      border-left: 4px solid #FF9800;
     }
     .tmi-title-badge {
       display: inline-block;
@@ -259,10 +266,23 @@
       color: #fff;
       padding: 4px 12px;
       border-radius: 12px;
-      font-size: 0.95rem;
-      margin-bottom: 12px;
+      font-size: 0.9rem;
+      margin: 10px 0 8px 0;
       box-shadow: 1px 2px 5px rgba(0,0,0,0.1);
     }
+    /* SNS 버튼 스타일 */
+    .sns-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .sns-tag {
+      padding: 4px 10px; border-radius: 8px; font-size: 0.85rem; text-decoration: none;
+      color: #fff; transition: 0.2s;
+    }
+    .sns-yt { background: #ff0000; }
+    .sns-ig { background: #e1306c; }
+    .sns-x { background: #000; }
+    .sns-fd { background: #ff4081; }
+    .sns-fs { background: #4caf50; }
+    .sns-ml { background: #3f51b5; } /* 멜로밍 노래책 전용 색상 */
+    .sns-tag:hover { transform: scale(1.1); filter: brightness(1.1); }
 
     /* =========================================
        [디자인 고도화] 다꾸 스타일 재생 스티커
@@ -364,18 +384,46 @@
 
     .polaroid img { filter: sepia(0.1) contrast(1.05); } /* 폴라로이드 감성 필터 */
 
+    /* =========================================
+       [디자인 고도화] 스프링 메모장 (게시판)
+       ========================================= */
+    .notepad {
+      position: absolute;
+      width: 280px; height: 380px;
+      background: #fff;
+      box-shadow: 8px 8px 0 rgba(0,0,0,0.05);
+      padding: 25px 20px 20px 20px;
+      z-index: 6;
+      cursor: grab;
+      border-radius: 5px;
+      background-image: linear-gradient(#e1e1e1 1px, transparent 1px);
+      background-size: 100% 28px; /* 줄노트 효과 */
+      line-height: 28px;
+    }
+    .notepad::before { /* 스프링 효과 */
+      content: ""; position: absolute; top: 10px; left: 0; width: 100%; height: 20px;
+      background-image: radial-gradient(circle, #555 30%, transparent 35%);
+      background-size: 20px 20px; background-repeat: repeat-x;
+    }
+    .notepad-header {
+      font-size: 1.3rem; color: #D32F2F; margin-bottom: 10px; font-weight: bold;
+      border-bottom: 2px solid #D32F2F; line-height: 1.5;
+    }
+    .board-list { list-style: none; padding: 0; margin: 0; }
+    .board-item {
+      display: block; text-decoration: none; color: #444; border-bottom: 1px solid #eee;
+      padding: 5px 0; transition: 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .board-item:hover { color: #D32F2F; transform: translateX(5px); }
+    .board-date { font-size: 0.75rem; color: #999; margin-left: 8px; }
+
   </style>
 </head>
 <body>
 
   <!-- 크앙 사운드 -->
   <audio id="roarSound" preload="auto">
-    <source src="https://cdn.freesound.org/previews/434/434463_8857218-lq.mp3" type="audio/mpeg">
-  </audio>
-
-  <!-- 폴라로이드 전용 사운드 (나중에 여기에 원하는 소리 파일 경로를 넣으세요!) -->
-  <audio id="polaroidSound" preload="auto">
-    <!-- 예시: <source src="audio/kuang.mp3" type="audio/mpeg"> -->
+    <source src="rika/크앙.mp3" type="audio/mpeg">
     <source src="https://cdn.freesound.org/previews/434/434463_8857218-lq.mp3" type="audio/mpeg">
   </audio>
 
@@ -402,15 +450,47 @@
       <h1>LIKA <span class="live-badge" id="liveBadge">ON AIR</span></h1>
       <div class="stat-line">팬클럽: <strong id="fanCount">---</strong>명</div>
       <div class="stat-line">총조회수: <strong id="totalViews">---</strong>회</div>
-      <p class="stat-msg" style="color:#A1887F; font-size:0.95rem; margin-top:10px;">👇 터치해서 TMI 보기!</p>
+      <div class="stat-line" style="border-bottom:none; font-size:1.1rem; color:#E64A19;">🎂 생일 <strong>D-<span id="dDayBirthday">?</span></strong></div>
+      <div class="stat-line" style="border-bottom:none; font-size:1.1rem; color:#5D4037;">🦖 방송 <strong><span id="dDayBroadcast">?</span></strong>일째</div>
+      <p class="stat-msg" style="color:#A1887F; font-size:0.95rem; margin-top:5px;">👇 터치해서 TMI 보기!</p>
 
       <!-- TMI 섹션 (클릭 시 펼쳐짐) -->
       <div class="tmi-section">
-        <div class="tmi-title-badge">✨ 리카's TMI 노트</div>
-        <div class="tmi-item">🏺 <b>종족:</b> 상현 5 항아리의 혈귀</div>
-        <div class="tmi-item">📺 <b>취향:</b> 연프(연애프로그램) & 애니 광팬!</div>
-        <div class="tmi-item">🥦 <b>불호:</b> 야채와 벌레는 극혐해요...</div>
-        <div class="tmi-item">🎨 <b>특징:</b> 귀여운 다꾸 감성 마스터</div>
+        <div class="tmi-title-badge">🦖 리카's 프로필</div>
+        <div class="tmi-item">
+          📅 <b>생일:</b> 7월 14일 (게자리)<br>
+          🧬 <b>MBTI:</b> ESFJ (B형)<br>
+          🎂 <b>첫 방송:</b> 2022년 10월 14일<br>
+          🐾 <b>팬닉:</b> 크앙단
+        </div>
+
+        <div class="tmi-title-badge" style="background:#E91E63;">💖 SNS & Link</div>
+        <div class="sns-links">
+          <a href="https://www.youtube.com/channel/UCslfL05OQcejZuExRKAQhew" target="_blank" class="sns-tag sns-yt">YouTube</a>
+          <a href="https://www.instagram.com/bbotto_lika/" target="_blank" class="sns-tag sns-ig">Insta</a>
+          <a href="https://x.com/LIKA_077" target="_blank" class="sns-tag sns-x">X(Twitter)</a>
+          <a href="https://fanding.kr/@RIKA0714" target="_blank" class="sns-tag sns-fd">팬딩</a>
+          <a href="https://fancim.me/celeb/profile.aspx?cu_id=lika0714" target="_blank" class="sns-tag sns-fs">팬심</a>
+          <a href="https://www.meloming.com/channel/lika" target="_blank" class="sns-tag sns-ml">🎵 노래책</a>
+        </div>
+
+        <div class="tmi-title-badge" style="background:#4CAF50;">✨ 리카's TMI</div>
+        <div class="tmi-item">
+          • <b>리어카, 범프리카, 크앙이</b> 등 별명 부자!<br>
+          • <b>취향:</b> 애니, 웹툰, 연프, 피규어, 디저트 킬러<br>
+          • <b>식성:</b> 야채 극혐! 패스트푸드도 야채 빼고 먹는 <b>육식공룡</b><br>
+          • <b>특징:</b> 졸리면 말이 느려지고 봉인 풀리면 <b>엑조디아 브레스</b> 발사!<br>
+          • <b>가족:</b> 집에 돼지(친오빠)가 살고 있음 (현실남매)
+        </div>
+
+        <div class="tmi-title-badge" style="background:#2196F3;">🏆 주요 업적</div>
+        <div class="tmi-item" style="font-size:0.85rem;">
+          • 오아컴퍼니 첫째딸 & 오성그룹 <b>리대리</b><br>
+          • <b>노래:</b> 'Always', 'MEMORY', 'BEEP!', 'Closer' 발매<br>
+          • <b>게임:</b> 배그/서든/옵치 대회 우승 및 상위권 다수<br>
+          • <b>활동:</b> 지하돌 오디션 합격 및 LUMINA 멤버 활동<br>
+          • <b>진행:</b> 2025.09 현재 <b>[꾸한성]</b> 참여 중! 🦖
+        </div>
       </div>
     </div>
 
@@ -453,6 +533,14 @@
       <div class="play-sticker" title="영상 보기" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()" onclick="playInlineVideo(this, 'https://vod.sooplive.com/player/194416999')"></div>
     </div>
 
+    <!-- [E] 방송국 최신 게시글 메모장 -->
+    <div class="notepad" id="noticeBoard" style="top: 55%; right: 100px; transform: rotate(-3deg);">
+      <div class="notepad-header">📌 STATION NEWS</div>
+      <div id="boardContainer" class="board-list">
+        <p style="text-align:center; color:#999; font-size:0.9rem;">소식 가져오는 중...</p>
+      </div>
+    </div>
+
     <!-- [D] 왕 큰 크앙 버튼 (사운드 보드 장난감 느낌) -->
     <div class="big-roar-btn" onclick="playPolaroidSound()">크앙!🦖</div>
 
@@ -471,7 +559,7 @@
 
     // 폴라로이드 소리 재생 함수
     function playPolaroidSound() {
-      const sound = document.getElementById('polaroidSound');
+      const sound = document.getElementById('roarSound');
       if (sound) {
         sound.currentTime = 0;
         sound.volume = 0.8;
@@ -496,6 +584,11 @@
       const img = polaroid.querySelector('img');
       
       if (img) {
+        // [추가] 동영상 재생 시 드래그 기능 해제 (커서 따라다니는 문제 방지)
+        polaroid.onmousedown = null;
+        polaroid.ontouchstart = null;
+        polaroid.style.cursor = 'default';
+
         const iframe = document.createElement('iframe');
         iframe.src = url + "?autoplay=1"; // 자동 재생 시도
         iframe.style.width = '100%';
@@ -550,6 +643,7 @@
       setTimeout(() => {
         document.body.classList.add('intro-done');
         loadApiData(); // 데스크 화면 진입 시 데이터 로드
+        initBoard();   // 게시판 로드 시작
       }, 1200);
     });
 
@@ -607,17 +701,38 @@
         document.ontouchend = null; document.ontouchmove = null;
         el.style.transform = el.style.transform.replace(/scale\([^\)]*\)/, ''); // 놓았을 때 원상복구
       }
+
+      // [추가] 브라우저 포커스가 나갈 때(iframe 클릭 등) 드래그 강제 중단
+      window.addEventListener('blur', closeDragElement);
     }
 
-    // 사진, 포스트잇, TV 모두 드래그 가능하게 만들기
-    document.querySelectorAll('.polaroid, .sticky-note, .retro-tv').forEach(el => {
+    // 사진, 포스트잇, TV, 메모장 모두 드래그 가능하게 만들기
+    document.querySelectorAll('.polaroid, .sticky-note, .retro-tv, .notepad').forEach(el => {
       makeDraggable(el);
     });
 
     // =========================================
     // 3. SOOP API 및 시트 데이터 로드
     // =========================================
+    function updateDDays() {
+      const now = new Date();
+      
+      // 1. 생일 D-Day (7월 14일)
+      let bday = new Date(now.getFullYear(), 6, 14); // 7월은 index 6
+      if (now > bday) {
+        bday = new Date(now.getFullYear() + 1, 6, 14);
+      }
+      const diffBday = Math.ceil((bday - now) / (1000 * 60 * 60 * 24));
+      document.getElementById('dDayBirthday').innerText = diffBday === 365 ? '0 (Today!)' : diffBday;
+
+      // 2. 방송 일수 (2022년 10월 14일)
+      const startDate = new Date(2022, 9, 14); // 10월은 index 9
+      const diffStart = Math.floor((now - startDate) / (1000 * 60 * 60 * 24)) + 1;
+      document.getElementById('dDayBroadcast').innerText = formatNum(diffStart);
+    }
+
     async function loadApiData() {
+      updateDDays(); // 디데이 계산 실행
       try {
         const vodGrid = document.getElementById('vodGrid');
         let isBroadcasting = false;
@@ -720,6 +835,45 @@
         console.error('API Error:', err);
       }
     }
+
+    // [추가] 게시판 데이터 로드 함수
+    async function loadBoardData() {
+      const container = document.getElementById('boardContainer');
+      try {
+        // SOOP 게시판 API (최신글 목록)
+        const res = await fetch('https://bjapi.afreecatv.com/api/lika07/board/posts?page=1');
+        const data = await res.json();
+        
+        if (data && data.data && data.data.length > 0) {
+          container.innerHTML = '';
+          // 상위 7개 게시글만 표시
+          data.data.slice(0, 7).forEach(post => {
+            const date = post.reg_date.split(' ')[0].replace(/-/g, '.');
+            const link = `https://www.sooplive.com/station/lika07/board/${post.board_no}/${post.title_no}`;
+            
+            container.innerHTML += `
+              <a href="${link}" target="_blank" class="board-item" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+                • ${post.title_name} <span class="board-date">${date}</span>
+              </a>
+            `;
+          });
+        } else {
+          container.innerHTML = '<p style="text-align:center; color:#999; padding-top:20px;">등록된 게시글이 없습니다.</p>';
+        }
+      } catch (err) {
+        console.error('Board API Error:', err);
+        container.innerHTML = '<p style="text-align:center; color:#999; padding-top:20px;">게시글을 불러올 수 없습니다.</p>';
+      }
+    }
+
+    // 데스크 진입 시 게시판 로드 및 1시간 주기 업데이트 설정
+    // (loadApiData 내부에서 호출됨)
+    function initBoard() {
+      loadBoardData();
+      setInterval(loadBoardData, 3600000); // 1시간(3,600,000ms)마다 업데이트
+    }
+
+    // loadApiData 마지막에 initBoard() 호출 추가 필요
   </script>
 </body>
 </html>
