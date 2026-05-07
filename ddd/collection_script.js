@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const targetInfo = document.getElementById('fusionTargetInfo');
     const btnSortStar = document.getElementById('btnSortStar');
     const memberFilter = document.getElementById('memberFilter');
+    const btnBulkFusion = document.getElementById('btnBulkFusion');
+    const bulkFusionTarget = document.getElementById('bulkFusionTarget');
 
     // ── 상태 변수 ──
     let inventory = [];
@@ -164,6 +166,54 @@ document.addEventListener('DOMContentLoaded', () => {
                 selectedCards = []; setTimeout(() => alert('강화 실패... 재료 카드가 파괴되었습니다.'), 600);
             }
             saveAndSync();
+        });
+    }
+
+    if (btnBulkFusion) {
+        btnBulkFusion.addEventListener('click', () => {
+            const targetStar = bulkFusionTarget.value; // 'all' or '1'~'5'
+            const groups = {};
+            inventory.forEach(card => {
+                if (card.starRank >= 6) return;
+                // 성급 필터링 적용
+                if (targetStar !== 'all' && card.starRank != targetStar) return;
+
+                const key = `${card.baseId}_${card.starRank}`;
+                if (!groups[key]) groups[key] = [];
+                groups[key].push(card);
+            });
+
+            let successCount = 0; let failCount = 0;
+            const newInventory = [];
+            const processedIds = new Set();
+            const probs = {2: 95, 3: 65, 4: 45, 5: 30, 6: 20};
+
+            Object.keys(groups).forEach(key => {
+                const group = groups[key];
+                const pairCount = Math.floor(group.length / 2);
+                const nextStar = group[0].starRank + 1;
+                const prob = probs[nextStar] || 100;
+
+                for (let i = 0; i < pairCount; i++) {
+                    const c1 = group[i * 2]; const c2 = group[i * 2 + 1];
+                    processedIds.add(c1.id); processedIds.add(c2.id);
+                    if (Math.random() * 100 <= prob) {
+                        const upgraded = { ...c1, id: Date.now() + Math.random(), starRank: nextStar, fortune: `✨ [${nextStar}성 효과] ` + c1.fortune };
+                        newInventory.push(upgraded); successCount++;
+                    } else {
+                        newInventory.push({ ...c1, id: Date.now() + Math.random() }); failCount++;
+                    }
+                }
+            });
+
+            if (successCount + failCount === 0) { alert('일괄 합성할 수 있는 카드 쌍이 없습니다.'); return; }
+            if (!confirm(`총 ${successCount + failCount}번의 합성을 진행하시겠습니까?\n(성공 확률은 각 등급별 확률과 동일하게 적용됩니다.)`)) return;
+
+            inventory = [...inventory.filter(item => !processedIds.has(item.id)), ...newInventory];
+            selectedCards = [];
+            createFusionExplosion(5);
+            saveAndSync();
+            setTimeout(() => alert(`일괄 합성 완료!\n성공: ${successCount}회\n실패: ${failCount}회`), 600);
         });
     }
 

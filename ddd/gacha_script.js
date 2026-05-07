@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
             gachaGate.classList.remove('shaking'); gachaGate.classList.add('opened');
             createExplosion(window.innerWidth / 2, window.innerHeight / 2, 50);
             setTimeout(() => {
+                const cardsToSave = [];
                 const allMembers = [];
                 Object.keys(summonPool).forEach(rarity => {
                     summonPool[rarity].forEach(member => {
