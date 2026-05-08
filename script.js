@@ -405,6 +405,12 @@ async function renderHomeSchedule() {
   try {
     const schedules = await DataService.getSchedules();
 
+    if (!Array.isArray(schedules)) {
+      console.error("Schedules data is not an array:", schedules);
+      container.innerHTML = '<div style="text-align:center; padding:20px; color:#666; font-size:0.85rem;">진행 예정인 일정이 없습니다.</div>';
+      return;
+    }
+
     // 📅 [날짜순 정렬 보강] 시간(MM.dd HH:mm) 문자열을 기준으로 내림차순 정렬
     const sortedSchedules = [...schedules].sort((a, b) => {
       const timeA = a.Time || a.time || "";

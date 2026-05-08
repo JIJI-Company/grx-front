@@ -1,5 +1,6 @@
 const CONFIG = {
   GAS_PROXY: "/.netlify/functions/gas-proxy",
+  STOCK_PROXY: "/.netlify/functions/stock-proxy",
   API_TOKEN: "SERVER_MANAGED", 
   
   TTLS: {
@@ -26,6 +27,6 @@ const CONFIG = {
   },
 
   GACHA: {
-    EXPIRE_HOURS: 48 // 24시간 동안 미접속 시 보관함 초기화
+    EXPIRE_HOURS: 999999 // 사실상 무제한으로 변경하여 초기화 방지
   }
 };

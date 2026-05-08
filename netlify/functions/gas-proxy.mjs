@@ -1,5 +1,5 @@
 export default async (req, context) => {
-  const GAS_URL = "https://script.google.com/macros/s/AKfycby4sJuWEuD8EcfMCMEZMKb6OgB3cVPSiY5_JQ20EElnD7tKlBy7czrIkMacgpCH5sSB/exec";
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbwgM8qO-rjIKL9e8TneI_rPcoyH00Z15ZeH64Is-q8g5xCOIxk_koYYhmb5OzOrN5ed/exec";
   const API_TOKEN = "ggu_castle_secure_99";
 
   // URL 파싱 안정화

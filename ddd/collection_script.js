@@ -23,12 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!rawData) return [];
         try {
             const data = JSON.parse(rawData);
-            const expireHours = 24; 
-            const expireMs = expireHours * 60 * 60 * 1000;
-            if (Date.now() - (data.lastUpdated || 0) > expireMs) {
-                localStorage.removeItem('grx_inventory_v2');
-                return [];
-            }
+            // 🛡️ [V2.1] 자동 초기화 로직 제거 (카드가 영구적으로 보관됩니다)
             return data.items || [];
         } catch (e) { return []; }
     };
