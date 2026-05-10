@@ -13,8 +13,34 @@
     const inputNick = document.getElementById('inputNick');
     const nickGroup = document.getElementById('nickGroup');
 
-    let currentUser = JSON.parse(localStorage.getItem('grx_stock_user')) || null;
+    let currentUser = JSON.parse(sessionStorage.getItem('grx_stock_user')) || JSON.parse(localStorage.getItem('grx_stock_user')) || null;
     let currentMarket = [];
+    let prevPrices = {}; 
+    let avgCostMap = JSON.parse(localStorage.getItem('grx_stock_avgcost')) || {};
+    let selectedStock = null; // 현재 선택된 종목 코드
+
+    // 🔐 AUTH & SESSION SYNC
+    async function syncSession() {
+        if (!currentUser || !currentUser.id || !currentUser.pw) return;
+        try {
+            const url = `${CONFIG.STOCK_PROXY}?action=login&id=${encodeURIComponent(currentUser.id)}&pw=${encodeURIComponent(currentUser.pw)}&_t=${Date.now()}`;
+            const res = await fetch(url);
+            const data = await res.json();
+            if (!data.error && data.user) {
+                currentUser = { ...data.user, pw: currentUser.pw };
+                sessionStorage.setItem('grx_stock_user', JSON.stringify(currentUser));
+                if (data.user.avgCost) {
+                    avgCostMap = data.user.avgCost;
+                    saveAvgCost();
+                }
+                updateUserUI();
+            }
+        } catch (e) {}
+    }
+
+    function saveAvgCost() {
+        localStorage.setItem('grx_stock_avgcost', JSON.stringify(avgCostMap));
+    }
 
     // ════════════════════════════════════
     // 🔔 TOAST 알림 시스템
@@ -150,23 +176,61 @@
         }
 
         let totalVal = 0;
+        let totalCost = 0;
         portfolioList.innerHTML = keys.map(code => {
             const qty = currentUser.portfolio[code];
             const stock = currentMarket.find(s => s.code === code) || { name: code, price: 0 };
-            const val = (stock.price || 0) * qty;
+            const curPrice = stock.price || 0;
+            const val = curPrice * qty;
             totalVal += val;
+
+            const avgCost = avgCostMap[code] || 0;
+            const costTotal = avgCost * qty;
+            totalCost += costTotal;
+            const pnl = val - costTotal;
+            const pnlPct = avgCost > 0 ? ((curPrice - avgCost) / avgCost * 100) : 0;
+            const isUp = pnl >= 0;
+            const pnlColor = isUp ? 'var(--up)' : 'var(--down)';
+            const pnlBg = isUp ? 'var(--up-dim)' : 'var(--down-dim)';
+            const pnlArrow = isUp ? '▲' : '▼';
+            const pnlSign = isUp ? '+' : '';
+
+            const avgCostLine = avgCost > 0
+                ? `<div class="port-avg">평균단가 ₩ ${avgCost.toLocaleString()}</div>`
+                : '';
+            const pnlBadge = avgCost > 0
+                ? `<div class="port-pnl" style="background:${pnlBg}; color:${pnlColor};">
+                        ${pnlArrow} ${pnlSign}${Math.abs(pnl).toLocaleString()} (${pnlSign}${pnlPct.toFixed(1)}%)
+                   </div>`
+                : '';
+
             return `
                 <div class="portfolio-item">
                     <div>
                         <div class="port-name">${stock.name}</div>
                         <div class="port-qty">${qty}주 보유</div>
+                        ${avgCostLine}
                     </div>
-                    <div class="port-val">₩ ${val.toLocaleString()}</div>
+                    <div style="text-align:right;">
+                        <div class="port-val">₩ ${val.toLocaleString()}</div>
+                        ${pnlBadge}
+                    </div>
                 </div>
             `;
         }).join('');
 
-        if (totalEl) totalEl.innerText = `₩ ${totalVal.toLocaleString()}`;
+        if (totalEl) {
+            const totalPnl = totalVal - totalCost;
+            const totalPnlPct = totalCost > 0 ? (totalPnl / totalCost * 100) : 0;
+            const isUp = totalPnl >= 0;
+            const sign = isUp ? '+' : '';
+            const arrow = isUp ? '▲' : '▼';
+            const color = isUp ? 'var(--up)' : 'var(--down)';
+            totalEl.innerHTML = `₩ ${totalVal.toLocaleString()}
+                <div style="font-size:0.75rem; color:${color}; margin-top:4px; font-weight:700;">
+                    ${arrow} ${sign}${Math.abs(totalPnl).toLocaleString()} (${sign}${totalPnlPct.toFixed(1)}%)
+                </div>`;
+        }
     };
 
     // ════════════════════════════════════
@@ -353,9 +417,28 @@
                         'success',
                         4000
                     );
+                    if (type === 'buy') {
+                        const oldQty = currentUser.portfolio[code] || 0;
+                        const oldAvg = avgCostMap[code] || 0;
+                        const newQty = oldQty + amount;
+                        const newAvg = ((oldAvg * oldQty) + (price * amount)) / newQty;
+                        avgCostMap[code] = Math.round(newAvg);
+                    } else {
+                        const oldQty = currentUser.portfolio[code] || 0;
+                        const newQty = oldQty - amount;
+                        if (newQty <= 0) {
+                            delete currentUser.portfolio[code];
+                            delete avgCostMap[code];
+                        } else {
+                            currentUser.portfolio[code] = newQty;
+                        }
+                    }
+                    saveAvgCost();
                     currentUser.balance = data.balance;
                     currentUser.portfolio = data.portfolio;
+                    currentUser.avgCost = data.avgCost || avgCostMap; 
                     localStorage.setItem('grx_stock_user', JSON.stringify(currentUser));
+                    sessionStorage.setItem('grx_stock_user', JSON.stringify(currentUser));
                     updateUserUI();
                     fetchRanking();
                     fetchMarket(true);
