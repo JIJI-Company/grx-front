@@ -8,7 +8,7 @@
     const btnLogin = document.getElementById('btnLogin');
     const loginModal = document.getElementById('loginModal');
     const btnConfirm = document.getElementById('btnConfirm');
-    const inputId = document.getElementById('inputId');
+    const inputID = document.getElementById('inputId');
     const inputPw = document.getElementById('inputPw');
     const inputNick = document.getElementById('inputNick');
     const nickGroup = document.getElementById('nickGroup');
@@ -17,25 +17,45 @@
     let currentMarket = [];
     let prevPrices = {}; 
     let avgCostMap = JSON.parse(localStorage.getItem('grx_stock_avgcost')) || {};
-    let selectedStock = null; // 현재 선택된 종목 코드
 
+    // ════════════════════════════════════
     // 🔐 AUTH & SESSION SYNC
+    // ════════════════════════════════════
     async function syncSession() {
         if (!currentUser || !currentUser.id || !currentUser.pw) return;
+
         try {
             const url = `${CONFIG.STOCK_PROXY}?action=login&id=${encodeURIComponent(currentUser.id)}&pw=${encodeURIComponent(currentUser.pw)}&_t=${Date.now()}`;
             const res = await fetch(url);
             const data = await res.json();
-            if (!data.error && data.user) {
-                currentUser = { ...data.user, pw: currentUser.pw };
+
+            if (data.error || !data.user) {
+                // 서버 데이터와 일치하지 않으면 세션 파기 (조용히)
+                console.warn('Session expired or invalid.');
+                logout(false); // 새로고침 없이 로그아웃 처리
+            } else {
+                // 최신 데이터로 동기화
+                currentUser = { ...data.user, id: data.user.id || currentUser.id, pw: currentUser.pw };
                 sessionStorage.setItem('grx_stock_user', JSON.stringify(currentUser));
+                localStorage.removeItem('grx_stock_user'); // 마이그레이션
+
                 if (data.user.avgCost) {
                     avgCostMap = data.user.avgCost;
                     saveAvgCost();
                 }
                 updateUserUI();
             }
-        } catch (e) {}
+        } catch (e) {
+            console.error('Session sync failed:', e);
+        }
+    }
+
+    function logout(shouldReload = true) {
+        sessionStorage.removeItem('grx_stock_user');
+        localStorage.removeItem('grx_stock_user');
+        currentUser = null;
+        updateUserUI();
+        if (shouldReload) location.reload();
     }
 
     function saveAvgCost() {
@@ -96,26 +116,35 @@
     // ════════════════════════════════════
     // 🎬 INIT
     // ════════════════════════════════════
-    const init = async () => {
+    async function init() {
         updateUserUI();
-        Promise.all([fetchMarket(), fetchRanking()]);
+        
+        if (currentUser) {
+            await syncSession(); 
+        }
 
+        fetchMarket();
+        fetchRanking(); 
+        
         setInterval(() => {
             if (document.hidden) return;
             fetchMarket(true);
             fetchRanking();
-        }, 60000);
+        }, 60000); // 1분마다 시장/랭킹 갱신
+
+        setInterval(() => {
+            if (document.hidden) return;
+            fetchNewsFromServer();
+        }, 120000); // 2분마다 뉴스 갱신
 
         btnLogin.onclick = () => {
             if (currentUser) {
                 showConfirmToast('로그아웃 하시겠습니까?', () => {
-                    localStorage.removeItem('grx_stock_user');
-                    currentUser = null;
-                    updateUserUI();
-                    showToast('로그아웃 완료', '', 'info');
+                    logout();
                 });
             } else {
                 loginModal.style.display = 'flex';
+                inputID.focus();
             }
         };
 
@@ -237,7 +266,7 @@
     // 🔐 LOGIN / AUTH
     // ════════════════════════════════════
     async function handleAuth() {
-        const id = inputId.value.trim();
+        const id = inputID.value.trim();
         const pw = inputPw.value.trim();
         const nick = inputNick.value.trim();
 
@@ -272,13 +301,24 @@
             } else {
                 const user = data.user;
                 const userData = { ...user, id: user.id || id, pw };
-                localStorage.setItem('grx_stock_user', JSON.stringify(userData));
-
+                sessionStorage.setItem('grx_stock_user', JSON.stringify(userData));
+                localStorage.removeItem('grx_stock_user'); 
+                
+                if (user.avgCost) {
+                    avgCostMap = user.avgCost;
+                    saveAvgCost();
+                }
+                
+                currentUser = userData;
+                updateUserUI();
+                
+                showToast('로그인 성공', `${user.nick}님 환영합니다!`, 'success');
                 loginModal.style.display = 'none';
-                location.reload();
+                setTimeout(() => location.reload(), 500);
             }
         } catch (e) {
-            showToast('연결 실패', '서버에 접근할 수 없습니다.', 'error');
+            console.error('Auth error:', e);
+            showToast('연결 실패', '서버 응답이 너무 느리거나 인터넷이 불안정합니다. 잠시 후 다시 시도해주세요.', 'error');
         } finally {
             btnConfirm.disabled = false;
             btnConfirm.innerText = originalText;
@@ -319,7 +359,17 @@
             inputValues[input.id] = input.value;
         });
 
-        marketGrid.innerHTML = currentMarket.map(c => `
+        marketGrid.innerHTML = currentMarket.map(c => {
+            const prevPrice = prevPrices[c.code];
+            let flashClass = '';
+            if (prevPrice !== undefined) {
+                if (c.price > prevPrice) flashClass = 'price-flash-up';
+                else if (c.price < prevPrice) flashClass = 'price-flash-down';
+            }
+            // 현재 가격 저장
+            prevPrices[c.code] = c.price;
+
+            return `
             <div class="stock-card" id="card_${c.code}">
                 <div class="stock-left">
                     <div class="stock-avatar">
@@ -335,7 +385,7 @@
                 </div>
                 <div class="stock-middle"></div>
                 <div class="stock-right">
-                    <div class="price-block">
+                    <div class="price-block ${flashClass}">
                         <div class="price-val">₩ ${Number(c.price).toLocaleString()}</div>
                         <div class="price-chg ${c.change >= 0 ? 'up' : 'down'}">
                             ${c.change >= 0 ? '▲' : '▼'} ${Math.abs(c.change)}%
@@ -347,13 +397,16 @@
                             <input type="number" class="qty-inp" id="qty_${c.code}" value="1" min="1">
                         </div>
                         <div class="trade-btns">
+                            <button class="btn-util" onclick="window.setMaxQty('${c.code}', ${c.price})" style="margin-right:2px;">MAX</button>
                             <button class="btn-trade buy" onclick="window.tradeStock('buy','${c.code}','${c.name}',${c.price})">매수</button>
+                            <button class="btn-util" onclick="window.setAllQty('${c.code}')" style="margin-right:2px;">ALL</button>
                             <button class="btn-trade sell" onclick="window.tradeStock('sell','${c.code}','${c.name}',${c.price})">매도</button>
                         </div>
                     </div>
                 </div>
             </div>
-        `).join('');
+            `;
+        }).join('');
 
         Object.keys(inputValues).forEach(id => {
             const el = document.getElementById(id);
@@ -374,7 +427,7 @@
 
         if (currentUser) {
             renderPortfolio();
-            updateTotalAsset(); // 시세 로드 완료 후 총 자산 재계산
+            updateTotalAsset();
         }
     }
 
@@ -396,7 +449,8 @@
                 const pw = currentUser.pw;
                 if (!pw) {
                     showToast('세션 만료', '다시 로그인해주세요.', 'error');
-                    localStorage.removeItem('grx_stock_user');
+                    sessionStorage.removeItem('grx_stock_user');
+        localStorage.removeItem('grx_stock_user');
                     currentUser = null;
                     updateUserUI();
                     return;
@@ -404,7 +458,7 @@
 
                 const encodedId = encodeURIComponent(currentUser.id);
                 const encodedPw = encodeURIComponent(pw);
-                const res = await fetch(`${CONFIG.STOCK_PROXY}?action=trade&id=${encodedId}&pw=${encodedPw}&type=${type}&code=${code}&amount=${amount}`);
+                const res = await fetch(`${CONFIG.STOCK_PROXY}?action=trade&id=${encodedId}&pw=${encodedPw}&type=${type}&code=${code}&amount=${amount}&_t=${Date.now()}`);
                 const data = await res.json();
 
                 if (data.error) {
@@ -417,28 +471,19 @@
                         'success',
                         4000
                     );
-                    if (type === 'buy') {
-                        const oldQty = currentUser.portfolio[code] || 0;
-                        const oldAvg = avgCostMap[code] || 0;
-                        const newQty = oldQty + amount;
-                        const newAvg = ((oldAvg * oldQty) + (price * amount)) / newQty;
-                        avgCostMap[code] = Math.round(newAvg);
-                    } else {
-                        const oldQty = currentUser.portfolio[code] || 0;
-                        const newQty = oldQty - amount;
-                        if (newQty <= 0) {
-                            delete currentUser.portfolio[code];
-                            delete avgCostMap[code];
-                        } else {
-                            currentUser.portfolio[code] = newQty;
-                        }
+
+                    // 서버 데이터로 로컬 상태 완전 동기화
+                    if (data.avgCost) {
+                        avgCostMap = data.avgCost;
+                        saveAvgCost();
                     }
-                    saveAvgCost();
+                    
                     currentUser.balance = data.balance;
                     currentUser.portfolio = data.portfolio;
-                    currentUser.avgCost = data.avgCost || avgCostMap; 
+                    currentUser.avgCost = data.avgCost; // 유저 객체 내 데이터도 갱신
                     localStorage.setItem('grx_stock_user', JSON.stringify(currentUser));
                     sessionStorage.setItem('grx_stock_user', JSON.stringify(currentUser));
+                    
                     updateUserUI();
                     fetchRanking();
                     fetchMarket(true);
@@ -489,5 +534,245 @@
         `).join('');
     }
 
+    // ════════════════════════════════════
+    // 🛠 UTILS (MAX/ALL)
+    // ════════════════════════════════════
+    window.setMaxQty = (code, price) => {
+        if (!currentUser) return showToast('로그인 필요', '로그인 후 이용 가능합니다.', 'warning');
+        const max = Math.floor(Number(currentUser.balance) / price);
+        const el = document.getElementById(`qty_${code}`);
+        if (el) el.value = max > 0 ? max : 1;
+    };
+
+    window.setAllQty = (code) => {
+        if (!currentUser || !currentUser.portfolio) return showToast('로그인 필요', '로그인 후 이용 가능합니다.', 'warning');
+        const qty = currentUser.portfolio[code] || 0;
+        const el = document.getElementById(`qty_${code}`);
+        if (el) el.value = qty > 0 ? qty : 1;
+    };
+
+    // ════════════════════════════════════
+    // 📰 RUMOR NEWS SYSTEM v2
+    // ════════════════════════════════════
+    const NEWS_TEMPLATES = [
+        { text: n => `[단독] ${n}, 대형 행사 확정설... "거의 다 됐다"`, sentiment: 'up', rumorChance: 0.2 },
+        { text: n => `${n} 측, 신규 콜라보 협의 중 "긍정적으로 검토"`, sentiment: 'up', rumorChance: 0.25 },
+        { text: n => `팬덤 소비력 집계서 ${n} 1위... "주목할 만한 수치"`, sentiment: 'up', rumorChance: 0.15 },
+        { text: n => `${n} 깜짝 대형컨텐츠 참여 예정? 관계자 "확인 중"`, sentiment: 'up', rumorChance: 0.3 },
+        { text: n => `해외 진출 논의 중인 ${n}... 계약 임박설 솔솔`, sentiment: 'up', rumorChance: 0.3 },
+        { text: n => `"${n} 다음 달 복귀" — 커뮤니티 카더라`, sentiment: 'up', rumorChance: 0.4 },
+        { text: n => `${n} 팬굿즈 매출 역대급... 수익성 개선 기대`, sentiment: 'up', rumorChance: 0.2 },
+        { text: n => `${n} 역오퍼 가능성 제기... "사실무근" 공식 부인`, sentiment: 'down', rumorChance: 0.4 },
+        { text: n => `${n} 활동 공백 장기화 우려... 팬들 불안 고조`, sentiment: 'down', rumorChance: 0.3 },
+        { text: n => `익명 제보 "${n}, 내부 갈등설"... 진위 불명`, sentiment: 'down', rumorChance: 0.5 },
+        { text: n => `${n} 최근 SNS 잠수... 건강 이상설`, sentiment: 'down', rumorChance: 0.3 },
+        { text: n => `[카더라] ${n} 계약 만료 임박? 재계약 불투명`, sentiment: 'down', rumorChance: 0.4 },
+        { text: n => `${n} 관련 논란 예상... 주가 하방 압력 우려`, sentiment: 'down', rumorChance: 0.3 },
+        { text: n => `${n} 오늘 오후 긴급 공지 예정 — 내용 불명`, sentiment: 'neutral', rumorChance: 0.4 },
+        { text: n => `${n} 관련 미확인 정보 다수 유포 중... 주의 요망`, sentiment: 'neutral', rumorChance: 0.4 },
+    ];
+
+    const ARTICLE_TEXTS = {
+        up_true:   [ n => `${n} 측은 오늘 공식 채널을 통해 대형 프로젝트 참여를 확인했다. 관계자는 "현재 최종 조율 단계에 있으며 곧 정식 발표될 것"이라고 전했다. 팬들의 기대감이 고조되는 가운데 주가도 긍정적 반응을 보이고 있다.` ],
+        up_fake:   [ n => `앞서 보도된 ${n} 관련 호재성 기사는 사실무근으로 확인됐다. ${n} 측은 "전혀 논의된 바 없다"며 강경하게 부인했다. 해당 루머를 퍼뜨린 계정은 현재 조사 중이다.` ],
+        down_true: [ n => `우려했던 바가 현실로 나타났다. ${n} 관련 악재가 사실로 확인되며 시장에 부정적 신호를 보내고 있다. 팬들은 공식 입장 발표를 기다리고 있다.` ],
+        down_fake: [ n => `${n} 측이 악성 루머에 대해 강력 부인하고 나섰다. "해당 보도는 전혀 사실이 아니며 법적 대응을 검토 중"이라고 밝혔다. 주가는 서서히 회복세를 보이고 있다.` ],
+        neutral_fake: [ n => `${n} 관련 미확인 정보는 결국 출처 불명의 루머로 드러났다. 현재 ${n} 측은 별다른 공식 입장을 내놓지 않고 있다.` ],
+    };
+
+    // { items: [], nextNewsAt: 0 } — 백엔드 공유
+    let newsBatch = JSON.parse(localStorage.getItem('grx_stock_news') || 'null') || { items: [], nextNewsAt: 0 };
+    let newsCountdownTimer = null;
+
+    function saveNewsLocal() { localStorage.setItem('grx_stock_news', JSON.stringify(newsBatch)); }
+    function pushNewsToServer() {
+        saveNewsLocal();
+        const enc = encodeURIComponent(JSON.stringify(newsBatch));
+        fetch(`${CONFIG.STOCK_PROXY}?action=saveNews&news=${enc}`).catch(() => {});
+    }
+
+    async function fetchNewsFromServer() {
+        try {
+            const res = await fetch(`${CONFIG.STOCK_PROXY}?action=getNews`);
+            const data = await res.json();
+            if (data && Array.isArray(data.items)) {
+                if ((data.nextNewsAt || 0) >= (newsBatch.nextNewsAt || 0)) {
+                    newsBatch = data;
+                    saveNewsLocal();
+                }
+            }
+        } catch(e) {}
+        renderNews();
+        startCountdown();
+        scheduleNewsCheck();
+    }
+
+    function scheduleNewsCheck() {
+        // 1분마다 "지금 새 뉴스 낼 시간인가?" 체크
+        setTimeout(() => {
+            checkAndMaybeGenerateNews();
+            scheduleNewsCheck();
+        }, 60000);
+    }
+
+    function checkAndMaybeGenerateNews() {
+        if (!currentMarket.length) return;
+        const now = Date.now();
+        // 미공개 뉴스 수만 카운트 (공개된 걸 포함하면 5개를 초과할 수 있음)
+        const unrevealed = newsBatch.items.filter(i => !i.revealed);
+        if (now >= newsBatch.nextNewsAt && unrevealed.length < 5) generateOneNews();
+    }
+
+    function generateOneNews() {
+        if (!currentMarket.length) return;
+        const now = Date.now();
+        const usedCodes = new Set(newsBatch.items.filter(i => now - i.generatedAt < 3600000).map(i => i.code));
+        const available = currentMarket.filter(s => !usedCodes.has(s.code));
+        if (!available.length) return;
+
+        const stock = available[Math.floor(Math.random() * available.length)];
+        const tpl = NEWS_TEMPLATES[Math.floor(Math.random() * NEWS_TEMPLATES.length)];
+        const isFake = Math.random() < tpl.rumorChance;
+
+        const item = {
+            id: now,
+            code: stock.code, name: stock.name,
+            headline: tpl.text(stock.name),
+            sentiment: tpl.sentiment, isFake,
+            revealed: false, result: null, articleText: null,
+            generatedAt: now,
+            revealableAt: now + 10 * 60 * 1000,
+            priceAtNews: stock.price,
+        };
+
+        newsBatch.items = newsBatch.items.filter(i => {
+            if (!i.revealed) return Date.now() < i.revealableAt + 5 * 60 * 1000; // 팬트체크 버튼 활성화 5분 후 제거
+            return Date.now() - (i.revealedAt || i.revealableAt) < 5 * 60 * 1000; // 공개 후도 5분
+        });
+        newsBatch.items.unshift(item);
+        newsBatch.nextNewsAt = now + (5 + Math.random() * 15) * 60 * 1000;
+
+        pushNewsToServer();
+        renderNews();
+        startCountdown();
+    }
+
+    window.revealNewsItem = (id) => {
+        const item = newsBatch.items.find(i => i.id === id);
+        if (!item || item.revealed) return;
+        const cur = currentMarket.find(s => s.code === item.code);
+        if (item.sentiment === 'neutral') {
+            item.result = 'fake';
+        } else if (cur && cur.price !== item.priceAtNews) {
+            item.result = (!item.isFake && (cur.price > item.priceAtNews ? 'up' : 'down') === item.sentiment) ? 'true' : 'fake';
+        } else {
+            item.result = item.isFake ? 'fake' : 'true';
+        }
+        const key = item.sentiment === 'neutral' ? 'neutral_fake' : `${item.sentiment}_${item.result === 'true' ? 'true' : 'fake'}`;
+        const pool = ARTICLE_TEXTS[key] || ARTICLE_TEXTS['neutral_fake'];
+        item.articleText = pool[Math.floor(Math.random() * pool.length)](item.name);
+        item.revealed = true;
+        item.revealedAt = Date.now(); 
+
+        // 팩트체크 클릭 시에는 이미 가격이 변동되어 있을 것이므로 기사만 보여줌
+        if (item.result === 'true' && item.sentiment !== 'neutral' && !item.priceApplied) {
+            item.priceApplied = true;
+            fetch(`${CONFIG.STOCK_PROXY}?action=applyNewsEffect&code=${item.code}&direction=${item.sentiment}`).catch(() => {});
+        }
+
+        pushNewsToServer();
+        renderNews();
+        showNewsArticle(item);
+    };
+
+    window.showRevealedArticle = (id) => {
+        const item = newsBatch.items.find(i => i.id === id);
+        if (item) showNewsArticle(item);
+    };
+
+    function showNewsArticle(item) {
+        const modal = document.getElementById('newsArticleModal');
+        if (!modal) return;
+        const isTrue = item.result === 'true';
+        const cur = currentMarket.find(s => s.code === item.code);
+        const curPrice = cur ? cur.price : item.priceAtNews;
+        const diff = curPrice - item.priceAtNews;
+        const pct = ((diff / item.priceAtNews) * 100).toFixed(1);
+        const col = diff >= 0 ? 'var(--up)' : 'var(--down)';
+        document.getElementById('articleContent').innerHTML = `
+            <div class="article-header">
+                <span class="article-badge">꾸한성 경제속보</span>
+                <span class="article-time">${new Date(item.generatedAt).toLocaleString('ko-KR')}</span>
+            </div>
+            <div class="article-stamp ${isTrue ? 'a-true' : 'a-fake'}">${isTrue ? '✅ 사실' : '🃏 루머'}</div>
+            <h3 class="article-headline">${item.headline}</h3>
+            <p class="article-body">${item.articleText || ''}</p>
+            <div class="article-price">📌 뉴스 당시 ₩${Number(item.priceAtNews).toLocaleString()} → 현재 <span style="color:${col};font-weight:700;">₩${Number(curPrice).toLocaleString()} (${diff>=0?'+':''}${pct}%)</span></div>
+        `;
+        modal.style.display = 'flex';
+    }
+
+    function startCountdown() {
+        if (newsCountdownTimer) clearInterval(newsCountdownTimer);
+        newsCountdownTimer = setInterval(() => {
+            const now = Date.now();
+            newsBatch.items.forEach(item => {
+                if (item.revealed) return;
+                const rem = item.revealableAt - now;
+                const cdEl = document.getElementById(`ncd-${item.id}`);
+                const btnEl = document.getElementById(`nbtn-${item.id}`);
+                if (rem > 0) {
+                    if (cdEl) cdEl.textContent = `⏱ ${Math.floor(rem/60000)}:${String(Math.floor((rem%60000)/1000)).padStart(2,'0')}`;
+                } else {
+                    if (cdEl) cdEl.style.display = 'none';
+                    if (btnEl) btnEl.style.display = 'inline-flex';
+                    
+                    // ★ 카운트다운 종료 시점(버튼 뜰 때) 가격 변동 자동 적용
+                    if (!item.revealed && !item.priceApplied && !item.isFake && item.sentiment !== 'neutral') {
+                        item.priceApplied = true;
+                        fetch(`${CONFIG.STOCK_PROXY}?action=applyNewsEffect&code=${item.code}&direction=${item.sentiment}`)
+                            .then(() => { pushNewsToServer(); fetchMarket(true); })
+                            .catch(() => {});
+                    }
+                }
+            });
+        }, 1000);
+    }
+
+    function renderNews() {
+        const el = document.getElementById('newsList');
+        if (!el) return;
+        const now = Date.now();
+        // 팩트체크 버튼 활성화(revealableAt) 후 5분까지 표시
+        const active = newsBatch.items.filter(i => now < i.revealableAt + 5 * 60 * 1000);
+        if (!active.length) {
+            el.innerHTML = '<div class="empty-state" style="padding:16px;">뉴스 대기 중...</div>';
+            return;
+        }
+        const nextIn = Math.max(0, newsBatch.nextNewsAt - now);
+        const nm = Math.floor(nextIn / 60000), ns = Math.floor((nextIn % 60000) / 1000);
+        el.innerHTML = `<div class="news-next-label">다음 뉴스까지 ${nm}분 ${String(ns).padStart(2,'0')}초</div>` +
+        active.map(item => {
+            const hintClass = item.sentiment === 'up' ? 'up' : item.sentiment === 'down' ? 'down' : 'unknown';
+            const hintLabel = item.sentiment === 'up' ? '▲ 상승 가능' : item.sentiment === 'down' ? '▼ 하락 우려' : '? 방향 불명';
+            const cardClass = item.sentiment === 'up' ? 'hint-up' : item.sentiment === 'down' ? 'hint-down' : 'hint-neutral';
+            const canReveal = now >= item.revealableAt;
+            const liveBadge = item.revealed
+                ? `<span class="news-live ${item.result==='true'?'n-true':'n-fake'}">${item.result==='true'?'✅ 사실':'🃏 루머'}</span>`
+                : '<span class="news-live">LIVE</span>';
+            const action = item.revealed
+                ? `<button class="btn-factcheck" onclick="window.showRevealedArticle(${item.id})">📰 기사 보기</button>`
+                : canReveal
+                    ? `<button class="btn-factcheck" id="nbtn-${item.id}" onclick="window.revealNewsItem(${item.id})">📰 팩트체크 →</button>`
+                    : `<span class="news-countdown" id="ncd-${item.id}">⏱ --:--</span><button class="btn-factcheck" id="nbtn-${item.id}" style="display:none;" onclick="window.revealNewsItem(${item.id})">📰 팩트체크 →</button>`;
+            return `<div class="news-card ${cardClass}${item.revealed?' is-revealed':''}">
+                <div class="news-meta">${liveBadge}<span>${item.code}</span><span style="margin-left:auto;">${new Date(item.generatedAt).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})}</span></div>
+                <div class="news-headline">${item.headline}</div>
+                <div class="news-actions"><span class="news-hint ${hintClass}">${hintLabel}</span>${action}</div>
+            </div>`;
+        }).join('');
+    }
+
     init();
+    setTimeout(() => fetchNewsFromServer(), 1500);
 })();

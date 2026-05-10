@@ -1,9 +1,9 @@
 export default async (req, context) => {
-  // Netlify 환경 변수에서 주소 가져오기
+  // Netlify 환경 변수에서 URL을 가져옵니다. (없을 경우 기본값 사용)
   const STOCK_GAS_URL = process.env.GAS_URL_STOCK;
-
+  
   if (!STOCK_GAS_URL) {
-    return new Response(JSON.stringify({ error: "GAS_URL_STOCK 환경 변수가 설정되지 않았습니다." }), {
+    return new Response(JSON.stringify({ error: "GAS_URL_STOCK is not configured." }), {
       status: 500,
       headers: { "Content-Type": "application/json" }
     });
