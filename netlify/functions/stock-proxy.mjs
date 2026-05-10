@@ -1,6 +1,13 @@
 export default async (req, context) => {
-  // 사용자가 주신 새 구글 시트 웹 앱 URL
-  const STOCK_GAS_URL = "https://script.google.com/macros/s/AKfycbwC-0A5pyhPL7RnNL5UANqmZYYh0UOeP2-A6hHdu6_8VnlMjhx963DVdNZMcs8ai7xH9A/exec";
+  // Netlify 환경 변수에서 주소 가져오기
+  const STOCK_GAS_URL = process.env.GAS_URL_STOCK;
+
+  if (!STOCK_GAS_URL) {
+    return new Response(JSON.stringify({ error: "GAS_URL_STOCK 환경 변수가 설정되지 않았습니다." }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
 
   const url = new URL(req.url);
   const searchParams = url.searchParams;
