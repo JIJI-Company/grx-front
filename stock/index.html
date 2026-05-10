@@ -4,193 +4,689 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>꾸한성 주식 거래소 | G-CASTLE EXCHANGE</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-dark: #0a0b1e;
-      --card-bg: rgba(255, 255, 255, 0.05);
-      --accent: #bb86fc;
-      --up: #ff4d4d;
-      --down: #4d79ff;
-      --text: #e0e0e0;
-      --glass: rgba(255, 255, 255, 0.03);
+      --bg: #0d0d0d;
+      --surface: #161616;
+      --surface2: #1e1e1e;
+      --border: rgba(255,255,255,0.06);
+      --border-hover: rgba(255,255,255,0.12);
+      --accent: #c8ff00;
+      --accent-dim: rgba(200,255,0,0.15);
+      --accent-glow: rgba(200,255,0,0.3);
+      --up: #00e676;
+      --up-dim: rgba(0,230,118,0.12);
+      --down: #ff3d57;
+      --down-dim: rgba(255,61,87,0.12);
+      --text: #f0f0f0;
+      --text-muted: #6b6b6b;
+      --text-dim: #9a9a9a;
+      --radius: 16px;
+      --radius-sm: 10px;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { 
-      background: var(--bg-dark); 
-      color: var(--text); 
-      font-family: 'Outfit', 'Noto Sans KR', sans-serif;
-      overflow-x: hidden;
-      background: radial-gradient(circle at top right, #1a1b3a, #0a0b1e);
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Grotesk', 'Noto Sans KR', sans-serif;
       min-height: 100vh;
+      overflow-x: hidden;
     }
 
-    /* Header */
+    /* ── 배경 노이즈/그리드 텍스처 ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(200,255,0,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(200,255,0,0.02) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ── HEADER ── */
     header {
-      padding: 20px 5%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(255,255,255,0.1);
       position: sticky; top: 0; z-index: 100;
-    }
-    .logo { font-size: 1.5rem; font-weight: 800; color: var(--accent); letter-spacing: 2px; }
-    .user-stats { display: flex; gap: 20px; align-items: center; }
-    .balance-box { 
-      background: var(--glass); padding: 8px 15px; border-radius: 20px; 
-      border: 1px solid rgba(255,255,255,0.1); font-weight: 600;
-    }
-    .login-btn { 
-      padding: 8px 20px; border-radius: 20px; background: var(--accent); 
-      color: #000; border: none; font-weight: 700; cursor: pointer; transition: 0.3s;
-    }
-    .login-btn:hover { transform: scale(1.05); filter: brightness(1.1); }
-
-    /* Main Container */
-    .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; display: grid; grid-template-columns: 2fr 1fr; gap: 30px; }
-
-    /* Market List */
-    .section-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 20px; color: var(--accent); display: flex; align-items: center; gap: 10px; }
-    .section-title::before { content: ''; width: 4px; height: 18px; background: var(--accent); border-radius: 2px; }
-
-    .market-grid { display: grid; gap: 15px; }
-    .stock-card {
-      background: var(--card-bg); border-radius: 15px; padding: 20px;
-      display: flex; justify-content: space-between; align-items: center;
-      border: 1px solid rgba(255,255,255,0.05); transition: 0.3s;
-      backdrop-filter: blur(5px);
-    }
-    .stock-card:hover { transform: translateX(10px); background: rgba(255,255,255,0.08); border-color: var(--accent); }
-
-    .stock-info { display: flex; align-items: center; gap: 15px; }
-    .stock-icon { 
-      width: 45px; height: 45px; background: var(--glass); border-radius: 12px;
-      display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
-    }
-    .stock-name { font-weight: 700; font-size: 1.1rem; }
-    .stock-code { font-size: 0.8rem; opacity: 0.5; margin-top: 2px; }
-
-    .stock-price-area { text-align: right; }
-    .price { font-size: 1.1rem; font-weight: 700; }
-    .change { font-size: 0.85rem; margin-top: 4px; }
-    .change.up { color: var(--up); }
-    .change.down { color: var(--down); }
-
-    /* Sidebar / Ranking */
-    .sidebar { display: flex; flex-direction: column; gap: 30px; }
-    .ranking-box { 
-      background: var(--card-bg); border-radius: 20px; padding: 25px;
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-    .rank-item {
+      background: rgba(13,13,13,0.85);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 5%;
+      height: 64px;
       display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-    .rank-item:last-child { border: none; }
-    .rank-nick { font-weight: 500; }
-    .rank-val { color: var(--accent); font-weight: 700; }
-
-    /* Login Modal */
-    .modal {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
-      display: none; justify-content: center; align-items: center; z-index: 1000;
-    }
-    .modal-content {
-      background: #15162c; padding: 40px; border-radius: 30px; width: 400px;
-      border: 1px solid rgba(255,255,255,0.1); text-align: center;
-    }
-    .modal h2 { margin-bottom: 25px; color: var(--accent); }
-    .input-group { margin-bottom: 20px; text-align: left; }
-    .input-group label { display: block; font-size: 0.8rem; margin-bottom: 8px; opacity: 0.7; }
-    .input-group input {
-      width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-      padding: 12px 15px; border-radius: 12px; color: #fff; font-size: 1rem;
-    }
-    .modal-btn {
-      width: 100%; padding: 15px; border-radius: 15px; background: var(--accent);
-      color: #000; border: none; font-weight: 700; font-size: 1.1rem; cursor: pointer;
     }
 
-    /* Animation */
-    @keyframes pulse {
-      0% { opacity: 0.5; }
-      50% { opacity: 1; }
-      100% { opacity: 0.5; }
+    .logo-area {
+      display: flex; align-items: center; gap: 10px; cursor: pointer;
     }
-    .loading-dot { display: inline-block; animation: pulse 1s infinite; }
+    .logo-badge {
+      background: var(--accent);
+      color: #000;
+      font-weight: 700;
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 1.5px;
+    }
+    .logo-text {
+      font-size: 1.1rem; font-weight: 700; letter-spacing: 1px; color: var(--text);
+    }
 
+    .header-right {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .user-chip {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--surface); border: 1px solid var(--border);
+      padding: 8px 14px; border-radius: 30px;
+      font-size: 0.9rem; font-weight: 500;
+    }
+    .user-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--text-muted);
+    }
+    .user-dot.online { background: var(--up); box-shadow: 0 0 8px var(--up); animation: pulse-dot 2s infinite; }
+    @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    .balance-chip {
+      background: var(--accent-dim);
+      border: 1px solid rgba(200,255,0,0.2);
+      color: var(--accent);
+      padding: 8px 14px; border-radius: 30px;
+      font-size: 0.95rem; font-weight: 700; letter-spacing: 0.5px;
+    }
+
+    .btn-login {
+      background: var(--accent);
+      color: #000;
+      border: none; border-radius: 30px;
+      padding: 9px 22px;
+      font-weight: 700; font-size: 0.9rem;
+      letter-spacing: 1px; cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .btn-login:hover { transform: scale(1.04); box-shadow: 0 0 20px var(--accent-glow); }
+
+    /* ── TICKER BAR ── */
+    .ticker-bar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 5%;
+      height: 38px;
+      display: flex; align-items: center; gap: 30px;
+      overflow: hidden; position: relative; z-index: 1;
+    }
+    .ticker-item {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.8rem; white-space: nowrap; letter-spacing: 0.5px;
+    }
+    .ticker-code { font-weight: 700; color: var(--text-dim); }
+    .ticker-val { font-weight: 600; }
+    .ticker-chg.up { color: var(--up); }
+    .ticker-chg.down { color: var(--down); }
+
+    /* ── MAIN LAYOUT ── */
+    .page-wrap {
+      position: relative; z-index: 1;
+      max-width: 1280px; margin: 0 auto;
+      padding: 40px 20px;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+    }
+
+    /* ── SECTION HEADER ── */
+    .section-label {
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 2px;
+      color: var(--text-muted); text-transform: uppercase; margin-bottom: 16px;
+    }
+
+    /* ── MARKET CARDS ── */
+    .market-grid { display: flex; flex-direction: column; gap: 10px; }
+
+    .stock-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 22px;
+      display: flex; align-items: center; justify-content: space-between;
+      transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+      cursor: default;
+    }
+    .stock-card:hover {
+      background: var(--surface2);
+      border-color: var(--border-hover);
+      transform: translateX(4px);
+    }
+
+    .stock-left { display: flex; align-items: center; gap: 14px; }
+    .stock-avatar {
+      width: 44px; height: 44px;
+      background: var(--surface2);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; font-weight: 800;
+      color: var(--accent);
+    }
+    .stock-name { font-size: 1rem; font-weight: 700; }
+    .stock-code-label { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; letter-spacing: 1px; }
+
+    .stock-middle { flex: 1; padding: 0 20px; }
+    /* mini sparkline placeholder */
+
+    .stock-right { display: flex; align-items: center; gap: 20px; }
+
+    .price-block { text-align: right; }
+    .price-val { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px; }
+    .price-chg {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: 0.78rem; font-weight: 700;
+      padding: 3px 8px; border-radius: 6px; margin-top: 4px;
+    }
+    .price-chg.up { background: var(--up-dim); color: var(--up); }
+    .price-chg.down { background: var(--down-dim); color: var(--down); }
+
+    .trade-block {
+      display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+    }
+    .qty-row { display: flex; align-items: center; gap: 6px; }
+    .qty-label { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; }
+    .qty-inp {
+      width: 60px; text-align: center;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text);
+      padding: 6px 8px; font-family: inherit;
+      font-size: 0.95rem; font-weight: 700;
+      transition: border-color 0.2s;
+    }
+    .qty-inp:focus { outline: none; border-color: rgba(200,255,0,0.5); }
+
+    .trade-btns { display: flex; gap: 6px; }
+    .btn-trade {
+      padding: 7px 16px; border: none; border-radius: 8px;
+      font-family: inherit; font-size: 0.8rem; font-weight: 700;
+      letter-spacing: 0.5px; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-trade.buy {
+      background: var(--up-dim); color: var(--up);
+      border: 1px solid rgba(0,230,118,0.2);
+    }
+    .btn-trade.buy:hover { background: var(--up); color: #000; transform: translateY(-2px); }
+    .btn-trade.sell {
+      background: var(--down-dim); color: var(--down);
+      border: 1px solid rgba(255,61,87,0.2);
+    }
+    .btn-trade.sell:hover { background: var(--down); color: #fff; transform: translateY(-2px); }
+
+    /* 유틸리티 버튼 (MAX / ALL) */
+    .btn-util {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+    .btn-util:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* 가격 변동 애니메이션 */
+    @keyframes flash-up {
+      0% { background: var(--up-dim); color: var(--up); }
+      100% { background: transparent; color: inherit; }
+    }
+    @keyframes flash-down {
+      0% { background: var(--down-dim); color: var(--down); }
+      100% { background: transparent; color: inherit; }
+    }
+    .price-flash-up { animation: flash-up 1.5s ease-out forwards; }
+    .price-flash-down { animation: flash-down 1.5s ease-out forwards; }
+
+    /* ── SIDEBAR ── */
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+
+    /* Portfolio */
+    .portfolio-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .total-val {
+      font-size: 1.6rem; font-weight: 700; color: var(--accent); letter-spacing: 1px;
+    }
+    .total-label { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; letter-spacing: 1px; }
+
+    .portfolio-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    .portfolio-item:last-child { border: none; }
+    .port-name { font-weight: 600; }
+    .port-qty { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+    .port-val { font-weight: 700; color: var(--accent); text-align: right; }
+    .port-avg { font-size: 0.72rem; color: var(--text-muted); margin-top: 3px; }
+    .port-pnl {
+      display: inline-block;
+      font-size: 0.72rem; font-weight: 700;
+      padding: 2px 8px; border-radius: 6px; margin-top: 4px;
+      letter-spacing: 0.3px;
+    }
+
+    /* ── NEWS PANEL ── */
+    .news-list { display: flex; flex-direction: column; gap: 10px; }
+    .news-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      transition: border-color 0.3s;
+    }
+    .news-card.hint-up  { border-left: 3px solid var(--up); }
+    .news-card.hint-down { border-left: 3px solid var(--down); }
+    .news-card.hint-neutral { border-left: 3px solid var(--text-muted); }
+    .news-meta {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.65rem; color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .news-live {
+      background: var(--down); color: #fff;
+      font-size: 0.6rem; font-weight: 800;
+      padding: 1px 5px; border-radius: 3px;
+      letter-spacing: 0.5px;
+      animation: pulse-dot 1.5s infinite;
+    }
+    .news-live.n-true { background: var(--up); animation: none; }
+    .news-live.n-fake { background: var(--text-muted); animation: none; }
+    .news-actions { display: flex; align-items: center; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+    .news-countdown { font-size: 0.72rem; color: var(--text-muted); font-weight: 700; }
+    .news-next-label {
+      font-size: 0.68rem; color: var(--text-muted); text-align: center;
+      padding: 4px 0 8px; letter-spacing: 0.5px;
+    }
+    .btn-factcheck {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: var(--accent-dim); border: 1px solid rgba(200,255,0,0.25);
+      color: var(--accent); font-size: 0.7rem; font-weight: 700;
+      padding: 3px 10px; border-radius: 6px; cursor: pointer;
+      font-family: inherit; transition: all 0.2s;
+    }
+    .btn-factcheck:hover { background: var(--accent); color: #000; }
+    .btn-factcheck.revealed { background: var(--surface2); border-color: var(--border); color: var(--text-dim); }
+    .news-card.is-revealed { opacity: 0.75; }
+
+    /* 기사 모달 */
+    .article-modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border-hover);
+      border-radius: 24px;
+      width: 480px; max-width: 92vw; max-height: 80vh;
+      overflow-y: auto; padding: 36px 32px;
+      position: relative;
+      animation: modal-in 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .article-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .article-badge {
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text-muted); font-size: 0.65rem; font-weight: 700;
+      padding: 3px 8px; border-radius: 4px; letter-spacing: 1px;
+    }
+    .article-time { font-size: 0.65rem; color: var(--text-muted); }
+    .article-stamp {
+      display: inline-block; font-size: 1rem; font-weight: 800;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.2rem; font-weight: 900;
+      transform: rotate(-5deg); border: 3px solid currentColor;
+      padding: 8px 24px; display: inline-block; margin: 20px 0;
+      text-transform: uppercase; border-radius: 4px;
+    }
+    .article-stamp.a-true { border-color: var(--up); color: var(--up); }
+    .article-stamp.a-fake { border-color: var(--accent); color: var(--accent); }
+    .article-headline { 
+      font-size: 1.5rem; font-weight: 800; color: #fff; 
+      line-height: 1.3; margin-bottom: 20px; 
+      letter-spacing: -0.5px;
+    }
+    .article-body { 
+      font-size: 0.95rem; line-height: 1.8; color: #ccc;
+      padding-left: 15px; border-left: 2px solid #333;
+      margin-bottom: 20px;
+    }
+    .article-price { font-size: 0.8rem; color: var(--text-muted); padding: 10px; background: #222; border-radius: 8px; }
+    .news-result {
+      font-size: 0.68rem; font-weight: 700;
+      padding: 2px 7px; border-radius: 4px; margin-top: 6px; margin-left: 4px;
+      display: inline-block;
+    }
+    .news-result.true  { background: var(--up-dim); color: var(--up); }
+    .news-result.false { background: rgba(200,255,0,0.1); color: var(--accent); }
+
+    /* Ranking */
+    .rank-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 0; border-bottom: 1px solid var(--border);
+    }
+    .rank-row:last-child { border: none; }
+    .rank-num {
+      width: 28px; height: 28px;
+      background: var(--surface2); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 800; color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .rank-num.gold { background: rgba(255,196,0,0.15); color: #ffc400; }
+    .rank-num.silver { background: rgba(200,200,200,0.1); color: #c0c0c0; }
+    .rank-num.bronze { background: rgba(200,120,60,0.12); color: #c87c3c; }
+    .rank-info { flex: 1; }
+    .rank-nick { font-weight: 600; font-size: 0.95rem; }
+    .rank-val { font-weight: 700; color: var(--accent); font-size: 0.9rem; }
+
+    /* ── MODAL ── */
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: none; justify-content: center; align-items: center;
+      z-index: 999;
+    }
+    .modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border-hover);
+      border-radius: 24px;
+      width: 420px; max-width: 90vw;
+      padding: 44px 40px;
+      position: relative;
+      animation: modal-in 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes modal-in {
+      from { opacity:0; transform: translateY(20px) scale(0.97); }
+      to   { opacity:1; transform: translateY(0) scale(1); }
+    }
+
+    .modal-close {
+      position: absolute; top: 18px; right: 18px;
+      width: 32px; height: 32px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 50%; cursor: pointer; color: var(--text-dim);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; transition: all 0.2s;
+    }
+    .modal-close:hover { background: var(--down-dim); color: var(--down); border-color: var(--down); }
+
+    .modal-title {
+      font-size: 1.5rem; font-weight: 700; margin-bottom: 8px;
+    }
+    .modal-title span { color: var(--accent); }
+    .modal-sub {
+      font-size: 0.85rem; color: var(--text-muted); margin-bottom: 32px; line-height: 1.5;
+    }
+
+    .field { margin-bottom: 20px; }
+    .field label {
+      display: block; font-size: 0.75rem; font-weight: 700;
+      color: var(--text-muted); letter-spacing: 1.5px; margin-bottom: 8px;
+    }
+    .field input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      color: var(--text);
+      font-family: inherit; font-size: 1rem; font-weight: 500;
+      transition: all 0.2s;
+    }
+    .field input:focus {
+      outline: none;
+      border-color: rgba(200,255,0,0.4);
+      box-shadow: 0 0 0 3px rgba(200,255,0,0.08);
+    }
+    .field-hint {
+      margin-top: 6px; font-size: 0.75rem; color: var(--text-muted);
+    }
+    .field-hint span { color: var(--accent); }
+
+    .btn-confirm {
+      width: 100%; padding: 16px;
+      background: var(--accent); color: #000;
+      border: none; border-radius: var(--radius-sm);
+      font-family: inherit; font-size: 1rem; font-weight: 800;
+      letter-spacing: 1px; cursor: pointer;
+      transition: all 0.2s; margin-top: 8px;
+    }
+    .btn-confirm:hover { transform: translateY(-2px); box-shadow: 0 8px 24px var(--accent-glow); }
+    .btn-confirm:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .modal-footer {
+      text-align: center; margin-top: 20px;
+      font-size: 0.8rem; color: var(--text-muted); line-height: 1.6;
+    }
+
+    /* ── LOADING / EMPTY STATES ── */
+    .skeleton {
+      background: linear-gradient(90deg, var(--surface2) 25%, var(--surface) 50%, var(--surface2) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 8px; height: 68px;
+    }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    .empty-state {
+      padding: 30px; text-align: center;
+      font-size: 0.85rem; color: var(--text-muted); line-height: 2;
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 2px; }
+
+    /* ── TOAST ── */
+    #toastContainer {
+      position: fixed; bottom: 28px; right: 28px;
+      display: flex; flex-direction: column; gap: 10px;
+      z-index: 9999; pointer-events: none;
+    }
+    .toast {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border-hover);
+      border-radius: 14px;
+      padding: 14px 18px;
+      min-width: 240px; max-width: 340px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      pointer-events: auto;
+      animation: toast-in 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards;
+    }
+    .toast.hide { animation: toast-out 0.3s ease forwards; }
+    @keyframes toast-in {
+      from { opacity:0; transform: translateY(16px) scale(0.95); }
+      to   { opacity:1; transform: translateY(0) scale(1); }
+    }
+    @keyframes toast-out {
+      from { opacity:1; transform: translateY(0) scale(1); }
+      to   { opacity:0; transform: translateY(8px) scale(0.95); }
+    }
+    .toast-icon { font-size: 1.2rem; flex-shrink: 0; }
+    .toast-body { flex: 1; }
+    .toast-title { font-size: 0.9rem; font-weight: 700; }
+    .toast-msg { font-size: 0.78rem; color: var(--text-dim); margin-top: 2px; }
+    .toast.success { border-color: rgba(0,230,118,0.3); }
+    .toast.success .toast-title { color: var(--up); }
+    .toast.error { border-color: rgba(255,61,87,0.3); }
+    .toast.error .toast-title { color: var(--down); }
+    .toast.info { border-color: rgba(200,255,0,0.25); }
+    .toast.info .toast-title { color: var(--accent); }
+
+    /* ── TOTAL ASSET CHIP ── */
+    .total-asset-chip {
+      background: rgba(200,255,0,0.08);
+      border: 1px solid rgba(200,255,0,0.2);
+      border-radius: 30px; padding: 8px 14px;
+      font-size: 0.75rem; font-weight: 700;
+      color: var(--text-dim); white-space: nowrap;
+    }
+    .total-asset-chip span { color: var(--accent); font-size: 0.95rem; }
+
+    /* ── RESPONSIVE ── */
     @media (max-width: 900px) {
-      .container { grid-template-columns: 1fr; }
+      .page-wrap { grid-template-columns: 1fr; }
+      .stock-middle { display: none; }
+    }
+    @media (max-width: 600px) {
+      header { padding: 0 4%; }
+      .balance-chip { display: none; }
+      .total-asset-chip { display: none; }
+      .trade-block { display: none; }
     }
   </style>
 </head>
 <body>
 
+<!-- ── HEADER ── -->
 <header>
-  <div class="logo" onclick="location.href='../index.html'" style="cursor:pointer">G-CASTLE STOCK</div>
-  <div class="user-stats">
-    <div class="balance-box" id="userNick">로그인 해주세요</div>
-    <div class="balance-box" id="userBalance">₩ 0</div>
-    <button class="login-btn" id="btnLogin">LOGIN</button>
+  <div class="logo-area" onclick="location.href='../index.html'">
+    <span class="logo-badge">EXCHANGE</span>
+    <span class="logo-text">G-CASTLE</span>
+  </div>
+  <div class="header-right">
+    <div class="user-chip">
+      <span class="user-dot" id="userDot"></span>
+      <span id="userNick">로그인 해주세요</span>
+    </div>
+    <div class="balance-chip" id="userBalance">₩ 0</div>
+    <div class="total-asset-chip" id="totalAssetChip" style="display:none;">
+      총자산 <span id="totalAssetVal">₩ 0</span>
+    </div>
+    <button class="btn-login" id="btnLogin">LOGIN</button>
   </div>
 </header>
 
-<div class="container">
-  <!-- 마켓 리스트 -->
-  <div class="market-section">
-    <div class="section-title">REAL-TIME MARKET</div>
+<!-- ── TICKER (동적 생성) ── -->
+<div class="ticker-bar" id="tickerBar"></div>
+
+<!-- ── MAIN ── -->
+<div class="page-wrap">
+
+  <!-- LEFT: 마켓 -->
+  <div>
+    <div class="section-label">📈 실시간 마켓</div>
     <div class="market-grid" id="marketGrid">
-      <div style="padding: 40px; text-align: center; opacity: 0.5;">
-        시장을 불러오는 중입니다<span class="loading-dot">...</span>
-      </div>
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
     </div>
   </div>
 
-  <!-- 사이드바 (포트폴리오 & 랭킹) -->
+  <!-- RIGHT: 사이드바 -->
   <div class="sidebar">
-    <!-- 내 포트폴리오 -->
-    <div class="ranking-box" id="portfolioBox" style="display: none; margin-bottom: 20px; border-color: var(--accent);">
-      <div class="section-title">MY PORTFOLIO</div>
+
+    <!-- 포트폴리오 -->
+    <div class="panel" id="portfolioBox" style="display:none;">
+      <div class="portfolio-header">
+        <div>
+          <div class="total-label">MY PORTFOLIO</div>
+          <div class="total-val" id="portfolioTotal">₩ 0</div>
+        </div>
+      </div>
       <div id="portfolioList">
-        <div style="padding: 10px; text-align: center; opacity: 0.5;">보유 자산이 없습니다.</div>
+        <div class="empty-state">보유 자산이 없습니다.</div>
+      </div>
+    </div>
+
+    <!-- 뉴스 -->
+    <div class="panel">
+      <div class="section-label">📰 MARKET RUMORS</div>
+      <div class="news-list" id="newsList">
+        <div class="empty-state" style="padding:16px;">뉴스 로딩 중...</div>
       </div>
     </div>
 
     <!-- 랭킹 -->
-    <div class="ranking-box">
-      <div class="section-title">TOP RANKERS</div>
+    <div class="panel">
+      <div class="section-label">🏆 TOP RANKERS</div>
       <div id="rankingList">
-        <div style="padding: 20px; text-align: center; opacity: 0.5;">집계 중...</div>
+        <div class="skeleton" style="height:42px; margin-bottom:8px;"></div>
+        <div class="skeleton" style="height:42px; margin-bottom:8px;"></div>
+        <div class="skeleton" style="height:42px;"></div>
       </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── LOGIN MODAL ── -->
+<div class="modal-backdrop" id="loginModal">
+  <div class="modal-box">
+    <div class="modal-close" id="modalClose">✕</div>
+    <div class="modal-title">Enter the <span>Exchange</span></div>
+    <p class="modal-sub">아이디와 비밀번호를 입력하세요.<br>처음이라면 자동으로 가입됩니다.</p>
+
+    <div class="field">
+      <label>ACCOUNT ID</label>
+      <input type="text" id="inputId" placeholder="아이디를 입력하세요" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>PASSWORD</label>
+      <input type="password" id="inputPw" placeholder="비밀번호를 입력하세요" autocomplete="new-password">
+      <div class="field-hint">💡 영문+숫자 조합 필수 <span>(예: star123)</span> — 숫자만 사용 시 경고 발생</div>
+    </div>
+    <div class="field" id="nickGroup" style="display:none;">
+      <label>NICKNAME (첫 가입시)</label>
+      <input type="text" id="inputNick" placeholder="사용할 닉네임을 입력하세요">
+    </div>
+
+    <button class="btn-confirm" id="btnConfirm">확인</button>
+    <div class="modal-footer">
+      이미 가입된 아이디라면 로그인이 진행됩니다.<br>
+      <span style="color: var(--down); font-size: 0.78rem;">⚠️ 평소에 자주 쓰는 비밀번호는 사용하지 마세요.</span>
     </div>
   </div>
 </div>
 
-<!-- 로그인 모달 -->
-<div class="modal" id="loginModal">
-  <div class="modal-content">
-    <h2 id="modalTitle">EXCHANGE LOGIN</h2>
-    <div class="input-group">
-      <label>ID (아이디)</label>
-      <input type="text" id="inputId" placeholder="아이디를 입력하세요">
+  <!-- 뉴스 기사 모달 -->
+  <div class="modal-backdrop" id="newsArticleModal" style="display:none;">
+    <div class="article-modal-box">
+      <div class="modal-close" id="newsArticleClose">✕</div>
+      <div id="articleContent"></div>
     </div>
-    <div class="input-group">
-      <label>PASSWORD (비밀번호)</label>
-      <input type="password" id="inputPw" placeholder="비밀번호를 입력하세요">
-    </div>
-    <div class="input-group" id="nickGroup" style="display: none;">
-      <label>NICKNAME (닉네임 - 첫 가입시에만 필요)</label>
-      <input type="text" id="inputNick" placeholder="사용할 닉네임을 입력하세요">
-    </div>
-    <button class="modal-btn" id="btnConfirm">확인</button>
-    <p style="margin-top: 20px; font-size: 0.8rem; opacity: 0.5;">처음 오셨나요? 아이디/비번을 입력하면 자동 가입됩니다.</p>
   </div>
-</div>
+
+  <!-- Toast Container -->
+<div id="toastContainer"></div>
 
 <script src="../common/config.js"></script>
 <script src="stock_script.js"></script>
+
+<script>
+  // 모달 닫기 버튼
+  document.getElementById('modalClose').onclick = () => {
+    document.getElementById('loginModal').style.display = 'none';
+  };
+  document.getElementById('newsArticleClose').onclick = () => {
+    document.getElementById('newsArticleModal').style.display = 'none';
+  };
+  window.onclick = (e) => {
+    if (e.target === document.getElementById('newsArticleModal'))
+      document.getElementById('newsArticleModal').style.display = 'none';
+  };
+</script>
+
 </body>
 </html>

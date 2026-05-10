@@ -61,12 +61,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     initTimes();
   }
   
-  // 3. GALLERY 초기화
+  /*
   const galleryMasonry = document.getElementById('galleryMasonry');
   if(galleryMasonry) {
     initGallery(galleryMasonry);
     initGalleryAdmin();
   }
+  */
 });
 
 // ════════════════════════════════════
@@ -410,10 +411,12 @@ function createExplosion(x, y, count=15) {
   }
 }
 
+/*
 document.addEventListener('click', (e) => {
   if (e.target.closest('.talisman-card') || e.target.closest('.guestbook-interface') || e.target.closest('.news-card') || e.target.closest('.gallery-item')) return;
   createExplosion(e.clientX, e.clientY, 8);
 });
+*/
 
 function initNav() {
   const nav = document.getElementById('mainNav');

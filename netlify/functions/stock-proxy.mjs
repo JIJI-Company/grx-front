@@ -1,6 +1,6 @@
 export default async (req, context) => {
   // 사용자가 주신 새 구글 시트 웹 앱 URL
-  const STOCK_GAS_URL = "https://script.google.com/macros/s/AKfycbydKxc8PSxLxI0OTm3pBJLncovOBTMG6Yd_eRKw4J39x2nKIklYE7Mg8fo5vgdmNIHFVw/exec";
+  const STOCK_GAS_URL = "https://script.google.com/macros/s/AKfycbwC-0A5pyhPL7RnNL5UANqmZYYh0UOeP2-A6hHdu6_8VnlMjhx963DVdNZMcs8ai7xH9A/exec";
 
   const url = new URL(req.url);
   const searchParams = url.searchParams;
@@ -26,7 +26,8 @@ export default async (req, context) => {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type"
+        "Access-Control-Allow-Headers": "Content-Type",
+        "Cache-Control": "no-cache, no-store, must-revalidate"
       }
     });
   } catch (err) {
