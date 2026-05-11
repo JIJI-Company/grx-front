@@ -334,7 +334,7 @@
         }
 
         try {
-            const res = await fetch(`${CONFIG.STOCK_PROXY}?action=getMarket`);
+            const res = await fetch(`${CONFIG.STOCK_PROXY}?action=getMarket&_t=${Date.now()}`);
             const newData = await res.json();
             if (Array.isArray(newData)) {
                 currentMarket = newData;
@@ -514,7 +514,7 @@
         }
 
         try {
-            const res = await fetch(`${CONFIG.STOCK_PROXY}?action=getRanking`);
+            const res = await fetch(`${CONFIG.STOCK_PROXY}?action=getRanking&_t=${Date.now()}`);
             const ranks = await res.json();
             if (Array.isArray(ranks)) {
                 localStorage.setItem('grx_stock_ranking', JSON.stringify(ranks));
