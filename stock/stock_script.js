@@ -552,63 +552,33 @@
     };
 
     // ════════════════════════════════════
-    // 📰 RUMOR NEWS SYSTEM v2
+    // 📰 RUMOR NEWS SYSTEM v3 (Server-Driven)
     // ════════════════════════════════════
-    const NEWS_TEMPLATES = [
-        { text: n => `[단독] ${n}, 대형 행사 확정설... "거의 다 됐다"`, sentiment: 'up', rumorChance: 0.2 },
-        { text: n => `${n} 측, 신규 콜라보 협의 중 "긍정적으로 검토"`, sentiment: 'up', rumorChance: 0.25 },
-        { text: n => `팬덤 소비력 집계서 ${n} 1위... "주목할 만한 수치"`, sentiment: 'up', rumorChance: 0.15 },
-        { text: n => `${n} 깜짝 대형컨텐츠 참여 예정? 관계자 "확인 중"`, sentiment: 'up', rumorChance: 0.3 },
-        { text: n => `해외 진출 논의 중인 ${n}... 계약 임박설 솔솔`, sentiment: 'up', rumorChance: 0.3 },
-        { text: n => `"${n} 다음 달 복귀" — 커뮤니티 카더라`, sentiment: 'up', rumorChance: 0.4 },
-        { text: n => `${n} 팬굿즈 매출 역대급... 수익성 개선 기대`, sentiment: 'up', rumorChance: 0.2 },
-        { text: n => `${n} 역오퍼 가능성 제기... "사실무근" 공식 부인`, sentiment: 'down', rumorChance: 0.4 },
-        { text: n => `${n} 활동 공백 장기화 우려... 팬들 불안 고조`, sentiment: 'down', rumorChance: 0.3 },
-        { text: n => `익명 제보 "${n}, 내부 갈등설"... 진위 불명`, sentiment: 'down', rumorChance: 0.5 },
-        { text: n => `${n} 최근 SNS 잠수... 건강 이상설`, sentiment: 'down', rumorChance: 0.3 },
-        { text: n => `[카더라] ${n} 계약 만료 임박? 재계약 불투명`, sentiment: 'down', rumorChance: 0.4 },
-        { text: n => `${n} 관련 논란 예상... 주가 하방 압력 우려`, sentiment: 'down', rumorChance: 0.3 },
-        { text: n => `${n} 오늘 오후 긴급 공지 예정 — 내용 불명`, sentiment: 'neutral', rumorChance: 0.4 },
-        { text: n => `${n} 관련 미확인 정보 다수 유포 중... 주의 요망`, sentiment: 'neutral', rumorChance: 0.4 },
-    ];
-
-    const ARTICLE_TEXTS = {
-        up_true:   [ n => `${n} 측은 오늘 공식 채널을 통해 대형 프로젝트 참여를 확인했다. 관계자는 "현재 최종 조율 단계에 있으며 곧 정식 발표될 것"이라고 전했다. 팬들의 기대감이 고조되는 가운데 주가도 긍정적 반응을 보이고 있다.` ],
-        up_fake:   [ n => `앞서 보도된 ${n} 관련 호재성 기사는 사실무근으로 확인됐다. ${n} 측은 "전혀 논의된 바 없다"며 강경하게 부인했다. 해당 루머를 퍼뜨린 계정은 현재 조사 중이다.` ],
-        down_true: [ n => `우려했던 바가 현실로 나타났다. ${n} 관련 악재가 사실로 확인되며 시장에 부정적 신호를 보내고 있다. 팬들은 공식 입장 발표를 기다리고 있다.` ],
-        down_fake: [ n => `${n} 측이 악성 루머에 대해 강력 부인하고 나섰다. "해당 보도는 전혀 사실이 아니며 법적 대응을 검토 중"이라고 밝혔다. 주가는 서서히 회복세를 보이고 있다.` ],
-        neutral_fake: [ n => `${n} 관련 미확인 정보는 결국 출처 불명의 루머로 드러났다. 현재 ${n} 측은 별다른 공식 입장을 내놓지 않고 있다.` ],
-    };
-
     // { items: [], nextNewsAt: 0 } — 백엔드 공유
     let newsBatch = JSON.parse(localStorage.getItem('grx_stock_news') || 'null') || { items: [], nextNewsAt: 0 };
     let newsCountdownTimer = null;
 
     function saveNewsLocal() { localStorage.setItem('grx_stock_news', JSON.stringify(newsBatch)); }
-    function pushNewsToServer() {
-        saveNewsLocal();
-        const enc = encodeURIComponent(JSON.stringify(newsBatch));
-        fetch(`${CONFIG.STOCK_PROXY}?action=saveNews&news=${enc}`).catch(() => {});
-    }
 
     async function fetchNewsFromServer() {
         try {
-            const res = await fetch(`${CONFIG.STOCK_PROXY}?action=getNews`);
+            const res = await fetch(`${CONFIG.STOCK_PROXY}?action=getNews&_t=${Date.now()}`);
             const data = await res.json();
             if (data && Array.isArray(data.items)) {
-                if ((data.nextNewsAt || 0) >= (newsBatch.nextNewsAt || 0)) {
-                    newsBatch = data;
-                    saveNewsLocal();
-                }
+                // 서버 데이터를 절대적으로 신뢰 (로컬 캐시보다 우선)
+                newsBatch = data;
+                saveNewsLocal();
             }
-        } catch(e) {}
+        } catch(e) {
+            console.warn('News fetch failed:', e);
+        }
         renderNews();
         startCountdown();
         scheduleNewsCheck();
     }
 
     function scheduleNewsCheck() {
-        // 1분마다 "지금 새 뉴스 낼 시간인가?" 체크
+        // 1분마다 서버 뉴스 확인
         setTimeout(() => {
             checkAndMaybeGenerateNews();
             scheduleNewsCheck();
@@ -616,45 +586,15 @@
     }
 
     function checkAndMaybeGenerateNews() {
-        if (!currentMarket.length) return;
         const now = Date.now();
-        // 미공개 뉴스 수만 카운트 (공개된 걸 포함하면 5개를 초과할 수 있음)
-        const unrevealed = newsBatch.items.filter(i => !i.revealed);
-        if (now >= newsBatch.nextNewsAt && unrevealed.length < 5) generateOneNews();
-    }
-
-    function generateOneNews() {
-        if (!currentMarket.length) return;
-        const now = Date.now();
-        const usedCodes = new Set(newsBatch.items.filter(i => now - i.generatedAt < 3600000).map(i => i.code));
-        const available = currentMarket.filter(s => !usedCodes.has(s.code));
-        if (!available.length) return;
-
-        const stock = available[Math.floor(Math.random() * available.length)];
-        const tpl = NEWS_TEMPLATES[Math.floor(Math.random() * NEWS_TEMPLATES.length)];
-        const isFake = Math.random() < tpl.rumorChance;
-
-        const item = {
-            id: now,
-            code: stock.code, name: stock.name,
-            headline: tpl.text(stock.name),
-            sentiment: tpl.sentiment, isFake,
-            revealed: false, result: null, articleText: null,
-            generatedAt: now,
-            revealableAt: now + 10 * 60 * 1000,
-            priceAtNews: stock.price,
-        };
-
-        newsBatch.items = newsBatch.items.filter(i => {
-            if (!i.revealed) return Date.now() < i.revealableAt + 5 * 60 * 1000; // 팬트체크 버튼 활성화 5분 후 제거
-            return Date.now() - (i.revealedAt || i.revealableAt) < 5 * 60 * 1000; // 공개 후도 5분
-        });
-        newsBatch.items.unshift(item);
-        newsBatch.nextNewsAt = now + (5 + Math.random() * 15) * 60 * 1000;
-
-        pushNewsToServer();
-        renderNews();
-        startCountdown();
+        const interval = 10 * 60 * 1000;
+        const currentBlock = Math.floor(now / interval) * interval;
+        
+        // 정각 시점(첫 1분 내)이면 서버에서 새 뉴스 가져오기
+        fetchNewsFromServer();
+        
+        // 다음 뉴스 예정 시각 업데이트 (UI 표시용)
+        newsBatch.nextNewsAt = currentBlock + interval;
     }
 
     window.revealNewsItem = (id) => {
@@ -728,10 +668,15 @@
                     if (btnEl) btnEl.style.display = 'inline-flex';
                     
                     // ★ 카운트다운 종료 시점(버튼 뜰 때) 가격 변동 자동 적용
-                    if (!item.revealed && !item.priceApplied && !item.isFake && item.sentiment !== 'neutral') {
+                    if (!item.revealed && !item.priceApplied && item.sentiment !== 'neutral') {
                         item.priceApplied = true;
-                        fetch(`${CONFIG.STOCK_PROXY}?action=applyNewsEffect&code=${item.code}&direction=${item.sentiment}`)
-                            .then(() => { pushNewsToServer(); fetchMarket(true); })
+                        // 루머(isFake)면 방향 반전: 좋은 소식 -> 떡락, 나쁜 소식 -> 떡상
+                        const targetDir = item.isFake 
+                            ? (item.sentiment === 'up' ? 'down' : 'up') 
+                            : item.sentiment;
+
+                        fetch(`${CONFIG.STOCK_PROXY}?action=applyNewsEffect&code=${item.code}&direction=${targetDir}&isFake=${item.isFake}`)
+                            .then(() => { saveNewsLocal(); fetchMarket(true); })
                             .catch(() => {});
                     }
                 }
@@ -743,8 +688,8 @@
         const el = document.getElementById('newsList');
         if (!el) return;
         const now = Date.now();
-        // 팩트체크 버튼 활성화(revealableAt) 후 5분까지 표시
-        const active = newsBatch.items.filter(i => now < i.revealableAt + 5 * 60 * 1000);
+        // 생성된 후 5분까지만 표시
+        const active = newsBatch.items.filter(i => now < i.generatedAt + 5 * 60 * 1000);
         if (!active.length) {
             el.innerHTML = '<div class="empty-state" style="padding:16px;">뉴스 대기 중...</div>';
             return;
