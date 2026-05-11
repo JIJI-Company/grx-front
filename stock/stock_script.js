@@ -130,12 +130,8 @@
             if (document.hidden) return;
             fetchMarket(true);
             fetchRanking();
-        }, 60000); // 1분마다 시장/랭킹 갱신
-
-        setInterval(() => {
-            if (document.hidden) return;
             fetchNewsFromServer();
-        }, 120000); // 2분마다 뉴스 갱신
+        }, 60000); // 1분마다 시장/랭킹/뉴스 갱신 동기화
 
         btnLogin.onclick = () => {
             if (currentUser) {
@@ -148,7 +144,9 @@
             }
         };
 
-        window.onclick = (e) => { if (e.target === loginModal) loginModal.style.display = 'none'; };
+        window.addEventListener('click', (e) => { 
+            if (e.target === loginModal) loginModal.style.display = 'none'; 
+        });
         btnConfirm.onclick = handleAuth;
     };
 
@@ -359,10 +357,15 @@
             inputValues[input.id] = input.value;
         });
 
+        let changedCount = 0;
+        let changedNames = [];
+
         marketGrid.innerHTML = currentMarket.map(c => {
             const prevPrice = prevPrices[c.code];
             let flashClass = '';
-            if (prevPrice !== undefined) {
+            if (prevPrice !== undefined && prevPrice !== c.price) {
+                changedCount++;
+                changedNames.push(c.name);
                 if (c.price > prevPrice) flashClass = 'price-flash-up';
                 else if (c.price < prevPrice) flashClass = 'price-flash-down';
             }
@@ -429,6 +432,14 @@
             renderPortfolio();
             updateTotalAsset();
         }
+
+        // 🔔 가격 변동 알림 (최초 로드 시 제외)
+        if (changedCount > 0 && Object.keys(prevPrices).length > 0) {
+            const msg = changedNames.length <= 3 
+                ? `${changedNames.join(', ')}의 시세가 변동되었습니다.` 
+                : `${changedNames[0]} 외 ${changedCount - 1}개 종목 시세 변동`;
+            showToast('시세 업데이트', msg, 'info', 4000);
+        }
     }
 
     // ════════════════════════════════════
@@ -481,7 +492,6 @@
                     currentUser.balance = data.balance;
                     currentUser.portfolio = data.portfolio;
                     currentUser.avgCost = data.avgCost; // 유저 객체 내 데이터도 갱신
-                    localStorage.setItem('grx_stock_user', JSON.stringify(currentUser));
                     sessionStorage.setItem('grx_stock_user', JSON.stringify(currentUser));
                     
                     updateUserUI();
@@ -554,133 +564,50 @@
     // ════════════════════════════════════
     // 📰 RUMOR NEWS SYSTEM v3 (Server-Driven)
     // ════════════════════════════════════
-    // { items: [], nextNewsAt: 0 } — 백엔드 공유
-    let newsBatch = JSON.parse(localStorage.getItem('grx_stock_news') || 'null') || { items: [], nextNewsAt: 0 };
+    // 이제 로컬 스토리지 캐싱을 사용하지 않고 무조건 서버 최신 데이터를 가져옵니다.
+    localStorage.removeItem('grx_stock_news'); // 구버전 잔여 데이터 초기화
+    let newsBatch = { items: [], nextNewsAt: 0 };
     let newsCountdownTimer = null;
-
-    function saveNewsLocal() { localStorage.setItem('grx_stock_news', JSON.stringify(newsBatch)); }
 
     async function fetchNewsFromServer() {
         try {
             const res = await fetch(`${CONFIG.STOCK_PROXY}?action=getNews&_t=${Date.now()}`);
             const data = await res.json();
             if (data && Array.isArray(data.items)) {
-                // 서버 데이터를 절대적으로 신뢰 (로컬 캐시보다 우선)
+                // 서버 데이터를 절대적으로 신뢰
                 newsBatch = data;
-                saveNewsLocal();
             }
         } catch(e) {
             console.warn('News fetch failed:', e);
         }
         renderNews();
         startCountdown();
-        scheduleNewsCheck();
     }
 
-    function scheduleNewsCheck() {
-        // 1분마다 서버 뉴스 확인
-        setTimeout(() => {
-            checkAndMaybeGenerateNews();
-            scheduleNewsCheck();
-        }, 60000);
-    }
+    // (클라이언트 팩트체크 요청 로직 완전 삭제 - 서버가 자동 처리함)
 
-    function checkAndMaybeGenerateNews() {
-        const now = Date.now();
-        const interval = 10 * 60 * 1000;
-        const currentBlock = Math.floor(now / interval) * interval;
-        
-        // 정각 시점(첫 1분 내)이면 서버에서 새 뉴스 가져오기
-        fetchNewsFromServer();
-        
-        // 다음 뉴스 예정 시각 업데이트 (UI 표시용)
-        newsBatch.nextNewsAt = currentBlock + interval;
-    }
-
-    window.revealNewsItem = (id) => {
-        const item = newsBatch.items.find(i => i.id === id);
-        if (!item || item.revealed) return;
-        const cur = currentMarket.find(s => s.code === item.code);
-        if (item.sentiment === 'neutral') {
-            item.result = 'fake';
-        } else if (cur && cur.price !== item.priceAtNews) {
-            item.result = (!item.isFake && (cur.price > item.priceAtNews ? 'up' : 'down') === item.sentiment) ? 'true' : 'fake';
-        } else {
-            item.result = item.isFake ? 'fake' : 'true';
-        }
-        const key = item.sentiment === 'neutral' ? 'neutral_fake' : `${item.sentiment}_${item.result === 'true' ? 'true' : 'fake'}`;
-        const pool = ARTICLE_TEXTS[key] || ARTICLE_TEXTS['neutral_fake'];
-        item.articleText = pool[Math.floor(Math.random() * pool.length)](item.name);
-        item.revealed = true;
-        item.revealedAt = Date.now(); 
-
-        // 팩트체크 클릭 시에는 이미 가격이 변동되어 있을 것이므로 기사만 보여줌
-        if (item.result === 'true' && item.sentiment !== 'neutral' && !item.priceApplied) {
-            item.priceApplied = true;
-            fetch(`${CONFIG.STOCK_PROXY}?action=applyNewsEffect&code=${item.code}&direction=${item.sentiment}`).catch(() => {});
-        }
-
-        pushNewsToServer();
-        renderNews();
-        showNewsArticle(item);
-    };
-
-    window.showRevealedArticle = (id) => {
-        const item = newsBatch.items.find(i => i.id === id);
-        if (item) showNewsArticle(item);
-    };
-
-    function showNewsArticle(item) {
-        const modal = document.getElementById('newsArticleModal');
-        if (!modal) return;
-        const isTrue = item.result === 'true';
-        const cur = currentMarket.find(s => s.code === item.code);
-        const curPrice = cur ? cur.price : item.priceAtNews;
-        const diff = curPrice - item.priceAtNews;
-        const pct = ((diff / item.priceAtNews) * 100).toFixed(1);
-        const col = diff >= 0 ? 'var(--up)' : 'var(--down)';
-        document.getElementById('articleContent').innerHTML = `
-            <div class="article-header">
-                <span class="article-badge">꾸한성 경제속보</span>
-                <span class="article-time">${new Date(item.generatedAt).toLocaleString('ko-KR')}</span>
-            </div>
-            <div class="article-stamp ${isTrue ? 'a-true' : 'a-fake'}">${isTrue ? '✅ 사실' : '🃏 루머'}</div>
-            <h3 class="article-headline">${item.headline}</h3>
-            <p class="article-body">${item.articleText || ''}</p>
-            <div class="article-price">📌 뉴스 당시 ₩${Number(item.priceAtNews).toLocaleString()} → 현재 <span style="color:${col};font-weight:700;">₩${Number(curPrice).toLocaleString()} (${diff>=0?'+':''}${pct}%)</span></div>
-        `;
-        modal.style.display = 'flex';
-    }
 
     function startCountdown() {
         if (newsCountdownTimer) clearInterval(newsCountdownTimer);
         newsCountdownTimer = setInterval(() => {
             const now = Date.now();
+            let needFetch = false;
+            
             newsBatch.items.forEach(item => {
                 if (item.revealed) return;
                 const rem = item.revealableAt - now;
                 const cdEl = document.getElementById(`ncd-${item.id}`);
-                const btnEl = document.getElementById(`nbtn-${item.id}`);
+                
                 if (rem > 0) {
-                    if (cdEl) cdEl.textContent = `⏱ ${Math.floor(rem/60000)}:${String(Math.floor((rem%60000)/1000)).padStart(2,'0')}`;
-                } else {
-                    if (cdEl) cdEl.style.display = 'none';
-                    if (btnEl) btnEl.style.display = 'inline-flex';
-                    
-                    // ★ 카운트다운 종료 시점(버튼 뜰 때) 가격 변동 자동 적용
-                    if (!item.revealed && !item.priceApplied && item.sentiment !== 'neutral') {
-                        item.priceApplied = true;
-                        // 루머(isFake)면 방향 반전: 좋은 소식 -> 떡락, 나쁜 소식 -> 떡상
-                        const targetDir = item.isFake 
-                            ? (item.sentiment === 'up' ? 'down' : 'up') 
-                            : item.sentiment;
-
-                        fetch(`${CONFIG.STOCK_PROXY}?action=applyNewsEffect&code=${item.code}&direction=${targetDir}&isFake=${item.isFake}`)
-                            .then(() => { saveNewsLocal(); fetchMarket(true); })
-                            .catch(() => {});
-                    }
+                    if (cdEl) cdEl.textContent = `⏱ 팩트체크까지 ${Math.floor(rem/60000)}:${String(Math.floor((rem%60000)/1000)).padStart(2,'0')}`;
+                } else if (!item.fetchingResult) {
+                    // 10분이 경과하면 서버에서 자동으로 결과가 생성되므로 바로 갱신
+                    item.fetchingResult = true;
+                    needFetch = true;
                 }
             });
+
+            if (needFetch) fetchNewsFromServer();
         }, 1000);
     }
 
@@ -688,33 +615,51 @@
         const el = document.getElementById('newsList');
         if (!el) return;
         const now = Date.now();
-        // 생성된 후 5분까지만 표시
-        const active = newsBatch.items.filter(i => now < i.generatedAt + 5 * 60 * 1000);
+        // 15분 사이클이므로 15분 경과한 뉴스만 제거 (서버와 동기화)
+        const active = newsBatch.items.filter(i => now < i.generatedAt + 15 * 60 * 1000);
+        
         if (!active.length) {
             el.innerHTML = '<div class="empty-state" style="padding:16px;">뉴스 대기 중...</div>';
             return;
         }
+
         const nextIn = Math.max(0, newsBatch.nextNewsAt - now);
         const nm = Math.floor(nextIn / 60000), ns = Math.floor((nextIn % 60000) / 1000);
-        el.innerHTML = `<div class="news-next-label">다음 뉴스까지 ${nm}분 ${String(ns).padStart(2,'0')}초</div>` +
+        
+        el.innerHTML = `<div class="news-next-label">다음 뉴스 생성까지 ${nm}분 ${String(ns).padStart(2,'0')}초</div>` +
         active.map(item => {
             const hintClass = item.sentiment === 'up' ? 'up' : item.sentiment === 'down' ? 'down' : 'unknown';
             const hintLabel = item.sentiment === 'up' ? '▲ 상승 가능' : item.sentiment === 'down' ? '▼ 하락 우려' : '? 방향 불명';
             const cardClass = item.sentiment === 'up' ? 'hint-up' : item.sentiment === 'down' ? 'hint-down' : 'hint-neutral';
-            const canReveal = now >= item.revealableAt;
-            const liveBadge = item.revealed
-                ? `<span class="news-live ${item.result==='true'?'n-true':'n-fake'}">${item.result==='true'?'✅ 사실':'🃏 루머'}</span>`
-                : '<span class="news-live">LIVE</span>';
-            const action = item.revealed
-                ? `<button class="btn-factcheck" onclick="window.showRevealedArticle(${item.id})">📰 기사 보기</button>`
-                : canReveal
-                    ? `<button class="btn-factcheck" id="nbtn-${item.id}" onclick="window.revealNewsItem(${item.id})">📰 팩트체크 →</button>`
-                    : `<span class="news-countdown" id="ncd-${item.id}">⏱ --:--</span><button class="btn-factcheck" id="nbtn-${item.id}" style="display:none;" onclick="window.revealNewsItem(${item.id})">📰 팩트체크 →</button>`;
-            return `<div class="news-card ${cardClass}${item.revealed?' is-revealed':''}">
-                <div class="news-meta">${liveBadge}<span>${item.code}</span><span style="margin-left:auto;">${new Date(item.generatedAt).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})}</span></div>
-                <div class="news-headline">${item.headline}</div>
-                <div class="news-actions"><span class="news-hint ${hintClass}">${hintLabel}</span>${action}</div>
-            </div>`;
+            
+            if (!item.revealed) {
+                // 대기중: 헤드라인 + 카운트다운 표시
+                return `<div class="news-card ${cardClass}">
+                    <div class="news-meta"><span class="news-live">LIVE</span><span>${item.code}</span><span style="margin-left:auto;">${new Date(item.generatedAt).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})}</span></div>
+                    <div class="news-headline">${item.headline}</div>
+                    <div class="news-actions"><span class="news-hint ${hintClass}">${hintLabel}</span><span class="news-countdown" id="ncd-${item.id}">⏱ 계산중...</span></div>
+                </div>`;
+            } else if (item.result) {
+                // 결과 공개: followUp(후속 헤드라인) + 등락폭 표시
+                const isBackfired = item.result.backfired;
+                const isTrue = !isBackfired; // B안에서는 backfired가 false면 사실(성사), true면 루머(무산)
+                const liveBadge = `<span class="news-live ${isTrue ? 'n-true' : 'n-fake'}">${isTrue ? '✅ 기정사실' : '🃏 해프닝(무산)'}</span>`;
+                
+                const changeVal = Number(item.result.change) || 0;
+                const col = changeVal > 0 ? 'var(--up)' : changeVal < 0 ? 'var(--down)' : 'var(--text-dim)';
+                const sign = changeVal > 0 ? '+' : '';
+                
+                return `<div class="news-card ${cardClass} is-revealed">
+                    <div class="news-meta">${liveBadge}<span>${item.code}</span><span style="margin-left:auto;">${new Date(item.generatedAt).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})}</span></div>
+                    <div class="news-headline" style="color:var(--accent);">${item.result.followUp || item.headline}</div>
+                    <div class="news-actions">
+                        <span class="news-hint ${hintClass}">종결</span>
+                        <span style="margin-left:auto; font-weight:700; color:${col};">변동률: ${sign}${changeVal}%</span>
+                    </div>
+                </div>`;
+            } else {
+                return ''; // 서버 데이터 누락 방어
+            }
         }).join('');
     }
 

@@ -11,7 +11,7 @@ const CONFIG = {
     schedule: 60
   },
 
-  CACHE_VERSION: 8,
+  CACHE_VERSION: 9,
 
   EVENT_POPUP: {
     enable: true,

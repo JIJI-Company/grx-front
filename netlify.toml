@@ -3,9 +3,3 @@
 
 [functions]
   directory = "netlify/functions"
-
-[[redirects]]
-  from = "/stock/*"
-  to = "/maintenance.html"
-  status = 302
-  force = true

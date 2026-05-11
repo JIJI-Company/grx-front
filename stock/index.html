@@ -307,6 +307,11 @@
       font-size: 0.65rem; color: var(--text-muted);
       margin-bottom: 6px;
     }
+    .news-headline {
+      font-size: 0.95rem; font-weight: 700;
+      line-height: 1.4; color: var(--text);
+      margin-bottom: 8px;
+    }
     .news-live {
       background: var(--down); color: #fff;
       font-size: 0.6rem; font-weight: 800;
@@ -317,6 +322,14 @@
     .news-live.n-true { background: var(--up); animation: none; }
     .news-live.n-fake { background: var(--text-muted); animation: none; }
     .news-actions { display: flex; align-items: center; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+    .news-hint {
+      font-size: 0.7rem; font-weight: 700;
+      padding: 2px 6px; border-radius: 4px;
+      background: var(--surface2);
+    }
+    .news-hint.up { color: var(--up); background: var(--up-dim); }
+    .news-hint.down { color: var(--down); background: var(--down-dim); }
+    .news-hint.unknown { color: var(--text-muted); }
     .news-countdown { font-size: 0.72rem; color: var(--text-muted); font-weight: 700; }
     .news-next-label {
       font-size: 0.68rem; color: var(--text-muted); text-align: center;
@@ -664,14 +677,6 @@
   </div>
 </div>
 
-  <!-- 뉴스 기사 모달 -->
-  <div class="modal-backdrop" id="newsArticleModal" style="display:none;">
-    <div class="article-modal-box">
-      <div class="modal-close" id="newsArticleClose">✕</div>
-      <div id="articleContent"></div>
-    </div>
-  </div>
-
   <!-- Toast Container -->
 <div id="toastContainer"></div>
 
@@ -682,13 +687,6 @@
   // 모달 닫기 버튼
   document.getElementById('modalClose').onclick = () => {
     document.getElementById('loginModal').style.display = 'none';
-  };
-  document.getElementById('newsArticleClose').onclick = () => {
-    document.getElementById('newsArticleModal').style.display = 'none';
-  };
-  window.onclick = (e) => {
-    if (e.target === document.getElementById('newsArticleModal'))
-      document.getElementById('newsArticleModal').style.display = 'none';
   };
 </script>
 
