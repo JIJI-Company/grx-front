@@ -264,6 +264,20 @@ const members = {
       color: '#87CEEB',
       link: 'https://www.sooplive.com/station/dbsthdus111',
     },
+    {
+      id: 'bomsai',
+      name: '봄사이',
+      rank: 'NEW',
+      img: 'img/BOMSAI.png',
+      art: '봉인의 호흡',
+      desc: '신입 혈귀 봄사이입니다. 수수께끼의 자물쇠를 지니고 있습니다.',
+      keywords: '#봄사이 #안경 #자물쇠',
+      birthday: '??',
+      mbti: '??',
+      tmi: '안경 위의 자물쇠에 대한 비밀은 아직 밝혀지지 않았습니다.',
+      color: '#5DADE2',
+      link: 'https://www.sooplive.com/station/bomsai',
+    },
   ],
 };
 
