@@ -3,9 +3,3 @@
 
 [functions]
   directory = "netlify/functions"
-
-[[redirects]]
-  from = "/proxy/bjapi/*"
-  to = "https://bjapi.afreecatv.com/:splat"
-  status = 200
-  force = true

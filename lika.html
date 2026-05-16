@@ -148,71 +148,70 @@
     .live-badge { display: inline-block; background: #FF4081; color: #fff; padding: 2px 10px; border-radius: 10px; font-size: 1rem; animation: pop 1s infinite alternate; display: none; }
     @keyframes pop { from { transform: scale(1); } to { transform: scale(1.1); } }
 
+    /* =========================================
+       [C] 레트로 TV (VOD 리스트)
+       ========================================= */
     .retro-tv {
       position: absolute;
       top: 100px; right: 50px;
-      width: 360px; height: 480px;
+      width: 350px; height: 450px;
       background: #FF9800;
       border-radius: 30px;
       border: 8px solid #E65100;
-      box-shadow: inset -5px -5px 0 rgba(0,0,0,0.2), 15px 20px 30px rgba(0,0,0,0.3);
+      box-shadow: inset -5px -5px 0 rgba(0,0,0,0.2), 10px 10px 20px rgba(0,0,0,0.3);
       padding: 20px;
       z-index: 5;
       display: flex; flex-direction: column;
       transform: rotate(2deg);
-      transition: transform 0.3s;
     }
-    .retro-tv:hover { transform: rotate(0deg) scale(1.02); }
     
     .tv-antennas { position: absolute; top: -40px; left: 50%; transform: translateX(-50%); width: 100px; height: 40px; }
     .tv-antennas::before, .tv-antennas::after { content:""; position:absolute; bottom:0; width:6px; height:60px; background:#8D6E63; border-radius:5px; }
     .tv-antennas::before { left: 20%; transform: rotate(-30deg); }
     .tv-antennas::after { right: 20%; transform: rotate(30deg); }
 
-    .tv-brand { text-align: center; font-size: 1.3rem; color: #FFE082; margin-bottom: 10px; letter-spacing: 3px; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+    .tv-brand { text-align: center; font-size: 1.2rem; color: #FFE082; margin-bottom: 10px; letter-spacing: 2px; }
 
     .tv-screen-wrap {
       flex: 1; background: #212121; border-radius: 20px; border: 5px solid #4E342E;
       position: relative; overflow: hidden;
-      box-shadow: inset 0 0 25px rgba(0,0,0,1);
+      box-shadow: inset 0 0 20px rgba(0,0,0,1);
     }
     
     /* VOD 목록 나오는 화면 */
     .tv-screen {
       width: 100%; height: 100%;
       overflow-y: auto; overflow-x: hidden;
-      padding: 12px; box-sizing: border-box;
+      padding: 10px; box-sizing: border-box;
       /* 커스텀 스크롤바 (TV 안쪽) */
     }
     .tv-screen::-webkit-scrollbar { width: 8px; }
-    .tv-screen::-webkit-scrollbar-thumb { background: rgba(78, 52, 46, 0.8); border-radius: 4px; }
+    .tv-screen::-webkit-scrollbar-thumb { background: #4E342E; border-radius: 4px; }
 
     .vod-item {
-      display: flex; flex-direction: column; background: linear-gradient(145deg, #4E342E, #3E2723); margin-bottom: 12px; border-radius: 12px;
-      text-decoration: none; color: #fff; padding: 0; border: 2px solid #5D4037;
-      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-      overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      display: block; background: #3E2723; margin-bottom: 10px; border-radius: 10px;
+      text-decoration: none; color: #fff; padding: 8px; border: 2px solid #5D4037;
+      transition: 0.2s;
     }
-    .vod-item:hover { background: #5D4037; border-color: #FFC107; transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 15px rgba(0,0,0,0.5); }
-    .vod-thumb { width: 100%; height: 110px; object-fit: cover; filter: contrast(1.1) brightness(0.9); transition: 0.3s; }
-    .vod-item:hover .vod-thumb { filter: contrast(1.2) brightness(1.1); }
-    .vod-title { font-size: 0.95rem; margin: 0; padding: 8px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #FFD54F; background: rgba(0,0,0,0.4); }
+    .vod-item:hover { background: #5D4037; border-color: #FFC107; transform: scale(1.02); }
+    .vod-thumb { width: 100%; height: 100px; object-fit: cover; border-radius: 5px; margin-bottom: 5px; filter: contrast(1.2) sepia(0.2); }
+    .vod-title { font-size: 0.9rem; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #FFD54F; }
     
     /* TV 노이즈 효과 */
     .tv-noise {
       position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 4px);
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.05) 2px, rgba(255,255,255,0.05) 4px);
       pointer-events: none; z-index: 10; animation: scrollNoise 10s linear infinite;
     }
     @keyframes scrollNoise { from { background-position: 0 0; } to { background-position: 0 1000px; } }
 
     /* 방문하기 버튼 */
     .tv-btn {
-      display: block; text-align: center; margin-top: 15px; padding: 12px;
-      background: linear-gradient(to bottom, #FF7043, #F4511E); color: #fff; text-decoration: none; border-radius: 20px;
-      box-shadow: 0 6px 0 #D84315, 0 10px 15px rgba(0,0,0,0.2); transition: 0.2s; font-size: 1.2rem; font-weight: bold;
+      display: block; text-align: center; margin-top: 15px; padding: 10px;
+      background: #FF5722; color: #fff; text-decoration: none; border-radius: 15px;
+      box-shadow: 0 5px 0 #D84315; transition: 0.2s; font-size: 1.2rem;
     }
-    .tv-btn:active { transform: translateY(6px); box-shadow: 0 0px 0 #D84315; }
+    .tv-btn:active { transform: translateY(5px); box-shadow: none; }
 
     /* =========================================
        [디자인 고도화] 포스트잇 TMI 애니메이션
@@ -225,10 +224,10 @@
     }
     .sticky-note.open {
       height: 650px; /* 높이 확장 */
-      width: 340px;  /* 너비 확장 */
+      width: 320px;  /* 너비 확장 */
       transform: rotate(0deg) scale(1.05);
       z-index: 50;
-      box-shadow: 15px 25px 40px rgba(0,0,0,0.25);
+      box-shadow: 10px 15px 30px rgba(0,0,0,0.15);
     }
     .tmi-section {
       margin-top: 15px;
@@ -241,8 +240,6 @@
       overflow-y: auto; /* 내용이 많으므로 스크롤 허용 */
       max-height: 450px;
       padding-right: 5px;
-      font-size: 1.05rem; /* 폰트 살짝 키우기 */
-      line-height: 1.6;
     }
     .tmi-section::-webkit-scrollbar { width: 4px; }
     .tmi-section::-webkit-scrollbar-thumb { background: #FFCC80; border-radius: 10px; }
@@ -423,56 +420,6 @@
   </style>
 </head>
 <body>
-  <!-- 라이브 팝업 (방송 중일 때만 표시됨) -->
-  <div id="livePopupOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999999; justify-content:center; align-items:center; flex-direction:column; backdrop-filter:blur(10px);">
-    <div style="position:relative; width:90%; max-width:800px; background:#111; border-radius:20px; border:3px solid #ff1a4a; box-shadow:0 0 60px rgba(255,26,74,0.6); overflow:hidden; animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
-      <button onclick="closeLivePopup()" style="position:absolute; top:15px; right:15px; background:rgba(255,0,0,0.8); color:white; border:none; width:45px; height:45px; border-radius:50%; font-size:24px; font-weight:bold; cursor:pointer; z-index:10; display:flex; justify-content:center; align-items:center; transition:0.3s; box-shadow:0 4px 10px rgba(0,0,0,0.5);">✕</button>
-      <div style="padding:20px 25px; background:linear-gradient(135deg, #ff1a4a, #cc0033); display:flex; align-items:center; gap:15px;">
-        <span style="background:white; color:#ff1a4a; padding:5px 12px; border-radius:15px; font-weight:900; font-size:16px; animation:blink 1.5s infinite; letter-spacing:1px;">ON AIR</span>
-        <h2 style="margin:0; color:white; font-size:1.8rem; text-shadow:0 2px 4px rgba(0,0,0,0.5);">지금 리카가 라이브 중입니다! 🦖</h2>
-      </div>
-      <div style="width:100%; padding-top:56.25%; position:relative; background:#000;">
-        <a href="https://play.sooplive.co.kr/lika07" target="_blank" onclick="closeLivePopup()" style="position:absolute; top:0; left:0; width:100%; height:100%; display:block;">
-          <img id="livePopupThumb" src="" style="width:100%; height:100%; object-fit:cover; opacity:0.85; transition:0.4s; filter:brightness(0.9);" onmouseover="this.style.opacity='1'; this.style.filter='brightness(1.1)'" onmouseout="this.style.opacity='0.85'; this.style.filter='brightness(0.9)'">
-          <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:rgba(255,26,74,0.95); color:white; padding:18px 40px; border-radius:40px; font-size:1.8rem; font-weight:900; pointer-events:none; box-shadow:0 8px 25px rgba(255,26,74,0.6); letter-spacing:1px; border:2px solid white;">방송 입장하기 ▶</div>
-        </a>
-      </div>
-      <div style="padding:20px 25px; background:#1a0005; border-top:1px solid #33000a;">
-        <h3 id="livePopupTitle" style="margin:0; color:#ffcc80; font-size:1.4rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:normal;">방제 로딩 중...</h3>
-      </div>
-    </div>
-  </div>
-  <style>
-    @keyframes popIn { 0% { opacity:0; transform:scale(0.8) translateY(30px); } 100% { opacity:1; transform:scale(1) translateY(0); } }
-    @keyframes blink { 0%, 100% { opacity:1; } 50% { opacity:0.5; } }
-  </style>
-  <script>
-    function closeLivePopup() {
-      document.getElementById('livePopupOverlay').style.display = 'none';
-      sessionStorage.setItem('likaLivePopupClosed', 'true');
-    }
-    function openVodModal() {
-      const modal = document.getElementById('vodModalOverlay');
-      if (modal) modal.style.display = 'flex';
-    }
-    function closeVodModal() {
-      const modal = document.getElementById('vodModalOverlay');
-      if (modal) modal.style.display = 'none';
-    }
-  </script>
-
-  <!-- VOD 모달 (클릭 시 나타나는 팝업) -->
-  <div id="vodModalOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999990; justify-content:center; align-items:center; backdrop-filter:blur(10px);">
-    <div style="position:relative; width:90%; max-width:800px; height:80vh; background:#212121; border-radius:20px; border:3px solid #FF9800; box-shadow:0 0 60px rgba(255,152,0,0.4); display:flex; flex-direction:column; animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
-      <button onclick="closeVodModal()" style="position:absolute; top:-20px; right:-20px; background:#FF5722; color:white; border:none; width:50px; height:50px; border-radius:50%; font-size:24px; font-weight:bold; cursor:pointer; z-index:10; box-shadow:0 4px 10px rgba(0,0,0,0.5); transition:0.3s;">✕</button>
-      <div style="padding:20px; background:linear-gradient(135deg, #FF9800, #F4511E); border-radius:15px 15px 0 0; text-align:center;">
-        <h2 style="margin:0; color:white; font-size:1.8rem; text-shadow:0 2px 4px rgba(0,0,0,0.3);">📺 LIKA 다시보기 & 클립 📺</h2>
-      </div>
-      <div id="vodModalContent" style="flex:1; overflow-y:auto; padding:20px; display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:15px; background:#1a1a1a;">
-        <p style="color:#aaa; text-align:center; width:100%; padding-top:50px;">데이터를 불러오는 중입니다...</p>
-      </div>
-    </div>
-  </div>
 
   <!-- 크앙 사운드 -->
   <audio id="roarSound" preload="auto">
@@ -548,23 +495,43 @@
     </div>
 
     <!-- [B] VOD 레트로 TV -->
-    <div class="retro-tv" id="retroTv" onclick="openVodModal()" style="cursor: pointer;" title="클릭해서 다시보기 열기">
+    <div class="retro-tv" id="retroTv">
       <div class="tv-antennas"></div>
       <div class="tv-brand">LIKA TV</div>
       <div class="tv-screen-wrap">
         <div class="tv-noise"></div>
-        <div class="tv-screen" style="display:flex; justify-content:center; align-items:center; background:#111;">
-          <div style="text-align:center;">
-            <div style="font-size:3rem; margin-bottom:10px;">📺</div>
-            <p style="color:#FFD54F; font-size:1.2rem; font-weight:bold; margin:0; text-shadow:0 0 10px rgba(255,213,79,0.5); animation:blink 1.5s infinite;">CLICK TO WATCH</p>
-            <p style="color:#A1887F; font-size:0.9rem; margin-top:5px;">최근 다시보기 모음</p>
-          </div>
+        <div class="tv-screen" id="vodGrid">
+          <p style="color:#fff; text-align:center; padding:20px;">치지직... VOD 수신중...</p>
         </div>
       </div>
-      <div class="tv-btn">방송국 & 다시보기 열기 📺</div>
+      <a href="https://www.sooplive.com/station/lika07" target="_blank" class="tv-btn">방송국 놀러가기 📺</a>
     </div>
 
-    <div id="polaroidContainer"></div>
+    <!-- [C] 흩뿌려진 폴라로이드 사진들 (드래그 가능!) -->
+    <!-- 
+      원하는 만큼 .polaroid를 복사해서 사진을 추가하세요!
+      top, left 퍼센트를 조절해서 위치를 흩뿌리고, transform: rotate 로 각도를 주세요.
+      data-text 에는 사진 밑에 적힐 짧은 메모를 쓰시면 됩니다!
+    -->
+    <div class="polaroid" data-text="어떡하지~" style="top: 50%; left: 10%; transform: rotate(-10deg);">
+      <img src="https://iflv14.sooplive.com/clip/20260501/563/3b2130e3-0bf9-401c-810d-a93bb9ed0abe/39774563_r.jpg" alt="사진1">
+      <div class="play-sticker" title="영상 보기" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()" onclick="playInlineVideo(this, 'https://vod.sooplive.com/player/194416999')"></div>
+    </div>
+    
+    <div class="polaroid" data-text="밤의무희" style="top: 20%; left: 40%; transform: rotate(15deg);">
+      <img src="https://iflv14.sooplive.com/clip/20260501/021/1aeaa4ca-54f5-4b69-962f-8a37f8066790/39770021_r.jpg" alt="사진2">
+      <div class="play-sticker" title="영상 보기" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()" onclick="playInlineVideo(this, 'https://vod.sooplive.com/player/194403779')"></div>
+    </div>
+    
+    <div class="polaroid" data-text="범퍼크앙🦖" style="top: 60%; left: 35%; transform: rotate(-5deg);">
+      <img src="https://iflv14.sooplive.com/clip/20260503/977/816708b9-5ef9-4aa6-8b8d-1e88821cfd00/18300977_v.jpg" alt="사진3">
+      <div class="play-sticker" title="영상 보기" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()" onclick="playInlineVideo(this, 'https://vod.sooplive.com/player/194614089/catch')"></div>
+    </div>
+    
+    <div class="polaroid" data-text="최고야✨" style="top: 40%; left: 65%; transform: rotate(8deg);">
+      <img src="https://iflv14.sooplive.com/clip/20260501/789/32a975c3-397e-40bc-b96e-b0e428e7dcd1/39775789_r.jpg" alt="사진4">
+      <div class="play-sticker" title="영상 보기" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()" onclick="playInlineVideo(this, 'https://vod.sooplive.com/player/194421421')"></div>
+    </div>
 
     <!-- [E] 방송국 최신 게시글 메모장 -->
     <div class="notepad" id="noticeBoard" style="top: 55%; right: 100px; transform: rotate(-3deg);">
@@ -785,110 +752,117 @@
               document.getElementById('liveBadge').style.display = 'inline-block';
               liveThumbnail = likaLive.thumbnail || likaLive.profileImg || 'img/lika.png';
               liveTitle = likaLive.streamTitle || '지금 방송 중입니다!';
-
-              // 라이브 팝업 띄우기
-              if (!sessionStorage.getItem('likaLivePopupClosed')) {
-                document.getElementById('livePopupThumb').src = liveThumbnail;
-                document.getElementById('livePopupTitle').innerText = liveTitle;
-                document.getElementById('livePopupOverlay').style.display = 'flex';
-              }
             }
           }
         } catch (e) { console.warn("Google Sheet Proxy Error"); }
 
         // [2] 방송국 상세 정보 로드 (총 시청자, 팬클럽)
-        const stationRes = await fetch('/proxy/bjapi/api/lika07/station');
+        const stationRes = await fetch('https://bjapi.afreecatv.com/api/lika07/station');
         const stationData = await stationRes.json();
         if (stationData && stationData.upd) {
           document.getElementById('totalViews').innerText = formatNum(stationData.upd.total_view_cnt);
           document.getElementById('fanCount').innerText = formatNum(stationData.upd.fan_cnt);
         }
 
-        // [3] VOD 모달에 데이터 로드
+        // [3] TV 화면 분기 처리 (방송 중 vs 오프라인)
         if (isBroadcasting) {
-          // 라이브 중일 때 최상단에 라이브 표시 추가
-          document.getElementById('vodModalContent').innerHTML = `
-            <a href="https://play.sooplive.co.kr/lika07" target="_blank" class="vod-item" style="grid-column: 1 / -1; border-color:#FF4081;">
-              <div style="position:relative; width:100%; height:200px;">
+          // 라이브 화면 출력
+          vodGrid.innerHTML = `
+            <a href="https://play.sooplive.co.kr/lika07" target="_blank" class="vod-item" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()" style="border-color:#FF4081; padding:0;">
+              <div style="position:relative; width:100%; height:150px;">
                 <img src="${liveThumbnail}" class="vod-thumb" style="height:100%; margin:0;" onerror="this.src='img/ggu_title.jpg'">
-                <span style="position:absolute; top:10px; left:10px; background:#FF4081; padding:5px 10px; border-radius:10px; font-weight:bold; font-size:1rem; animation:pop 1s infinite alternate;">🔴 ON-AIR</span>
+                <span style="position:absolute; top:10px; left:10px; background:#FF4081; padding:2px 8px; border-radius:10px; font-weight:bold; font-size:0.9rem; animation:pop 1s infinite alternate;">ON-AIR</span>
               </div>
               <div style="padding:15px;">
-                <h4 class="vod-title" style="color:#FFC107; font-size:1.2rem;">${liveTitle}</h4>
-                <p style="color:#FFAB91; margin:5px 0 0; font-size:1rem; font-weight:bold;">라이브 참여하기 👉</p>
+                <h4 class="vod-title" style="color:#FFC107; font-size:1.1rem; white-space:normal; line-height:1.4;">${liveTitle}</h4>
+                <p style="color:#A1887F; margin:5px 0 0; font-size:0.9rem;">지금 바로 시청하러 가기! 👉</p>
               </div>
             </a>
           `;
         } else {
-          document.getElementById('vodModalContent').innerHTML = '';
-        }
+          // 오프라인일 때: VOD / 클립 / 캐치 출력
+          const vodRes = await fetch('https://bjapi.afreecatv.com/api/lika07/vods?page=1');
+          const vodData = await vodRes.json();
+          vodGrid.innerHTML = '';
 
-        // VOD 데이터 로드
-        const vodRes = await fetch('/proxy/bjapi/api/lika07/vods?page=1');
-        const vodData = await vodRes.json();
-        
-        if (vodData && vodData.data && vodData.data.length > 0) {
-          const allVods = vodData.data.sort((a,b) => new Date(b.reg_date) - new Date(a.reg_date));
-          const topVods = allVods.slice(0, 10); // 최근 10개만 표시
-          
-          let htmlString = '';
-          topVods.forEach(vod => {
-            let tUrl = vod.ucc.thumb;
-            if (tUrl && tUrl.startsWith('//')) tUrl = 'https:' + tUrl;
-            else if (!tUrl) tUrl = 'img/ggu_title.jpg';
-            const link = `https://vod.sooplive.co.kr/player/${vod.title_no}`;
+          if (vodData && vodData.data && vodData.data.length > 0) {
+            let allVods = vodData.data;
             
-            htmlString += `
-              <a href="${link}" target="_blank" class="vod-item" style="height:100%;">
-                <div style="position:relative; width:100%; padding-top:56.25%;">
-                  <img src="${tUrl}" alt="VOD" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; border-radius:10px 10px 0 0;" onerror="this.src='img/ggu_title.jpg'">
-                  <div style="position:absolute; bottom:5px; right:5px; background:rgba(0,0,0,0.8); color:#fff; padding:2px 6px; border-radius:4px; font-size:0.8rem;">VOD</div>
-                </div>
-                <div style="padding:10px; flex:1; display:flex; flex-direction:column; justify-content:center;">
-                  <h4 class="vod-title" style="font-size:1rem; white-space:normal; line-height:1.3; margin:0; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; text-overflow:ellipsis;">${vod.title_name}</h4>
-                  <span style="color:#aaa; font-size:0.8rem; margin-top:5px;">${vod.reg_date.split(' ')[0]}</span>
-                </div>
-              </a>
-            `;
-          });
-          document.getElementById('vodModalContent').innerHTML += htmlString;
-
-          // --- 폴라로이드 동적 생성 (최근 4개) ---
-          const polaroidContainer = document.getElementById('polaroidContainer');
-          if (polaroidContainer) {
-            polaroidContainer.innerHTML = '';
-            const top4 = allVods.slice(0, 4);
-            
-            const positions = [
-              { top: '50%', left: '10%', rotate: '-10deg' },
-              { top: '20%', left: '40%', rotate: '15deg' },
-              { top: '60%', left: '35%', rotate: '-5deg' },
-              { top: '40%', left: '65%', rotate: '8deg' }
+            // 유저가 특별히 추가를 요청한 누락된 최신 영상들 수동 주입
+            const manualVods = [
+              {
+                title_no: 195812543,
+                title_name: "[꾸한성/버댄동]오뱅알~",
+                reg_date: "2026-05-16 00:54:29",
+                ucc: { thumb: "//videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20260515_607250C1_294030121_2_r" }
+              },
+              {
+                title_no: 195713787,
+                title_name: "[꾸한성/버댄동]=ㅅ=",
+                reg_date: "2026-05-15 00:35:06",
+                ucc: { thumb: "//videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20260514_276D74DB_294004265_2_r" }
+              },
+              {
+                title_no: 195636973,
+                title_name: "[꾸한성/버댄동]친구모아 아일랜드",
+                reg_date: "2026-05-14 04:20:44",
+                ucc: { thumb: "//videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20260513_F4B3FC47_293977539_2_r" }
+              },
+              {
+                title_no: 195539851,
+                title_name: "[꾸한성/버댄동]제 노력은 새 빠진 신상입니다",
+                reg_date: "2026-05-13 03:50:28",
+                ucc: { thumb: "//videoimg.sooplive.com/php/SnapshotLoad.php?rowKey=20260512_C7EB8589_293948769_1_r" }
+              }
             ];
 
-            top4.forEach((vod, index) => {
+            manualVods.forEach(mv => {
+              if (!allVods.find(v => v.title_no === mv.title_no)) {
+                allVods.push(mv);
+              }
+            });
+
+            // 최신순 정렬 (문자열 비교로 크로스 브라우징 이슈 해결)
+            allVods.sort((a, b) => b.reg_date.localeCompare(a.reg_date));
+
+            // 최근 동영상 중 가장 최신 영상을 '오늘의 클립/캐치'로 선정
+            const randomPick = allVods[0];
+            
+            // '오늘의 클립' 렌더링
+            let thumbUrl = randomPick.ucc.thumb;
+            if (thumbUrl && thumbUrl.startsWith('//')) thumbUrl = 'https:' + thumbUrl;
+            else if (!thumbUrl) thumbUrl = 'img/ggu_title.jpg';
+            const vodLink = `https://vod.sooplive.co.kr/player/${randomPick.title_no}`;
+            
+            vodGrid.innerHTML += `
+              <h3 style="color:#FF9800; text-align:center; margin:10px 0 10px 0; font-size:1.3rem;">✨ 오늘의 핫클립 / 캐치 ✨</h3>
+              <a href="${vodLink}" target="_blank" class="vod-item" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()" style="border-color:#FF9800; background:#4E342E;">
+                <img src="${thumbUrl}" class="vod-thumb" style="filter:none;" onerror="this.src='img/ggu_title.jpg'">
+                <h4 class="vod-title" style="color:#FFD54F;">${randomPick.title_name}</h4>
+              </a>
+              <div style="border-bottom: 2px dashed #5D4037; margin: 15px 0;"></div>
+              <h3 style="color:#FFE082; text-align:center; margin:0 0 10px 0; font-size:1.1rem;">📺 최근 동영상</h3>
+            `;
+
+            // 나머지 동영상들 렌더링
+            const remainingVods = allVods.filter(v => v.title_no !== randomPick.title_no).slice(0, 8);
+            
+            remainingVods.forEach(vod => {
               let tUrl = vod.ucc.thumb;
               if (tUrl && tUrl.startsWith('//')) tUrl = 'https:' + tUrl;
               else if (!tUrl) tUrl = 'img/ggu_title.jpg';
-              
               const link = `https://vod.sooplive.co.kr/player/${vod.title_no}`;
-              const dateStr = vod.reg_date.split(' ')[0].slice(2).replace(/-/g, '.'); // 26.05.09 형식
-              const shortTitle = vod.title_name.length > 10 ? vod.title_name.substring(0,10)+'...' : vod.title_name;
-              const pos = positions[index % positions.length];
               
-              polaroidContainer.innerHTML += `
-                <div class="polaroid" data-text="[${dateStr}] ${shortTitle}" style="top: ${pos.top}; left: ${pos.left}; transform: rotate(${pos.rotate});">
-                  <img src="${tUrl}" alt="VOD" onerror="this.src='img/ggu_title.jpg'">
-                  <div class="play-sticker" title="영상 보기" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()" onclick="playInlineVideo(this, '${link}')"></div>
-                </div>
+              vodGrid.innerHTML += `
+                <a href="${link}" target="_blank" class="vod-item" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+                  <img src="${tUrl}" alt="VOD" class="vod-thumb" onerror="this.src='img/ggu_title.jpg'">
+                  <h4 class="vod-title">${vod.title_name}</h4>
+                </a>
               `;
             });
-            // 새로 생성된 폴라로이드들에 드래그 이벤트 다시 적용
-            document.querySelectorAll('.polaroid').forEach(makeDraggable);
+          } else {
+            vodGrid.innerHTML = '<p style="text-align:center; color:#fff;">VOD가 없습니다.</p>';
           }
-
-        } else {
-          document.getElementById('vodModalContent').innerHTML += '<p style="text-align:center; color:#fff; grid-column:1/-1;">VOD가 없습니다.</p>';
         }
       } catch (err) {
         console.error('API Error:', err);
@@ -899,8 +873,8 @@
     async function loadBoardData() {
       const container = document.getElementById('boardContainer');
       try {
-        // SOOP 게시판 API 우회
-        const res = await fetch('/.netlify/functions/soop-board');
+        // SOOP 게시판 API (최신글 목록)
+        const res = await fetch('https://bjapi.afreecatv.com/api/lika07/board/posts?page=1');
         const data = await res.json();
         
         if (data && data.data && data.data.length > 0) {
@@ -908,7 +882,7 @@
           // 상위 7개 게시글만 표시
           data.data.slice(0, 7).forEach(post => {
             const date = post.reg_date.split(' ')[0].replace(/-/g, '.');
-            const link = `https://ch.sooplive.co.kr/lika07/post/${post.title_no}`;
+            const link = `https://www.sooplive.com/station/lika07/board/${post.board_no}/${post.title_no}`;
             
             container.innerHTML += `
               <a href="${link}" target="_blank" class="board-item" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
