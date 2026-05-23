@@ -204,6 +204,9 @@ function initScrollReveal() {
 
 // ── 초기화 ──
 document.addEventListener('DOMContentLoaded', async () => {
+  // 공통 프리미엄 인터랙션 구동
+  initCommonInteractions();
+
   achievements = await DataService.getData('history', (updatedData) => {
     achievements = updatedData || [];
     renderTotalStats();
@@ -217,4 +220,209 @@ document.addEventListener('DOMContentLoaded', async () => {
   initTabs();
   initNav();
   initScrollReveal();
+
+  // 드래그 관성 슬라이더 개시
+  initDragSlider('hof-slider');
+  initDragSlider('cat-slider');
 });
+
+// =========================================
+// 🪐 [프리미엄 GSAP 공통 인터랙션 패키지]
+// =========================================
+function initSmoothScroll() {
+  if (typeof Lenis !== 'undefined') {
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smooth: true
+    });
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add((time) => {
+      lenis.raf(time * 1000);
+    });
+    gsap.ticker.lagSmoothing(0);
+  }
+}
+
+class TextScramble {
+  constructor(el) {
+    this.el = el;
+    this.chars = '!<>-_\\/[]{}—=+*^?#________';
+    this.update = this.update.bind(this);
+  }
+  setText(newText) {
+    const oldText = this.el.innerText;
+    const length = Math.max(oldText.length, newText.length);
+    const promise = new Promise((resolve) => this.resolve = resolve);
+    this.queue = [];
+    for (let i = 0; i < length; i++) {
+      const from = oldText[i] || '';
+      const to = newText[i] || '';
+      const start = Math.floor(Math.random() * 15);
+      const end = start + Math.floor(Math.random() * 15);
+      this.queue.push({ from, to, start, end });
+    }
+    cancelAnimationFrame(this.frameRequest);
+    this.frame = 0;
+    this.update();
+    return promise;
+  }
+  update() {
+    let output = '';
+    let complete = 0;
+    for (let i = 0, n = this.queue.length; i < n; i++) {
+      let { from, to, start, end, char } = this.queue[i];
+      if (this.frame >= end) {
+        complete++;
+        output += to;
+      } else if (this.frame >= start) {
+        if (!char || Math.random() < 0.28) {
+          char = this.randomChar();
+          this.queue[i].char = char;
+        }
+        output += `<span style="color: #e11d48; opacity: 0.7;">${char}</span>`;
+      } else {
+        output += from;
+      }
+    }
+    this.el.innerHTML = output;
+    if (complete === this.queue.length) {
+      this.resolve();
+    } else {
+      this.frameRequest = requestAnimationFrame(this.update);
+      this.frame++;
+    }
+  }
+  randomChar() {
+    return this.chars[Math.floor(Math.random() * this.chars.length)];
+  }
+}
+
+function initCommonInteractions() {
+  initSmoothScroll();
+
+  // 메뉴 호버 스크램블
+  document.querySelectorAll('.nav-links a').forEach(link => {
+    const originalText = link.innerText;
+    const fx = new TextScramble(link);
+    let isScrambling = false;
+    
+    link.addEventListener('mouseenter', () => {
+      if (isScrambling) return;
+      isScrambling = true;
+      fx.setText(originalText).then(() => {
+        isScrambling = false;
+      });
+    });
+  });
+
+  // 헤더 타이틀 디코딩 등장 연출
+  const glowTitle = document.querySelector('.glow-title, .hero-title, .archive-title, .sch-title-main');
+  if (glowTitle) {
+    const orig = glowTitle.innerText;
+    const fx = new TextScramble(glowTitle);
+    gsap.set(glowTitle, { opacity: 1 });
+    setTimeout(() => {
+      fx.setText(orig);
+    }, 400);
+  }
+}
+
+// ── 🏆 드래그 관성(Momentum) 슬라이더 물리 연산 엔진 ──
+function initDragSlider(trackId) {
+  const track = document.getElementById(trackId);
+  if (!track) return;
+
+  let isDown = false;
+  let startX;
+  let scrollLeft;
+  let velocity = 0;
+  let lastX = 0;
+  let lastTime = 0;
+  let rafId = null;
+
+  track.addEventListener('mousedown', (e) => {
+    isDown = true;
+    track.style.cursor = 'grabbing';
+    startX = e.pageX - track.offsetLeft;
+    scrollLeft = track.scrollLeft;
+    velocity = 0;
+    lastX = e.pageX;
+    lastTime = Date.now();
+    cancelAnimationFrame(rafId);
+  });
+
+  track.addEventListener('mouseleave', () => {
+    if (!isDown) return;
+    isDown = false;
+    track.style.cursor = 'grab';
+    applyInertia();
+  });
+
+  track.addEventListener('mouseup', () => {
+    if (!isDown) return;
+    isDown = false;
+    track.style.cursor = 'grab';
+    applyInertia();
+  });
+
+  track.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - track.offsetLeft;
+    const walk = (x - startX) * 1.6; // 드래그 가중 감도
+    track.scrollLeft = scrollLeft - walk;
+
+    const now = Date.now();
+    const dt = now - lastTime;
+    if (dt > 0) {
+      const dx = e.pageX - lastX;
+      velocity = dx / dt;
+    }
+    lastX = e.pageX;
+    lastTime = now;
+  });
+
+  // 모바일 터치 지원
+  track.addEventListener('touchstart', (e) => {
+    isDown = true;
+    startX = e.touches[0].pageX - track.offsetLeft;
+    scrollLeft = track.scrollLeft;
+    velocity = 0;
+    lastX = e.touches[0].pageX;
+    lastTime = Date.now();
+    cancelAnimationFrame(rafId);
+  });
+
+  track.addEventListener('touchend', () => {
+    if (!isDown) return;
+    isDown = false;
+    applyInertia();
+  });
+
+  track.addEventListener('touchmove', (e) => {
+    if (!isDown) return;
+    const x = e.touches[0].pageX - track.offsetLeft;
+    const walk = (x - startX) * 1.6;
+    track.scrollLeft = scrollLeft - walk;
+
+    const now = Date.now();
+    const dt = now - lastTime;
+    if (dt > 0) {
+      const dx = e.touches[0].pageX - lastX;
+      velocity = dx / dt;
+    }
+    lastX = e.touches[0].pageX;
+    lastTime = now;
+  });
+
+  function applyInertia() {
+    if (Math.abs(velocity) < 0.05) return;
+    track.scrollLeft -= velocity * 16;
+    velocity *= 0.94; // 94% 마찰 감쇠
+    rafId = requestAnimationFrame(applyInertia);
+  }
+
+  // 초기 커서 스타일 설정
+  track.style.cursor = 'grab';
+}

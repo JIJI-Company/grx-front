@@ -1,3 +1,4 @@
+/*
 (function() {
     const marketGrid = document.getElementById('marketGrid');
     const rankingList = document.getElementById('rankingList');
@@ -666,3 +667,4 @@
     init();
     setTimeout(() => fetchNewsFromServer(), 1500);
 })();
+*/

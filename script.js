@@ -1,6 +1,69 @@
+/** 👾 매트릭스 스타일 데코 텍스트 디코딩 클래스 */
+class TextScramble {
+  constructor(el) {
+    this.el = el;
+    this.chars = '!<>-_\\/[]{}—=+*^?#________';
+    this.update = this.update.bind(this);
+  }
+  setText(newText) {
+    const oldText = this.el.innerText;
+    const length = Math.max(oldText.length, newText.length);
+    const promise = new Promise((resolve) => this.resolve = resolve);
+    this.queue = [];
+    for (let i = 0; i < length; i++) {
+      const from = oldText[i] || '';
+      const to = newText[i] || '';
+      const start = Math.floor(Math.random() * 20);
+      const end = start + Math.floor(Math.random() * 20);
+      this.queue.push({ from, to, start, end });
+    }
+    cancelAnimationFrame(this.frameRequest);
+    this.frame = 0;
+    this.update();
+    return promise;
+  }
+  update() {
+    let output = '';
+    let complete = 0;
+    for (let i = 0, n = this.queue.length; i < n; i++) {
+      let { from, to, start, end, char } = this.queue[i];
+      if (this.frame >= end) {
+        complete++;
+        output += to;
+      } else if (this.frame >= start) {
+        if (!char || Math.random() < 0.28) {
+          char = this.randomChar();
+          this.queue[i].char = char;
+        }
+        output += `<span style="color: #e11d48; opacity: 0.7;">${char}</span>`;
+      } else {
+        output += from;
+      }
+    }
+    this.el.innerHTML = output;
+    if (complete === this.queue.length) {
+      this.resolve();
+    } else {
+      this.frameRequest = requestAnimationFrame(this.update);
+      this.frame++;
+    }
+  }
+  randomChar() {
+    return this.chars[Math.floor(Math.random() * this.chars.length)];
+  }
+}
+
 function moveSlider(amount) {
   const slider = document.getElementById('memberSlider');
-  slider.scrollLeft += amount;
+  if (slider) {
+    const targetScroll = slider.scrollLeft + amount;
+    gsap.to(slider, {
+      scrollLeft: targetScroll,
+      duration: 0.8,
+      ease: "power3.out",
+      overwrite: "auto"
+    });
+  }
 }
 
 // ⚡ 라이브 데이터 사전 로드 (LIVE 페이지 진입 시 속도 향상을 위해)
@@ -10,6 +73,28 @@ DataService.getLive().then(data => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+  // 🌊 [Lenis 초고성능 스무스 스크롤 연동]
+  if (typeof Lenis !== 'undefined') {
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      direction: 'vertical',
+      gestureDirection: 'vertical',
+      smooth: true,
+      mouseMultiplier: 1.0,
+      smoothTouch: false,
+      touchMultiplier: 2.0
+    });
+
+    lenis.on('scroll', ScrollTrigger.update);
+
+    gsap.ticker.add((time) => {
+      lenis.raf(time * 1000);
+    });
+
+    gsap.ticker.lagSmoothing(0);
+  }
+
   const enterBtn = document.getElementById('enter-btn');
   const gate = document.getElementById('intro-gate');
   const introContent = document.querySelector('.intro-content');
@@ -23,24 +108,66 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  // 🎥 [프리미엄 무한성 등장 효과]
+  const triggerHeroReveal = () => {
+    // 초기 투명도 및 Y축 시작점 세팅
+    gsap.set([".hero-label", ".hero h1", ".hero p", ".scroll-indicator"], { opacity: 0, y: 60 });
+    gsap.set(".logo", { opacity: 0, y: -30 });
+    gsap.set(".nav-links a", { opacity: 0, y: -30 });
+
+    // 네비게이션 바 로드
+    gsap.to(".logo", { opacity: 1, y: 0, duration: 1.0, delay: 0.2, ease: "power3.out" });
+    gsap.to(".nav-links a", { opacity: 1, y: 0, stagger: 0.08, duration: 1.0, delay: 0.3, ease: "power3.out" });
+
+    // 히어로 섹션 요소 순차 등장 (stagger + 탄성) (h1 제목 제외)
+    gsap.to([".hero-label", ".hero p", ".scroll-indicator"], {
+      opacity: 1,
+      y: 0,
+      stagger: 0.15,
+      duration: 1.5,
+      delay: 0.5,
+      ease: "power4.out"
+    });
+
+    // 👾 [매트릭스 스크램블 효과로 히어로 타이틀 해독 전개]
+    const heroTitle = document.querySelector('.hero h1');
+    if (heroTitle) {
+      gsap.set(heroTitle, { opacity: 1, y: 0 });
+      const fx = new TextScramble(heroTitle);
+      setTimeout(() => {
+        fx.setText('GGU CASTLE');
+      }, 500);
+    }
+  };
+
   // 한 번 봤으면 게이트 스킵
   if (sessionStorage.getItem('gateShown')) {
     if (gate) gate.style.display = 'none';
     document.body.classList.add('show-main');
     triggerPopup(1000); // 메인화면 바로 진입 시 1초 뒤 등장
+    setTimeout(triggerHeroReveal, 100);
   }
 
   if (enterBtn && gate) {
     enterBtn.addEventListener('click', () => {
+      // 1. 게이트 벌어지는 효과
       gate.classList.add('open');
 
       if (introContent) {
-        introContent.style.opacity = '0';
-        introContent.style.transform = 'scale(0.8)';
-        introContent.style.pointerEvents = 'none';
+        // 인트로 문구 부드럽게 퇴장
+        gsap.to(introContent, {
+          opacity: 0,
+          scale: 0.8,
+          duration: 0.6,
+          ease: "power2.in",
+          pointerEvents: "none"
+        });
       }
 
       document.body.classList.add('show-main');
+      
+      // 2. 웅장한 무한성 콘텐츠 등장 연출 가동
+      triggerHeroReveal();
 
       setTimeout(() => {
         gate.style.display = 'none';
@@ -102,9 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }, 3000);
 
-  // 🎇 팝업 노출 로직은 윗부분의 게이트 컨트롤(triggerPopup)으로 이동되었습니다.
-
-  // 🖱️ 패럴랙스 (마우스 이동 대응)
+  // 🖱️ [고급 마우스 패럴랙스 - 물리 엔진처럼 부드러운 글라이딩 인터랙션]
   const heroSection = document.getElementById('heroSection');
   if (heroSection) {
     heroSection.addEventListener('mousemove', (e) => {
@@ -115,11 +240,187 @@ document.addEventListener('DOMContentLoaded', () => {
         const speed = parseFloat(layer.getAttribute('data-speed')) || 0;
         const xOffset = xPos * speed * window.innerWidth;
         const yOffset = yPos * speed * window.innerHeight;
-        layer.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
+        
+        // style 조작 대신 GSAP으로 속도감 있고 탄성 있게 애니메이션 처리
+        gsap.to(layer, {
+          x: xOffset,
+          y: yOffset,
+          duration: 0.8,
+          ease: "power2.out",
+          overwrite: "auto"
+        });
       });
     });
   }
+
+  // 🌌 [ScrollTrigger 기반 무한성 공간 스크롤 3D 패럴랙스]
+  if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+    gsap.registerPlugin(ScrollTrigger);
+
+    const heroBg = document.querySelector('.hero-bg');
+    const heroContent = document.querySelector('.hero-content-wrap');
+    const verticalText = document.querySelector('.hero-vertical-text');
+
+    if (heroBg) {
+      gsap.to(heroBg, {
+        yPercent: 20,
+        scale: 1.08,
+        ease: "none",
+        scrollTrigger: {
+          trigger: "#heroSection",
+          start: "top top",
+          end: "bottom top",
+          scrub: true
+        }
+      });
+    }
+
+    if (heroContent) {
+      gsap.to(heroContent, {
+        yPercent: -15,
+        opacity: 0.1,
+        ease: "none",
+        scrollTrigger: {
+          trigger: "#heroSection",
+          start: "top top",
+          end: "bottom top",
+          scrub: true
+        }
+      });
+    }
+
+    if (verticalText) {
+      gsap.to(verticalText, {
+        yPercent: -40,
+        opacity: 0,
+        ease: "none",
+        scrollTrigger: {
+          trigger: "#heroSection",
+          start: "top top",
+          end: "bottom top",
+          scrub: true
+        }
+      });
+    }
+  }
+
+  // 👾 [메뉴 및 버튼 매트릭스 데코 텍스트 스크램블 등록]
+  if (typeof TextScramble !== 'undefined') {
+    document.querySelectorAll('.nav-links a').forEach(link => {
+      const originalText = link.innerText;
+      const fx = new TextScramble(link);
+      let isScrambling = false;
+      
+      link.addEventListener('mouseenter', () => {
+        if (isScrambling) return;
+        isScrambling = true;
+        fx.setText(originalText).then(() => {
+          isScrambling = false;
+        });
+      });
+    });
+
+    const enterBtnElement = document.getElementById('enter-btn');
+    if (enterBtnElement) {
+      const originalText = enterBtnElement.innerText;
+      const fx = new TextScramble(enterBtnElement);
+      let isScrambling = false;
+      
+      enterBtnElement.addEventListener('mouseenter', () => {
+        if (isScrambling) return;
+        isScrambling = true;
+        fx.setText(originalText).then(() => {
+          isScrambling = false;
+        });
+      });
+    }
+  }
+
+  // 💎 [3D 홀로그램 카드 틸트 & 광택 효과 적용]
+  init3DTilt();
 });
+
+/** 💎 3D 카드 틸트 및 광택(Shimmer) 이펙트 초기화 함수 */
+function init3DTilt() {
+  const cards = document.querySelectorAll('.card, .update-box');
+  
+  cards.forEach(card => {
+    // 1. 홀로그램 광택 레이어 동적 주입
+    let shimmer = card.querySelector('.card-shimmer');
+    if (!shimmer) {
+      shimmer = document.createElement('div');
+      shimmer.className = 'card-shimmer';
+      shimmer.style.cssText = `
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 0% 0%, rgba(225, 29, 72, 0.15) 0%, transparent 60%);
+        pointer-events: none;
+        z-index: 3;
+        opacity: 0;
+        transition: opacity 0.3s;
+      `;
+      card.appendChild(shimmer);
+    }
+    
+    // 2. 3D 원근법 스타일 강제 적용
+    card.style.transformStyle = 'preserve-3d';
+    card.style.perspective = '1000px';
+
+    // 3. 마우스 진입 시 크기 확장 & 쉐도우 증폭
+    card.addEventListener('mouseenter', () => {
+      gsap.to(card, {
+        scale: 1.03,
+        boxShadow: '0 25px 60px rgba(0,0,0,0.85), 0 0 35px rgba(225, 29, 72, 0.25)',
+        borderColor: 'rgba(225, 29, 72, 0.5)',
+        duration: 0.4,
+        ease: 'power2.out'
+      });
+      shimmer.style.opacity = '1';
+    });
+
+    // 4. 마우스 무브에 따른 3D 기울기 실시간 계산 및 부드러운 렌더링
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      
+      // 회전값 조율 (-8도 ~ 8도 제한으로 부담스럽지 않게 세팅)
+      const rotX = -((y - centerY) / centerY) * 8;
+      const rotY = ((x - centerX) / centerX) * 8;
+      
+      gsap.to(card, {
+        rotationX: rotX,
+        rotationY: rotY,
+        duration: 0.25,
+        ease: 'power2.out',
+        overwrite: 'auto'
+      });
+      
+      // 마우스 좌표에 매핑된 실시간 홀로그램 광택 좌표 갱신
+      const px = (x / rect.width) * 100;
+      const py = (y / rect.height) * 100;
+      shimmer.style.background = `radial-gradient(circle at ${px}% ${py}%, rgba(225, 29, 72, 0.25) 0%, transparent 60%)`;
+    });
+
+    // 5. 마우스 이탈 시 복구
+    card.addEventListener('mouseleave', () => {
+      gsap.to(card, {
+        rotationX: 0,
+        rotationY: 0,
+        scale: 1,
+        boxShadow: '0 15px 30px rgba(0,0,0,0.9), inset 0 1px 1px rgba(255, 255, 255, 0.05)',
+        borderColor: 'rgba(225, 29, 72, 0.15)',
+        duration: 0.6,
+        ease: 'power2.out',
+        overwrite: 'auto'
+      });
+      gsap.to(shimmer, { opacity: 0, duration: 0.6 });
+    });
+  });
+}
 
 /** 🎇 팝업 생성 및 노출 함수 */
 function showEventPopup() {

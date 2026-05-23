@@ -17,8 +17,15 @@
   box-sizing: border-box;
 }
 
-html {
-  scroll-behavior: smooth;
+/* 🪐 Lenis Smooth Scroll 공식 레이아웃 보정 선언 (CSS 스크롤 충돌 방지) */
+html.lenis, html.lenis-smooth {
+  height: auto;
+}
+.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis-smooth iframe {
+  pointer-events: none;
 }
 
 body {

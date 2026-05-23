@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>LIKA - 다꾸(다이어리 꾸미기) 공간 🦖</title>
   <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <style>
     :root {
       --bg-yellow: #FFFDE7;
@@ -104,7 +105,7 @@
       cursor: grab;
       width: 200px;
       height: 200px; /* 사진 크기: 정사각형 */
-      transition: transform 0.2s, box-shadow 0.2s, width 0.3s, height 0.3s;
+      transition: box-shadow 0.2s;
       z-index: 10;
     }
     .drawer-item.scattering {
@@ -362,7 +363,7 @@
        ========================================= */
     .sticky-note {
       height: 250px; /* 기본 높이 고정 */
-      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition: box-shadow 0.3s ease, border-color 0.3s ease;
       overflow: hidden;
       cursor: pointer;
     }
@@ -806,7 +807,9 @@
   </div>
 
   <script>
-    // 서랍 기능 초기화 (팬아트 및 스티커)
+    // =========================================
+    // 📸 [디자인 고도화 - 서랍 기능 GSAP 자석 비행 연출]
+    // =========================================
     function initDrawer() {
       const drawerItems = document.querySelectorAll('.drawer-item');
       const drawer = document.getElementById('photoDrawer');
@@ -817,21 +820,22 @@
       drawer.appendChild(thumbContainer);
 
       drawerItems.forEach((p, idx) => {
-        // 기존 위치 저장
+        // 기존 위치 기록
         p.dataset.origTop = p.style.top;
         p.dataset.origLeft = p.style.left;
         p.dataset.origTransform = p.style.transform;
-        // 서랍 안으로 숨기기
+        
+        // 서랍 안으로 안전하게 격리
         p.classList.add('in-drawer');
+        p.style.opacity = '0';
 
-
-        // 썸네일 버튼 생성 (img 태그인 스티커와 div.polaroid 구분)
+        // 썸네일 버튼 생성
         const imgUrl = p.querySelector('img').src;
         const thumbBtn = document.createElement('div');
         thumbBtn.className = 'drawer-thumb-btn';
         thumbBtn.style.backgroundImage = `url(${imgUrl})`;
         
-        // 미리보기 기능
+        // 미리보기 기능 호버 바인딩
         thumbBtn.onmouseover = () => {
           const preview = document.getElementById('drawer-preview');
           if (preview) {
@@ -844,43 +848,69 @@
           if (preview) preview.style.display = 'none';
         };
 
-        // 썸네일 클릭 시 꺼내기
+        // 썸네일 클릭 시 날아오는 효과 (GSAP 3D Flight)
         thumbBtn.onclick = (e) => {
-          e.stopPropagation(); // 서랍 닫히는 것 방지
-          p.classList.add('scattering');
+          e.stopPropagation(); // 서랍 닫힘 방지
           p.classList.remove('in-drawer');
+          p.style.opacity = '1';
           
-          setTimeout(() => {
-            p.style.top = p.dataset.origTop;
-            p.style.left = p.dataset.origLeft;
-            p.style.transform = p.dataset.origTransform;
-          }, 50);
+          const origRot = p.dataset.origTransform.match(/rotate\(([^deg)]+)deg\)/) ? parseFloat(p.dataset.origTransform.match(/rotate\(([^deg)]+)deg\)/)[1]) : 0;
           
-          setTimeout(() => {
-            p.classList.remove('scattering');
-          }, 850);
+          gsap.fromTo(p, 
+            {
+              left: window.innerWidth / 2 - 100,
+              top: window.innerHeight - 80,
+              scale: 0.1,
+              rotation: 0
+            },
+            {
+              left: p.dataset.origLeft,
+              top: p.dataset.origTop,
+              scale: 1,
+              rotation: origRot,
+              duration: 0.8,
+              ease: "back.out(1.2)",
+              overwrite: "auto"
+            }
+          );
           
-          thumbBtn.style.display = 'none'; // 꺼낸 사진/스티커는 서랍에서 제거
+          thumbBtn.style.display = 'none'; // 서랍에서 숨김
         };
         thumbContainer.appendChild(thumbBtn);
 
-        // 넣기 버튼 동적 생성
+        // 넣기 버튼 동적 생성 및 매핑
         const putBackBtn = document.createElement('div');
         putBackBtn.className = 'put-back-btn';
         putBackBtn.innerHTML = '✖';
         putBackBtn.title = '서랍에 넣기';
         putBackBtn.onmousedown = (e) => e.stopPropagation();
         putBackBtn.ontouchstart = (e) => e.stopPropagation();
+        
         putBackBtn.onclick = (e) => {
           e.stopPropagation();
-          p.classList.add('in-drawer');
-          thumbBtn.style.display = 'block'; // 썸네일 다시 표시
+          
+          // 서랍 안으로 부드럽게 날아가 처박히는 효과
+          gsap.to(p, {
+            left: window.innerWidth / 2 - p.offsetWidth / 2,
+            top: window.innerHeight - 30,
+            scale: 0.1,
+            rotation: 0,
+            opacity: 0,
+            duration: 0.6,
+            ease: "back.in(1.2)",
+            overwrite: "auto",
+            onComplete: () => {
+              p.classList.add('in-drawer');
+              thumbBtn.style.display = 'block';
+              gsap.fromTo(thumbBtn, { scale: 0 }, { scale: 1, duration: 0.4, ease: "back.out(2)" });
+            }
+          });
         };
         p.appendChild(putBackBtn);
       });
     }
 
-    // 서랍 열기/닫기 토글
+    // 서랍 토글 애니메이션 (GSAP 밴딩 업)
     function toggleDrawer() {
       const drawer = document.getElementById('photoDrawer');
       const thumbs = drawer.querySelector('.drawer-thumbnails');
@@ -890,6 +920,8 @@
         drawer.classList.add('expanded');
         if(label) label.style.display = 'none';
         if(thumbs) thumbs.style.display = 'flex';
+        
+        gsap.fromTo(thumbs, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" });
       } else {
         drawer.classList.remove('expanded');
         if(label) label.style.display = 'block';
@@ -899,19 +931,57 @@
 
     initDrawer(); // 스크립트 실행 시 바로 적용
 
-    // 사진 크게 보기 (라이트박스) 로직
-    function openLightbox(src) {
+    // 📑 [디자인 고도화 - GSAP Flip 스타일 레이아웃 확대/축소 비행 트랜지션]
+    function openLightbox(src, clickedEl) {
       const lightbox = document.getElementById('lightbox');
       const lightboxImg = document.getElementById('lightbox-img');
+      
       lightboxImg.src = src;
       lightbox.style.display = 'flex';
-      setTimeout(() => lightbox.classList.add('show'), 10);
+      
+      // 클릭한 카드 위치 기준으로 화면 중앙까지 비행하는 Flip 모션
+      if (clickedEl) {
+        const rect = clickedEl.getBoundingClientRect();
+        const startRot = clickedEl.style.transform.match(/rotate\(([^deg)]+)deg\)/) ? parseFloat(clickedEl.style.transform.match(/rotate\(([^deg)]+)deg\)/)[1]) : 0;
+        
+        gsap.set(lightboxImg, {
+          x: rect.left + rect.width / 2 - window.innerWidth / 2,
+          y: rect.top + rect.height / 2 - window.innerHeight / 2,
+          width: rect.width,
+          height: rect.height,
+          rotation: startRot,
+          scale: 0.7
+        });
+        
+        gsap.fromTo(lightbox, { opacity: 0 }, { opacity: 1, duration: 0.3 });
+        
+        gsap.to(lightboxImg, {
+          x: 0,
+          y: 0,
+          width: "auto",
+          height: "auto",
+          rotation: 0,
+          scale: 1,
+          duration: 0.65,
+          ease: "power3.out"
+        });
+      } else {
+        // 폴백
+        lightbox.classList.add('show');
+      }
     }
 
     function closeLightbox() {
       const lightbox = document.getElementById('lightbox');
-      lightbox.classList.remove('show');
-      setTimeout(() => lightbox.style.display = 'none', 300);
+      gsap.to(lightbox, {
+        opacity: 0,
+        duration: 0.35,
+        ease: "power2.out",
+        onComplete: () => {
+          lightbox.style.display = 'none';
+          lightbox.classList.remove('show');
+        }
+      });
     }
 
     // 숫자 콤마 (기존 유지)
@@ -978,17 +1048,20 @@
     }
 
     // =========================================
-    // 1. 인트로 로직 (공룡 꿀꺽)
+    // 🦖 [1. 인트로 로직 (공룡 꿀꺽 - GSAP 시네마틱 오프닝)]
     // =========================================
     const introGate = document.getElementById('intro-gate');
     const dinoBtn = document.getElementById('dinoBtn');
     const roarSound = document.getElementById('roarSound');
 
-    // 화면 어디를 클릭해도 인트로가 넘어가도록 변경
+    let introTriggered = false;
     introGate.addEventListener('click', () => {
+      if (introTriggered) return;
+      introTriggered = true;
+
       document.querySelector('.intro-title').style.opacity = 0;
       
-      // 소리 재생 (브라우저 정책으로 인해 실패할 경우를 대비한 안전한 처리)
+      // 소리 재생
       try {
         roarSound.volume = 0.6;
         roarSound.currentTime = 0;
@@ -1005,98 +1078,272 @@
         console.error(e);
       }
 
-      // 줌인 애니메이션
-      dinoBtn.classList.add('eat');
+      // GSAP을 이용한 다단계 극장식 연출 (살짝 뒤로 물러났다가 번개처럼 물어뜯는 연출)
+      const tl = gsap.timeline({
+        onComplete: () => {
+          document.body.classList.add('intro-done');
+          loadApiData(); // 데스크 화면 진입 시 데이터 로드
+          initBoard();   // 게시판 로드 시작
+          
+          // 둥실둥실 책상 위로 떨어지는 꿀렁한 바운스 바인딩
+          gsap.from('.polaroid:not(.in-drawer), .sticky-note, .retro-tv, .notepad', {
+            y: -400,
+            opacity: 0,
+            rotation: () => gsap.utils.random(-25, 25),
+            stagger: 0.1,
+            duration: 1.4,
+            ease: "back.out(1.5)"
+          });
+        }
+      });
 
-      // 애니메이션 후 화면 전환
-      setTimeout(() => {
-        document.body.classList.add('intro-done');
-        loadApiData(); // 데스크 화면 진입 시 데이터 로드
-        initBoard();   // 게시판 로드 시작
-      }, 1200);
+      tl.to(dinoBtn, {
+        scale: 1.15,
+        rotation: -6,
+        duration: 0.25,
+        ease: "power2.out"
+      })
+      .to(dinoBtn, {
+        scale: 0.85,
+        rotation: 4,
+        duration: 0.12,
+        ease: "back.in(2)"
+      })
+      .to(dinoBtn, {
+        scale: 85,
+        rotation: -15,
+        duration: 0.85,
+        ease: "power3.in"
+      })
+      .to(introGate, {
+        opacity: 0,
+        duration: 0.25,
+        pointerEvents: "none"
+      }, "-=0.25");
     });
 
     // =========================================
-    // 2. 드래그 앤 드롭 로직 (폴라로이드 & 포스트잇 & TV 잡고 끌기)
+    // 🧲 [2. 드래그 앤 드롭 로직 (물리 관성 던지기 + 서랍 자석 흡입 + Bouncy 펄럭임)]
     // =========================================
     let highestZ = 100;
+    
     function makeDraggable(el) {
-      let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-      let startX = 0, startY = 0;
+      let vx = 0, vy = 0;
+      let lastX = 0, lastY = 0;
       let isDragging = false;
+      let startX = 0, startY = 0;
       
-      // PC 마우스
-      el.onmousedown = dragMouseDown;
-      // 모바일 터치
-      el.ontouchstart = dragTouchStart;
+      let originalRotation = 0;
+      const match = el.style.transform.match(/rotate\(([^deg)]+)deg\)/);
+      if (match) {
+        originalRotation = parseFloat(match[1]);
+      }
 
-      function dragMouseDown(e) {
+      el.addEventListener('mousedown', dragStart);
+      el.addEventListener('touchstart', dragStart, { passive: false });
+
+      function dragStart(e) {
+        if (e.target.closest('a, button, .play-sticker, .put-back-btn')) return;
+        
         e.preventDefault();
-        startX = e.clientX; startY = e.clientY;
-        pos3 = e.clientX; pos4 = e.clientY;
-        isDragging = false;
-        bringToFront();
-        document.onmouseup = closeDragElement;
-        document.onmousemove = elementDrag;
-      }
-      function dragTouchStart(e) {
-        if(e.touches.length > 1) return;
-        let touch = e.touches[0];
-        startX = touch.clientX; startY = touch.clientY;
-        pos3 = touch.clientX; pos4 = touch.clientY;
-        isDragging = false;
-        bringToFront();
-        document.ontouchend = closeDragElement;
-        document.ontouchmove = elementDragTouch;
-      }
-
-      function bringToFront() {
+        
         highestZ++;
         el.style.zIndex = highestZ;
-        el.style.transform = el.style.transform.replace(/scale\([^\)]*\)/, '') + ' scale(1.1)'; // 잡았을 때 살짝 커짐
-      }
-
-      function elementDrag(e) {
-        e.preventDefault();
-        if (Math.abs(startX - e.clientX) > 5 || Math.abs(startY - e.clientY) > 5) isDragging = true;
-        pos1 = pos3 - e.clientX; pos2 = pos4 - e.clientY;
-        pos3 = e.clientX; pos4 = e.clientY;
-        el.style.top = (el.offsetTop - pos2) + "px";
-        el.style.left = (el.offsetLeft - pos1) + "px";
-      }
-      function elementDragTouch(e) {
-        let touch = e.touches[0];
-        if (Math.abs(startX - touch.clientX) > 5 || Math.abs(startY - touch.clientY) > 5) isDragging = true;
-        pos1 = pos3 - touch.clientX; pos2 = pos4 - touch.clientY;
-        pos3 = touch.clientX; pos4 = touch.clientY;
-        el.style.top = (el.offsetTop - pos2) + "px";
-        el.style.left = (el.offsetLeft - pos1) + "px";
-      }
-
-      function closeDragElement() {
-        document.onmouseup = null; document.onmousemove = null;
-        document.ontouchend = null; document.ontouchmove = null;
-        el.style.transform = el.style.transform.replace(/scale\([^\)]*\)/, ''); // 놓았을 때 원상복구
         
-        // 드래그가 아니라 단순 클릭이었을 경우 사진 크게 보기(라이트박스) 실행
-        // 서랍에서 꺼낸 아이템(.drawer-item)만 확대 가능하도록 설정 (동영상 제외)
-        if (!isDragging && el.classList.contains('drawer-item')) {
-          const img = el.querySelector('img');
-          if (img) openLightbox(img.src);
+        const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+        const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+        
+        startX = clientX;
+        startY = clientY;
+        lastX = clientX;
+        lastY = clientY;
+        isDragging = false;
+
+        // 집어 올렸을 때 쫄깃한 확장 & 3D 쉐도우
+        gsap.to(el, {
+          scale: 1.08,
+          boxShadow: '10px 15px 35px rgba(0,0,0,0.25)',
+          duration: 0.25,
+          ease: "power2.out"
+        });
+
+        if (e.type === 'touchstart') {
+          document.addEventListener('touchmove', dragMove, { passive: false });
+          document.addEventListener('touchend', dragEnd);
+        } else {
+          document.addEventListener('mousemove', dragMove);
+          document.addEventListener('mouseup', dragEnd);
         }
       }
 
-      // [수정] 브라우저 포커스가 나갈 때(iframe 클릭 등) '드래그 중일 때만' 중단 처리
-      // (클릭 시 엉뚱하게 확대창이 뜨는 버그 방지)
-      window.addEventListener('blur', () => {
-        if (isDragging) closeDragElement();
-      });
+      function dragMove(e) {
+        e.preventDefault();
+        const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+        const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+        
+        if (Math.abs(startX - clientX) > 4 || Math.abs(startY - clientY) > 4) {
+          isDragging = true;
+        }
+
+        // 실시간 물리 속도 계산
+        vx = clientX - lastX;
+        vy = clientY - lastY;
+        
+        lastX = clientX;
+        lastY = clientY;
+
+        const newLeft = el.offsetLeft + vx;
+        const newTop = el.offsetTop + vy;
+
+        // 드래그 속도(vx)에 비례해서 카드가 펄럭펄럭 기울도록 세팅 (Bouncy Swing)
+        gsap.to(el, {
+          left: newLeft,
+          top: newTop,
+          rotation: originalRotation + (vx * 0.35),
+          duration: 0.1,
+          ease: "power1.out",
+          overwrite: "auto"
+        });
+      }
+
+      function dragEnd() {
+        document.removeEventListener('mousemove', dragMove);
+        document.removeEventListener('mouseup', dragEnd);
+        document.removeEventListener('touchmove', dragMove);
+        document.removeEventListener('touchend', dragEnd);
+
+        // 내려 놓을 때 스케일 원상 복구
+        gsap.to(el, {
+          scale: 1,
+          boxShadow: '3px 8px 20px rgba(0,0,0,0.15)',
+          duration: 0.3,
+          ease: "power2.out"
+        });
+
+        if (isDragging) {
+          const currentY = el.offsetTop;
+          const targetY = currentY + vy * 10;
+          
+          // 📥 [서랍 자석 흡입 연출] 
+          if (el.classList.contains('drawer-item') && (targetY > window.innerHeight - 220 || (vy > 3 && currentY > window.innerHeight - 350))) {
+            gsap.to(el, {
+              left: window.innerWidth / 2 - el.offsetWidth / 2,
+              top: window.innerHeight - 30,
+              scale: 0.1,
+              rotation: 0,
+              opacity: 0,
+              duration: 0.6,
+              ease: "back.in(1.2)",
+              overwrite: "auto",
+              onComplete: () => {
+                el.classList.add('in-drawer');
+                
+                // 해당되는 썸네일 서랍 버튼 찾아 팝업
+                const img = el.querySelector('img');
+                if (img) {
+                  const imgUrl = img.src;
+                  const thumbs = document.querySelectorAll('.drawer-thumb-btn');
+                  thumbs.forEach(thumb => {
+                    if (thumb.style.backgroundImage.includes(imgUrl) || imgUrl.includes(thumb.style.backgroundImage)) {
+                      thumb.style.display = 'block';
+                      gsap.fromTo(thumb, { scale: 0 }, { scale: 1, duration: 0.5, ease: "back.out(2)" });
+                    }
+                  });
+                }
+              }
+            });
+          } else {
+            // 🧲 [관성 던지기 물리 효과] 던진 속도 그대로 스르륵 미끄러짐
+            const targetX = el.offsetLeft + vx * 10;
+            const targetRot = originalRotation + (vx * 0.45);
+            
+            // 화면 밖으로 탈출하지 않도록 Clamp 보정
+            const finalX = Math.max(-50, Math.min(window.innerWidth - el.offsetWidth + 50, targetX));
+            const finalY = Math.max(-50, Math.min(window.innerHeight - el.offsetHeight + 50, targetY));
+
+            gsap.to(el, {
+              left: finalX,
+              top: finalY,
+              rotation: targetRot,
+              duration: 0.8,
+              ease: "power2.out",
+              overwrite: "auto",
+              onComplete: () => {
+                originalRotation = targetRot; // 회전각 누적 반영
+              }
+            });
+          }
+        } else {
+          // 탭/클릭 시 확대 이벤트 발동
+          if (el.classList.contains('drawer-item')) {
+            const img = el.querySelector('img');
+            if (img) openLightbox(img.src, el);
+          }
+        }
+        
+        vx = 0; vy = 0;
+      }
     }
 
     // 사진, 포스트잇, TV, 메모장 모두 드래그 가능하게 만들기
     document.querySelectorAll('.polaroid, .sticky-note, .retro-tv, .notepad').forEach(el => {
       makeDraggable(el);
     });
+
+    // 📑 [포스트잇 TMI 다이어리 스프링 촤르륵 연출 추가]
+    const stickyNote = document.getElementById('stickyNote');
+    if (stickyNote) {
+      stickyNote.onclick = null; // 인라인 강제 해제 후 바인딩
+      
+      let stickyOpen = false;
+      stickyNote.addEventListener('click', (e) => {
+        if (e.target.closest('a, .sns-tag, .put-back-btn')) return;
+        
+        stickyOpen = !stickyOpen;
+        
+        if (stickyOpen) {
+          stickyNote.classList.add('open');
+          highestZ++;
+          stickyNote.style.zIndex = highestZ;
+          
+          // 촤르륵 펼쳐지기
+          gsap.to(stickyNote, {
+            width: 320,
+            height: 650,
+            rotation: 0,
+            scale: 1.05,
+            duration: 0.65,
+            ease: "back.out(1.2)",
+            overwrite: "auto"
+          });
+          
+          // 내부 TMI 아이템들 순차 펄럭 등장
+          gsap.fromTo('.sticky-note.open .tmi-title-badge, .sticky-note.open .tmi-item, .sticky-note.open .sns-links', 
+            { opacity: 0, y: 15 },
+            { opacity: 1, y: 0, stagger: 0.05, duration: 0.4, delay: 0.15, ease: "power2.out" }
+          );
+        } else {
+          // 접히기
+          gsap.to('.sticky-note .tmi-title-badge, .sticky-note .tmi-item, .sticky-note .sns-links', {
+            opacity: 0,
+            y: -10,
+            duration: 0.2,
+            onComplete: () => {
+              stickyNote.classList.remove('open');
+              gsap.to(stickyNote, {
+                width: 250,
+                height: 250,
+                rotation: -3,
+                scale: 1,
+                duration: 0.5,
+                ease: "power2.out",
+                overwrite: "auto"
+              });
+            }
+          });
+        }
+      });
+    }
 
     // =========================================
     // 3. SOOP API 및 시트 데이터 로드

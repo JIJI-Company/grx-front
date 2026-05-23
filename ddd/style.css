@@ -12,6 +12,17 @@
   --glass-border: rgba(255, 26, 74, 0.2);
 }
 
+/* 🪐 Lenis Smooth Scroll 공식 레이아웃 보정 선언 */
+html.lenis, html.lenis-smooth {
+  height: auto;
+}
+.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis-smooth iframe {
+  pointer-events: none;
+}
+
 * {
   margin: 0; padding: 0; box-sizing: border-box;
 }
@@ -479,7 +490,7 @@ nav {
   top: 0; width: 50%; height: 100%;
   background: rgba(15, 0, 5, 0.95);
   border: 1px solid var(--glass-border);
-  transition: transform 1.2s cubic-bezier(0.8, 0, 0.2, 1);
+  transition: border-color 0.3s, background-color 0.3s;
   display: flex; align-items: center; justify-content: center;
 }
 

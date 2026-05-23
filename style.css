@@ -595,7 +595,7 @@ nav {
   border-top: 1px solid rgba(255, 26, 74, 0.5);
   padding: 40px;
   position: relative;
-  transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+  transition: border-color 0.5s ease, background 0.5s ease, opacity 0.5s ease;
   box-shadow: 0 15px 30px rgba(0,0,0,0.9), inset 0 1px 1px rgba(255, 255, 255, 0.05);
   overflow: hidden; /* 박스 크기 고정 + 모서리 장식 클립 */
 }
@@ -629,7 +629,7 @@ nav {
   padding: 40px;
   border-radius: 12px;
   position: relative;
-  transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+  transition: border-color 0.5s ease, background 0.5s ease, opacity 0.5s ease;
   box-shadow: 0 15px 35px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,26,74,0.05);
   overflow: hidden;
   display: flex;

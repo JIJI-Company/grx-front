@@ -330,6 +330,9 @@ function createCard(member, isGold = false) {
 
 // 3. 페이지 초기화
 document.addEventListener('DOMContentLoaded', () => {
+  // 공통 프리미엄 인터랙션 구동
+  initCommonInteractions();
+
   // 마스터 렌더링
   const masterContainer = document.querySelector(
     '.master-container .flip-container',
@@ -374,6 +377,9 @@ document.addEventListener('DOMContentLoaded', () => {
       newGrid.appendChild(div);
     });
   }
+
+  // 마인드맵 뷰 초기화
+  initMindmapView();
 });
 
 // 4. 모달 기능
@@ -438,19 +444,465 @@ function openMemberModal(data) {
     `;
 
   overlay.style.display = 'flex';
-  setTimeout(() => {
-    overlay.classList.add('active');
-  }, 10);
+  
+  // 🪐 3D 공간감 확장 GSAP 오프닝 시퀀스
+  gsap.killTweensOf([overlay, ".modal-left img", ".modal-right > *", "#modal-detail-view"]);
+  
+  // 백드롭 페이드인
+  gsap.fromTo(overlay, 
+    { opacity: 0 },
+    { opacity: 1, duration: 0.35, ease: "power2.out" }
+  );
+
+  // 정보판 3D 팝업
+  gsap.fromTo("#modal-detail-view",
+    { scale: 0.9, rotateX: 10, y: 50, opacity: 0 },
+    { scale: 1, rotateX: 0, y: 0, opacity: 1, duration: 0.65, ease: "back.out(1.1)", perspective: 1200 }
+  );
+
+  // 아바타 3D 슬라이드 인
+  gsap.fromTo(".modal-left img",
+    { scale: 0.85, rotateY: -20, opacity: 0 },
+    { scale: 1, rotateY: 0, opacity: 1, duration: 0.7, delay: 0.1, ease: "power3.out" }
+  );
+
+  // 상세 텍스트 요소들 시간차 등장 (Stagger)
+  gsap.fromTo(".modal-right > *",
+    { x: 35, opacity: 0 },
+    { x: 0, opacity: 1, duration: 0.55, stagger: 0.05, delay: 0.15, ease: "power2.out" }
+  );
 }
 
 function closeMemberModal() {
   const overlay = document.getElementById('memberModal');
-  overlay.classList.remove('active');
-  setTimeout(() => {
-    overlay.style.display = 'none';
-  }, 400); // 애니메이션 시간 대기
+  
+  // 🪐 3D 수축 페이드아웃 클로징 시퀀스
+  gsap.to("#modal-detail-view", {
+    scale: 0.92,
+    rotateX: -10,
+    y: 30,
+    opacity: 0,
+    duration: 0.35,
+    ease: "power2.in"
+  });
+
+  gsap.to(overlay, {
+    opacity: 0,
+    duration: 0.35,
+    ease: "power2.in",
+    onComplete: () => {
+      overlay.style.display = 'none';
+    }
+  });
 }
 // 배경 클릭 시 닫기
 window.onclick = (e) => {
   if (e.target == document.getElementById('memberModal')) closeMemberModal();
 };
+
+// =========================================
+// 🪐 [프리미엄 GSAP 공통 인터랙션 패키지]
+// =========================================
+function initSmoothScroll() {
+  if (typeof Lenis !== 'undefined') {
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smooth: true
+    });
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add((time) => {
+      lenis.raf(time * 1000);
+    });
+    gsap.ticker.lagSmoothing(0);
+  }
+}
+
+class TextScramble {
+  constructor(el) {
+    this.el = el;
+    this.chars = '!<>-_\\/[]{}—=+*^?#________';
+    this.update = this.update.bind(this);
+  }
+  setText(newText) {
+    const oldText = this.el.innerText;
+    const length = Math.max(oldText.length, newText.length);
+    const promise = new Promise((resolve) => this.resolve = resolve);
+    this.queue = [];
+    for (let i = 0; i < length; i++) {
+      const from = oldText[i] || '';
+      const to = newText[i] || '';
+      const start = Math.floor(Math.random() * 15);
+      const end = start + Math.floor(Math.random() * 15);
+      this.queue.push({ from, to, start, end });
+    }
+    cancelAnimationFrame(this.frameRequest);
+    this.frame = 0;
+    this.update();
+    return promise;
+  }
+  update() {
+    let output = '';
+    let complete = 0;
+    for (let i = 0, n = this.queue.length; i < n; i++) {
+      let { from, to, start, end, char } = this.queue[i];
+      if (this.frame >= end) {
+        complete++;
+        output += to;
+      } else if (this.frame >= start) {
+        if (!char || Math.random() < 0.28) {
+          char = this.randomChar();
+          this.queue[i].char = char;
+        }
+        output += `<span style="color: #e11d48; opacity: 0.7;">${char}</span>`;
+      } else {
+        output += from;
+      }
+    }
+    this.el.innerHTML = output;
+    if (complete === this.queue.length) {
+      this.resolve();
+    } else {
+      this.frameRequest = requestAnimationFrame(this.update);
+      this.frame++;
+    }
+  }
+  randomChar() {
+    return this.chars[Math.floor(Math.random() * this.chars.length)];
+  }
+}
+
+function initCommonInteractions() {
+  initSmoothScroll();
+
+  // 메뉴 호버 스크램블
+  document.querySelectorAll('.nav-links a').forEach(link => {
+    const originalText = link.innerText;
+    const fx = new TextScramble(link);
+    let isScrambling = false;
+    
+    link.addEventListener('mouseenter', () => {
+      if (isScrambling) return;
+      isScrambling = true;
+      fx.setText(originalText).then(() => {
+        isScrambling = false;
+      });
+    });
+  });
+
+  // 헤더 타이틀 디코딩 등장 연출
+  const glowTitle = document.querySelector('.glow-title, .hero-title, .archive-title, .sch-title-main');
+  if (glowTitle) {
+    const orig = glowTitle.innerText;
+    const fx = new TextScramble(glowTitle);
+    gsap.set(glowTitle, { opacity: 1 });
+    setTimeout(() => {
+      fx.setText(orig);
+    }, 400);
+  }
+}
+
+// 🪐 5. [무한성 마인드맵 캔버스 엔진]
+function initMindmapView() {
+  const gridViewBtn = document.getElementById('grid-view-btn');
+  const mindmapViewBtn = document.getElementById('mindmap-view-btn');
+  const traditionalView = document.getElementById('traditional-grids-view');
+  const mindmapView = document.getElementById('mindmap-canvas-container');
+  const canvas = document.getElementById('mindmap-canvas');
+  const nodesLayer = document.getElementById('mindmap-nodes-layer');
+  const svg = document.getElementById('mindmap-svg');
+
+  if (!gridViewBtn || !mindmapViewBtn || !traditionalView || !mindmapView) return;
+
+  let mindmapInitialized = false;
+
+  // 드래그 & 줌 렌더러 변수
+  let isDragging = false;
+  let startX, startY;
+  let currentX = -750; // 가상 캔버스 디폴트 X
+  let currentY = -500; // 가상 캔버스 디폴트 Y
+  let scale = 0.8;      // 기본 뷰 스케일
+
+  function updateTransform() {
+    canvas.style.transform = `translate(${currentX}px, ${currentY}px) scale(${scale})`;
+  }
+
+  // 1. 마우스 휠 줌 휠 핸들러
+  mindmapView.addEventListener('wheel', (e) => {
+    if (mindmapView.style.display === 'none') return;
+    e.preventDefault();
+    const zoomFactor = 0.05;
+    if (e.deltaY < 0) {
+      scale = Math.min(1.8, scale + zoomFactor);
+    } else {
+      scale = Math.max(0.35, scale - zoomFactor);
+    }
+    updateTransform();
+  }, { passive: false });
+
+  // 2. 드래그/이동 마우스 제어
+  mindmapView.addEventListener('mousedown', (e) => {
+    if (e.target.closest('.mindmap-node')) return; // 노드 클릭 시 드래그 방지
+    isDragging = true;
+    startX = e.clientX - currentX;
+    startY = e.clientY - currentY;
+    mindmapView.style.cursor = 'grabbing';
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    currentX = e.clientX - startX;
+    currentY = e.clientY - startY;
+    updateTransform();
+  });
+
+  window.addEventListener('mouseup', () => {
+    isDragging = false;
+    mindmapView.style.cursor = 'grab';
+  });
+
+  // 3. 모바일 터치 스와이프 제어
+  mindmapView.addEventListener('touchstart', (e) => {
+    if (e.target.closest('.mindmap-node')) return;
+    isDragging = true;
+    startX = e.touches[0].clientX - currentX;
+    startY = e.touches[0].clientY - currentY;
+  });
+
+  window.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
+    currentX = e.touches[0].clientX - startX;
+    currentY = e.touches[0].clientY - startY;
+    updateTransform();
+  });
+
+  window.addEventListener('touchend', () => {
+    isDragging = false;
+  });
+
+  // 4. 뷰 모드 토글 바인딩
+  gridViewBtn.addEventListener('click', () => {
+    gridViewBtn.classList.add('active');
+    mindmapViewBtn.classList.remove('active');
+    traditionalView.style.display = 'block';
+    mindmapView.style.display = 'none';
+  });
+
+  mindmapViewBtn.addEventListener('click', () => {
+    mindmapViewBtn.classList.add('active');
+    gridViewBtn.classList.remove('active');
+    traditionalView.style.display = 'none';
+    mindmapView.style.display = 'block';
+
+    if (!mindmapInitialized) {
+      buildMindmap();
+      mindmapInitialized = true;
+    } else {
+      triggerBurstAnimation();
+    }
+  });
+
+  // 마인드맵 절대 좌표계 설계
+  const centerX = 1500;
+  const centerY = 1000;
+
+  const nodeMap = [];
+  let isBurst = false;
+
+  function buildMindmap() {
+    nodesLayer.innerHTML = '';
+    if (svg) svg.innerHTML = '';
+    nodeMap.length = 0;
+
+    // [0] 거대한 3D 배경 타이포그래피 (씨네마틱 깊이감)
+    createBgTypo('THE INFINITY', centerX, centerY, -1500, 15);
+    createBgTypo('UPPER MOONS', centerX, centerY - 500, -1000, 8);
+    createBgTypo('LOWER MOONS', centerX, centerY + 500, -1000, 8);
+
+    // [A] 마스터 코어 노드 (Sleek Monolithic Card)
+    const coreNode = document.createElement('div');
+    coreNode.className = 'mindmap-node core-node 3d-core cinematic-card';
+    coreNode.style.left = `${centerX}px`;
+    coreNode.style.top = `${centerY}px`;
+    
+    coreNode.innerHTML = `
+      <div class="cinematic-img-wrapper">
+        <img src="${members.master[0].img}" alt="MASTER">
+        <div class="cinematic-overlay"></div>
+      </div>
+      <div class="cinematic-info">
+        <div class="cine-rank" style="color: #ff1a4a">MASTER</div>
+        <div class="cine-name">${members.master[0].name}</div>
+      </div>
+    `;
+    
+    coreNode.onclick = () => {
+      if (!isBurst) triggerBurstAnimation();
+      else openMemberModal(members.master[0]);
+    };
+    nodesLayer.appendChild(coreNode);
+    nodeMap.push({ el: coreNode, x: centerX, y: centerY, targetX: centerX, targetY: centerY, targetZ: -200, isCore: true });
+
+    // [B] 서열 멤버 노드
+    const upperMembers = members.upper || [];
+    upperMembers.forEach((m, idx) => {
+      const spreadX = (idx - Math.floor(upperMembers.length / 2)) * 220;
+      const zDepth = Math.random() * -600 - 100;
+      createMemberNode(m, centerX + spreadX, centerY - 450, zDepth);
+    });
+
+    const lowerMembers = members.lower || [];
+    lowerMembers.forEach((m, idx) => {
+      const spreadX = (idx - Math.floor(lowerMembers.length / 2)) * 220;
+      const zDepth = Math.random() * -600 - 100;
+      createMemberNode(m, centerX + spreadX, centerY + 450, zDepth);
+    });
+
+    const newMembers = members.new || [];
+    newMembers.forEach((m, idx) => {
+      const spreadX = (idx % 3) * 120;
+      const spreadY = Math.floor(idx / 3) * 150;
+      createMemberNode(m, centerX + 600 + spreadX, centerY + 300 + spreadY, -800, 0.7);
+    });
+
+    updateTransform();
+    
+    // 초기화: 마스터만 노출
+    gsap.set('.member-node:not(.core-node)', { left: centerX, top: centerY, z: 0, opacity: 0, scale: 0.2, filter: 'blur(20px)' });
+    gsap.set('.bg-typo', { opacity: 0, scale: 0.5, z: -3000 });
+    isBurst = false;
+  }
+
+  function createBgTypo(text, tx, ty, tz, blur) {
+    const typo = document.createElement('div');
+    typo.className = 'bg-typo';
+    typo.innerHTML = text;
+    typo.style.left = `${tx}px`;
+    typo.style.top = `${ty}px`;
+    typo.dataset.targetZ = tz;
+    typo.dataset.blur = blur;
+    nodesLayer.appendChild(typo);
+  }
+
+  function createMemberNode(m, tx, ty, tz, forceScale = 1) {
+    const memNode = document.createElement('div');
+    memNode.className = 'mindmap-node member-node floating-node cinematic-card';
+    memNode.style.left = `${centerX}px`;
+    memNode.style.top = `${centerY}px`;
+    memNode.style.setProperty('--node-color', m.color || '#ff1a4a');
+    
+    memNode.innerHTML = `
+      <div class="cinematic-img-wrapper">
+        <img src="${m.img}" alt="${m.name}">
+        <div class="cinematic-overlay"></div>
+      </div>
+      <div class="cinematic-info">
+        <div class="cine-rank" style="color: ${m.color || '#fff'}">${m.rank}</div>
+        <div class="cine-name">${m.name}</div>
+      </div>
+    `;
+    
+    memNode.onclick = () => openMemberModal(m);
+    nodesLayer.appendChild(memNode);
+
+    nodeMap.push({
+      el: memNode,
+      x: centerX,
+      y: centerY,
+      targetX: tx,
+      targetY: ty,
+      targetZ: tz,
+      targetScale: forceScale,
+      isCore: false
+    });
+  }
+
+  function triggerBurstAnimation() {
+    isBurst = true;
+    gsap.killTweensOf('.mindmap-node, .bg-typo');
+
+    const instruction = document.getElementById('space-instruction');
+    if (instruction) gsap.to(instruction, { opacity: 0, duration: 0.5 });
+
+    // 배경 타이포그래피 등장 (Depth 확립)
+    document.querySelectorAll('.bg-typo').forEach((el, i) => {
+      gsap.to(el, {
+        z: el.dataset.targetZ,
+        opacity: 0.15,
+        scale: 1,
+        filter: `blur(${el.dataset.blur}px)`,
+        duration: 2.5,
+        delay: i * 0.1,
+        ease: "expo.out"
+      });
+    });
+
+    // 마스터 코어 Z축 후퇴
+    const core = nodeMap.find(n => n.isCore);
+    if (core) {
+      gsap.to(core.el, {
+        z: core.targetZ,
+        duration: 1.5,
+        ease: "power3.out",
+        boxShadow: "0 0 100px rgba(255, 26, 74, 0.2)"
+      });
+    }
+
+    // 멤버들 3D 공간으로 폭발 (Cinematic Depth of Field)
+    nodeMap.forEach((node) => {
+      if (!node.isCore) {
+        // Z축 깊이에 따른 블러(DOF) 동적 계산
+        const dofBlur = node.targetZ < -400 ? Math.abs(node.targetZ + 400) * 0.01 : 0;
+        
+        gsap.to(node.el, {
+          left: node.targetX,
+          top: node.targetY,
+          z: node.targetZ,
+          scale: node.targetScale,
+          opacity: 1,
+          filter: `blur(${dofBlur}px)`,
+          duration: 1.8,
+          delay: Math.random() * 0.2,
+          ease: "expo.out"
+        });
+      }
+    });
+
+    // 3D Parallax MouseMove 바인딩 (극대화된 카메라 워크)
+    window.addEventListener('mousemove', handleParallax);
+  }
+
+  function handleParallax(e) {
+    if (!isBurst || isDragging) return;
+    const mouseX = (e.clientX / window.innerWidth) - 0.5;
+    const mouseY = (e.clientY / window.innerHeight) - 0.5;
+
+    // 카메라(컨테이너 전체) 미세 패럴랙스
+    gsap.to(canvas, {
+      rotationY: mouseX * 8,
+      rotationX: mouseY * -8,
+      x: mouseX * -100,
+      y: mouseY * -100,
+      duration: 1.5,
+      ease: 'power2.out'
+    });
+
+    // 개별 카드 시차 적용
+    gsap.to('.floating-node', {
+      x: mouseX * -40,
+      y: mouseY * -40,
+      duration: 1,
+      ease: 'power2.out',
+      stagger: 0.002
+    });
+    
+    // 배경 타이포그래피 시차 극대화
+    gsap.to('.bg-typo', {
+      x: mouseX * 150,
+      y: mouseY * 150,
+      duration: 2,
+      ease: 'power2.out'
+    });
+  }
+}
+

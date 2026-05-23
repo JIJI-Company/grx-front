@@ -38,6 +38,9 @@ let galleryData = [];
 
 // ── 페이지 초기화 분기 처리 ──
 document.addEventListener('DOMContentLoaded', async () => {
+  // 공통 프리미엄 인터랙션 구동
+  initCommonInteractions();
+
   initNav();
   
   // 1. GUESTBOOK 초기화
@@ -274,24 +277,40 @@ function initTimes() {
     container.appendChild(item);
   });
 
-  // 🚪 미닫이문(Fusuma) 애니메이션 트리거 (IntersectionObserver)
-  const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-  };
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('is-visible');
-        // 한 번 열리면 계속 열려있게 하려면 unobserve (취향껏 조절)
-        // observer.unobserve(entry.target); 
+  // 🚪 [무한성 장벽 미닫이문 - GSAP ScrollTrigger 시네마틱 연동]
+  document.querySelectorAll('.scroll-item').forEach(item => {
+    const fLeft = item.querySelector('.fusuma-left');
+    const fRight = item.querySelector('.fusuma-right');
+    const tNode = item.querySelector('.timeline-node');
+    const sContent = item.querySelector('.scroll-content');
+    
+    // 타임라인 아이템 개별 타임라인 생성
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: item,
+        start: "top 88%",   // 화면 88% 지점에 닿았을 때 시작
+        end: "top 55%",     // 화면 55% 지점까지 도달 시 문 열림 완료
+        scrub: 1.2,         // 1.2초 저항 스크럽으로 버터처럼 부드럽게 동기화
+        toggleActions: "play none none reverse"
       }
     });
-  }, observerOptions);
 
-  document.querySelectorAll('.scroll-item').forEach(item => {
-    observer.observe(item);
+    if (fLeft && fRight) {
+      tl.to(fLeft, { xPercent: -100, duration: 1 }, 0)
+        .to(fRight, { xPercent: 100, duration: 1 }, 0);
+    }
+    
+    if (tNode) {
+      tl.fromTo(tNode, { scale: 0, backgroundColor: "#555" }, { scale: 1.2, backgroundColor: "#ff1a4a", duration: 0.5 }, 0.2);
+    }
+    
+    if (sContent) {
+      tl.fromTo(sContent, 
+        { opacity: 0, x: 60, scale: 0.95 }, 
+        { opacity: 1, x: 0, scale: 1, duration: 0.8, ease: "power2.out" }, 
+        0.25
+      );
+    }
   });
 }
 
@@ -430,4 +449,106 @@ function initNav() {
       nav.style.borderBottom = '1px solid rgba(255, 26, 74, 0.15)';
     }
   }, { passive: true });
+}
+
+// =========================================
+// 🪐 [프리미엄 GSAP 공통 인터랙션 패키지]
+// =========================================
+function initSmoothScroll() {
+  if (typeof Lenis !== 'undefined') {
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smooth: true
+    });
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add((time) => {
+      lenis.raf(time * 1000);
+    });
+    gsap.ticker.lagSmoothing(0);
+  }
+}
+
+class TextScramble {
+  constructor(el) {
+    this.el = el;
+    this.chars = '!<>-_\\/[]{}—=+*^?#________';
+    this.update = this.update.bind(this);
+  }
+  setText(newText) {
+    const oldText = this.el.innerText;
+    const length = Math.max(oldText.length, newText.length);
+    const promise = new Promise((resolve) => this.resolve = resolve);
+    this.queue = [];
+    for (let i = 0; i < length; i++) {
+      const from = oldText[i] || '';
+      const to = newText[i] || '';
+      const start = Math.floor(Math.random() * 15);
+      const end = start + Math.floor(Math.random() * 15);
+      this.queue.push({ from, to, start, end });
+    }
+    cancelAnimationFrame(this.frameRequest);
+    this.frame = 0;
+    this.update();
+    return promise;
+  }
+  update() {
+    let output = '';
+    let complete = 0;
+    for (let i = 0, n = this.queue.length; i < n; i++) {
+      let { from, to, start, end, char } = this.queue[i];
+      if (this.frame >= end) {
+        complete++;
+        output += to;
+      } else if (this.frame >= start) {
+        if (!char || Math.random() < 0.28) {
+          char = this.randomChar();
+          this.queue[i].char = char;
+        }
+        output += `<span style="color: #e11d48; opacity: 0.7;">${char}</span>`;
+      } else {
+        output += from;
+      }
+    }
+    this.el.innerHTML = output;
+    if (complete === this.queue.length) {
+      this.resolve();
+    } else {
+      this.frameRequest = requestAnimationFrame(this.update);
+      this.frame++;
+    }
+  }
+  randomChar() {
+    return this.chars[Math.floor(Math.random() * this.chars.length)];
+  }
+}
+
+function initCommonInteractions() {
+  initSmoothScroll();
+
+  // 메뉴 호버 스크램블
+  document.querySelectorAll('.nav-links a').forEach(link => {
+    const originalText = link.innerText;
+    const fx = new TextScramble(link);
+    let isScrambling = false;
+    
+    link.addEventListener('mouseenter', () => {
+      if (isScrambling) return;
+      isScrambling = true;
+      fx.setText(originalText).then(() => {
+        isScrambling = false;
+      });
+    });
+  });
+
+  // 헤더 타이틀 디코딩 등장 연출
+  const glowTitle = document.querySelector('.glow-title, .hero-title, .archive-title, .sch-title-main');
+  if (glowTitle) {
+    const orig = glowTitle.innerText;
+    const fx = new TextScramble(glowTitle);
+    gsap.set(glowTitle, { opacity: 1 });
+    setTimeout(() => {
+      fx.setText(orig);
+    }, 400);
+  }
 }
