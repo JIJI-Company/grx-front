@@ -5,7 +5,6 @@ const initialMessages = [
   { author: '무명의 혈귀', target: '꾸티뉴', text: '마스터님 이번 합동 방송 최고였습니다!! 영원히 충성!! 🔥' },
   { author: '달빛 검사', target: '야무지', text: '야무지님 달의 호흡 폼 미쳤다... 랭크전 1위 기원합니다!' },
   { author: '북극의 사냥꾼', target: '엔쥬', text: '얼음 깎는 장인 엔쥬 화이팅! 빙결 혈귀술 만만세 ❄️' },
-  { author: '주먹이 운다', target: '란다', text: '파괴살 권술 타격감 완전 돌았음... 란다님 방송 너무 재밌어요!' },
   { author: '항아리 요정', target: '리카', text: '리카님 항아리 소환할 때마다 빵빵 터져요 ㅋㅋㅋ' },
   { author: '하현 뉴비', target: '하현', text: '하현 분들 다들 너무 귀여우신 거 아닙니까 ㅠㅠ 다뮤 난워니 화이팅!' },
 ];
@@ -21,12 +20,10 @@ const staticImages = [
   { author: "GRVR", desc: "고퀄리티 스페셜 - 난워니", img: "/img2/nanwoni.png" },
   { author: "GRVR", desc: "고퀄리티 스페셜 - 다뮤", img: "/img2/damu.png" },
   { author: "GRVR", desc: "고퀄리티 스페셜 - 딴딴", img: "/img2/ttanttan.png" },
-  { author: "GRVR", desc: "고퀄리티 스페셜 - 란다", img: "/img2/randa.jpg" },
   { author: "GRVR", desc: "고퀄리티 스페셜 - 리카", img: "/img2/lika.jpg" },
   { author: "GRVR", desc: "고퀄리티 스페셜 - 바먀", img: "/img2/baamya.png" },
   { author: "GRVR", desc: "고퀄리티 스페셜 - 야주미", img: "/img2/yamuzi.jpg" },
   { author: "GRVR", desc: "고퀄리티 스페셜 - 엔쥬", img: "/img2/enju.jpg" },
-  { author: "GRVR", desc: "고퀄리티 스페셜 - 초구ㅏ", img: "/img2/chogua.png" },
   { author: "GRVR", desc: "고퀄리티 스페셜 - 서라0", img: "/img2/seora0.jpg" },
   { author: "GRVR", desc: "고퀄리티 스페셜 - 임민트", img: "/img/mint.png" }
 ];

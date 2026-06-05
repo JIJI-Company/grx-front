@@ -503,10 +503,8 @@ async function checkLiveStatus() {
     const memberImages = {
       "꾸티뉴": "img/ggutinho.png", "엔쥬": "img/enju.png",
       "난워니": "img/nanana.png", "야무지": "img/yamuzi.png",
-      "란다": "img/randa.png",
       "리카": "img/lika.png",
       "다뮤": "img/damu.jpeg", "딴딴2당": "img/ttanttan.jpeg",
-      "초귀요미": "img/cho-cutie.png",
       "바먀": "img/baamya.png",
       "서라0": "img/서라0.jpg",
       "임민트": "img/mint.png",
