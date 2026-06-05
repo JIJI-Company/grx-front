@@ -23,12 +23,9 @@ const staticImages = [
   { author: "GRVR", desc: "고퀄리티 스페셜 - 딴딴", img: "/img2/ttanttan.png" },
   { author: "GRVR", desc: "고퀄리티 스페셜 - 란다", img: "/img2/randa.jpg" },
   { author: "GRVR", desc: "고퀄리티 스페셜 - 리카", img: "/img2/lika.jpg" },
-  { author: "GRVR", desc: "고퀄리티 스페셜 - 밈먀", img: "/img2/mimmya.png" },
   { author: "GRVR", desc: "고퀄리티 스페셜 - 바먀", img: "/img2/baamya.png" },
-  { author: "GRVR", desc: "고퀄리티 스페셜 - 셀키", img: "/img2/selky.png" },
   { author: "GRVR", desc: "고퀄리티 스페셜 - 야주미", img: "/img2/yamuzi.jpg" },
   { author: "GRVR", desc: "고퀄리티 스페셜 - 엔쥬", img: "/img2/enju.jpg" },
-  { author: "GRVR", desc: "고퀄리티 스페셜 - 영감", img: "/img2/yeonggam.png" },
   { author: "GRVR", desc: "고퀄리티 스페셜 - 초구ㅏ", img: "/img2/chogua.png" },
   { author: "GRVR", desc: "고퀄리티 스페셜 - 서라0", img: "/img2/seora0.jpg" },
   { author: "GRVR", desc: "고퀄리티 스페셜 - 임민트", img: "/img/mint.png" }
