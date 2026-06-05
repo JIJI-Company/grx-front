@@ -15,9 +15,9 @@ const CONFIG = {
 
   EVENT_POPUP: {
     enable: true,
-    title: "🎉 WELCOME 냥쏘,윤타미,김옥독🎉",
-    message: "새로운 혈귀들을 환영해주세요!<br>",
-    imageUrl: "img/welcom.png",
+    title: "🎉 GOODBYE🎉",
+    message: " 또다른 도전을 응원해주세여!<br>",
+    imageUrl: "img/goodbye.png",
     link: ""
   },
 
