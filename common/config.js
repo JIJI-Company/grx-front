@@ -18,7 +18,7 @@ const CONFIG = {
   EVENT_POPUP: {
     enable: true,
     title: "🎉 WELCOME🎉",
-    message: "새로운 혈귀를!<br>",
+    message: "새로운 혈귀 모야를 환영해주세요!<br>",
     imageUrl: "img/moya.png",
     link: ""
   },
