@@ -41,6 +41,24 @@ const DataService = {
   },
 
   async fetchFromServer(type) {
+    if (type === 'notion_calendar') {
+      const proxyUrl = CONFIG.NOTION_CALENDAR_PROXY || "/.netlify/functions/notion-calendar";
+      try {
+        const response = await fetch(proxyUrl);
+        if (!response.ok) throw new Error(`Proxy Error: ${response.status}`);
+        
+        const data = await response.json();
+        if (data && (CONFIG.TTLS[type] > 0)) {
+          this.setCache(type, data);
+        }
+        
+        return data;
+      } catch (err) {
+        console.error(`[DataService] notion_calendar 로드 실패:`, err.message);
+        return [];
+      }
+    }
+
     const sheetNameMap = { 
       'live': 'Live', 
       'history': 'History', 
@@ -96,5 +114,6 @@ const DataService = {
   async getHistory()   { return await this.getData('history'); },
   async getTimes()     { return await this.getData('times'); },
   async getPosts()     { return await this.getData('posts'); },
-  async getSchedules() { return await this.getData('schedule'); }
+  async getSchedules() { return await this.getData('schedule'); },
+  async getNotionSchedules(onUpdate = null) { return await this.getData('notion_calendar', onUpdate); }
 };

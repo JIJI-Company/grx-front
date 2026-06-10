@@ -1,6 +1,7 @@
 const CONFIG = {
   GAS_PROXY: "/.netlify/functions/gas-proxy",
   STOCK_PROXY: "/.netlify/functions/stock-proxy",
+  NOTION_CALENDAR_PROXY: "/.netlify/functions/notion-calendar",
   API_TOKEN: "SERVER_MANAGED", 
   
   TTLS: {
@@ -8,7 +9,8 @@ const CONFIG = {
     history: 3600,
     times: 3600,
     posts: 3600,
-    schedule: 60
+    schedule: 60,
+    notion_calendar: 10
   },
 
   CACHE_VERSION: 9,

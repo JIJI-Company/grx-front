@@ -1246,7 +1246,6 @@ nav {
   gap: 30px;
   overflow-x: auto;
   padding: 40px 10%; /* Center peek */
-  scroll-behavior: smooth;
   scrollbar-width: none;
   mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
   perspective: 2000px;

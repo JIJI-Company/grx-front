@@ -206,6 +206,20 @@ const members = {
       color: '#5DADE2',
       link: 'https://www.sooplive.com/station/bomsai',
     },
+    {
+      id: 'moya',
+      name: '모야',
+      rank: 'NEW',
+      img: 'img/moya.png',
+      art: '모야의 호흡',
+      desc: '신입 혈귀.',
+      keywords: '#모야 #신입',
+      birthday: '??',
+      mbti: '??',
+      tmi: '상세 정보 업데이트 예정입니다.',
+      color: '#fce17e',
+      link: 'https://www.sooplive.com/station/neul0908',
+    },
   ],
 };
 
@@ -372,6 +386,7 @@ function openMemberModal(data) {
     `;
 
   overlay.style.display = 'flex';
+  overlay.classList.add('active');
   
   // 🪐 3D 공간감 확장 GSAP 오프닝 시퀀스
   gsap.killTweensOf([overlay, ".modal-left img", ".modal-right > *", "#modal-detail-view"]);
@@ -420,6 +435,7 @@ function closeMemberModal() {
     ease: "power2.in",
     onComplete: () => {
       overlay.style.display = 'none';
+      overlay.classList.remove('active');
     }
   });
 }

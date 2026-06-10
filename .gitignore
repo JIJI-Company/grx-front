@@ -8,3 +8,5 @@ node_modules
 .npm
 dist/
 stock/
+calendar.html
+netlify/functions/notion-calendar.mjs
