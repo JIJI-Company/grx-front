@@ -219,7 +219,21 @@ const members = {
       tmi: '상세 정보 업데이트 예정입니다.',
       color: '#fce17e',
       link: 'https://www.sooplive.com/station/neul0908',
+    },{
+      id: 'sosimhae',
+      name: '소심해',
+      rank: 'NEW',
+      img: 'img/sosim.jpeg',
+      art: '소심해',
+      desc: '신입 혈귀.',
+      keywords: '#소심해 #신입',
+      birthday: '??',
+      mbti: '??',
+      tmi: '상세 정보 업데이트 예정입니다.',
+      color: '#EADDE2',
+      link: 'https://www.sooplive.com/station/thtlago0607',
     },
+    
   ],
 };
 

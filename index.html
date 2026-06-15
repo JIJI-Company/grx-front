@@ -49,7 +49,7 @@
     <nav id="navbar">
       <a href="index.html" class="logo glow-title">G-CASTLE</a>
       <div class="nav-links">
-        <a href="live.html">LIVE</a><a href="members.html">MEMBERS</a><a href="history.html">HISTORY</a><a href="times.html">TIMES</a><a href="schedule.html">SCHEDULE</a><!-- <a href="calendar.html">CALENDAR</a> -->
+        <a href="live.html">LIVE</a><a href="members.html">MEMBERS</a><a href="history.html">HISTORY</a><a href="times.html">TIMES</a><a href="schedule.html">SCHEDULE</a><a href="calendar.html">CALENDAR</a>
       </div>
     </nav>
 
@@ -103,6 +103,153 @@
           </div>
         </div>
       </div>
+
+      <!-- 주간 미니 캘린더 -->
+      <div class="container calendar-preview-section animate-fade-in" style="margin-top: 20px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <div>
+            <h2 class="section-title" style="margin-bottom: 4px;">WEEKLY SCHEDULE</h2>
+            <span id="miniCalWeekLabel" style="font-size:0.85rem; color:#666;"></span>
+          </div>
+          <a href="calendar.html" style="
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 20px;
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: #f9a8d4;
+            border: 1px solid rgba(225, 29, 72, 0.5);
+            background: rgba(225, 29, 72, 0.08);
+            border-radius: 6px;
+            text-decoration: none;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+            white-space: nowrap;
+          "
+          onmouseover="this.style.background='rgba(225,29,72,0.2)';this.style.borderColor='rgba(225,29,72,0.9)';this.style.color='#fff';"
+          onmouseout="this.style.background='rgba(225,29,72,0.08)';this.style.borderColor='rgba(225,29,72,0.5)';this.style.color='#f9a8d4';"
+          >전체 캘린더 <span style="font-size:1rem;">→</span></a>
+        </div>
+        <!-- 요일 헤더 -->
+        <div class="mini-week-header">
+          <div class="mini-week-dow sun">일</div>
+          <div class="mini-week-dow">월</div>
+          <div class="mini-week-dow">화</div>
+          <div class="mini-week-dow">수</div>
+          <div class="mini-week-dow">목</div>
+          <div class="mini-week-dow">금</div>
+          <div class="mini-week-dow sat">토</div>
+        </div>
+        <!-- 7일 그리드 -->
+        <div class="mini-week-grid" id="homeMiniCalendar">
+          <div style="color:#aaa; text-align:center; padding:30px; grid-column: 1 / span 7;">이번 주 일정을 불러오는 중...</div>
+        </div>
+      </div>
+
+      <style>
+      /* 주간 미니 캘린더 그리드 */
+      .mini-week-header {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-bottom: none;
+      }
+      .mini-week-dow {
+        padding: 8px 0;
+        text-align: center;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #777;
+        letter-spacing: 1px;
+        border-right: 1px solid rgba(255,255,255,0.06);
+      }
+      .mini-week-dow:last-child { border-right: none; }
+      .mini-week-dow.sun { color: #f87171; }
+      .mini-week-dow.sat { color: #60a5fa; }
+
+      .mini-week-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-top: 2px solid #e11d48;
+        min-height: 130px;
+      }
+      .mini-week-col {
+        border-right: 1px solid rgba(255,255,255,0.06);
+        background: #0d0d0d;
+        display: flex;
+        flex-direction: column;
+        min-height: 130px;
+      }
+      .mini-week-col:last-child { border-right: none; }
+      .mini-week-col.today-col {
+        background: rgba(225, 29, 72, 0.05);
+      }
+      .mini-week-col-header {
+        padding: 8px 0;
+        text-align: center;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+      }
+      .mini-week-day-num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #aaa;
+        border-radius: 50%;
+      }
+      .mini-week-day-num.is-today {
+        background: #e11d48;
+        color: #fff;
+      }
+      .mini-week-day-num.is-sun { color: #f87171; }
+      .mini-week-day-num.is-sat { color: #60a5fa; }
+      .mini-week-day-num.is-today.is-sun,
+      .mini-week-day-num.is-today.is-sat { color: #fff; }
+
+      .mini-week-events {
+        padding: 3px 2px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        flex: 1;
+      }
+      .mini-week-event-card {
+        padding: 2px 5px;
+        font-size: 0.68rem;
+        font-weight: 600;
+        color: #fce7f3;
+        background: #2d0a1a;
+        border-left: 2px solid #db2777;
+        cursor: pointer;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        transition: filter 0.2s;
+        line-height: 1.5;
+      }
+      .mini-week-event-card:hover { filter: brightness(1.3); }
+      .mini-week-event-card.is-dayoff {
+        background: #2d2200;
+        border-left-color: #f59e0b;
+        color: #fde68a;
+      }
+      .mini-week-event-card.is-content {
+        background: #012a2e;
+        border-left-color: #06b6d4;
+        color: #a5f3fc;
+      }
+      @media (max-width: 768px) {
+        .mini-week-event-card { font-size: 0.6rem; }
+        .mini-week-day-num { width: 22px; height: 22px; font-size: 0.78rem; }
+      }
+      </style>
 
       <div class="container news-section animate-fade-in">
         <div class="section-row">
@@ -243,6 +390,13 @@
       <img src="img/moya.png" alt="모야">
       <div class="mini-card-info">
         <p class="mini-name">모야</p>
+      </div>
+    </div>
+
+    <div class="mini-card">
+      <img src="img/sosim.jpeg" alt="소심해">
+      <div class="mini-card-info">
+        <p class="mini-name">소심해</p>
       </div>
     </div>
 
@@ -426,6 +580,121 @@
               }, 500);
             }
           });
+        }
+      })();
+
+      // 메인 홈 미니 캘린더 로드
+      (async function loadHomeMiniCalendar() {
+        const container = document.getElementById('homeMiniCalendar');
+        if (!container) return;
+        
+        try {
+          const schedules = await DataService.getNotionSchedules();
+          if (!Array.isArray(schedules) || schedules.length === 0) {
+            container.innerHTML = '<div style="color: #666; text-align: center; padding: 20px;">예정된 일정이 없습니다.</div>';
+            return;
+          }
+
+          const current = new Date();
+          const day = current.getDay();
+          const diff = current.getDate() - day; // 이번주 일요일 기준
+          const firstDay = new Date(current.getFullYear(), current.getMonth(), diff);
+          const days = [];
+          for (let i = 0; i < 7; i++) {
+            days.push(new Date(firstDay.getFullYear(), firstDay.getMonth(), firstDay.getDate() + i));
+          }
+
+          // scheduleMap: 다중일 일정도 날짜 범위 전체에 등록
+          const scheduleMap = {};
+          const addToMap = (key, s) => {
+            if (!scheduleMap[key]) scheduleMap[key] = [];
+            if (!scheduleMap[key].find(e => e.id === s.id)) scheduleMap[key].push(s);
+          };
+          schedules.forEach(s => {
+            if (!s.date) return;
+            const startStr = s.date.slice(0, 10);
+            if (!s.endDate) {
+              addToMap(startStr, s);
+            } else {
+              const endStr = s.endDate.slice(0, 10);
+              const [sy, sm, sd] = startStr.split('-').map(Number);
+              const [ey, em, ed] = endStr.split('-').map(Number);
+              let loop = new Date(sy, sm - 1, sd);
+              const endObj = new Date(ey, em - 1, ed);
+              while (loop <= endObj) {
+                const k = `${loop.getFullYear()}-${String(loop.getMonth()+1).padStart(2,'0')}-${String(loop.getDate()).padStart(2,'0')}`;
+                addToMap(k, s);
+                loop.setDate(loop.getDate() + 1);
+              }
+            }
+          });
+
+          // 날짜별 이벤트 오름차순 정렬 (종일 먼저, 이후 시간순)
+          Object.keys(scheduleMap).forEach(key => {
+            scheduleMap[key].sort((a, b) => {
+              const aT = a.date && a.date.includes('T');
+              const bT = b.date && b.date.includes('T');
+              if (!aT && bT) return -1;
+              if (aT && !bT) return 1;
+              return new Date(a.date) - new Date(b.date);
+            });
+          });
+
+          // 주간 레이블 설정
+          const weekLabel = document.getElementById('miniCalWeekLabel');
+          if (weekLabel) {
+            const first = days[0], last = days[6];
+            weekLabel.textContent = `${first.getMonth()+1}월 ${first.getDate()}일 ~ ${last.getMonth()+1}월 ${last.getDate()}일`;
+          }
+
+          container.innerHTML = '';
+          const todayStr = `${current.getFullYear()}-${String(current.getMonth()+1).padStart(2,'0')}-${String(current.getDate()).padStart(2,'0')}`;
+
+          days.forEach((d, i) => {
+            const y = d.getFullYear();
+            const mo = d.getMonth();
+            const dt = d.getDate();
+            const key = `${y}-${String(mo+1).padStart(2,'0')}-${String(dt).padStart(2,'0')}`;
+            const isToday = key === todayStr;
+            const isSun = i === 0;
+            const isSat = i === 6;
+            const events = scheduleMap[key] || [];
+
+            const col = document.createElement('div');
+            col.className = 'mini-week-col' + (isToday ? ' today-col' : '');
+
+            // 날짜 헤더
+            const header = document.createElement('div');
+            header.className = 'mini-week-col-header';
+            const numClasses = ['mini-week-day-num',
+              isToday ? 'is-today' : '',
+              isSun   ? 'is-sun'   : '',
+              isSat   ? 'is-sat'   : ''
+            ].filter(Boolean).join(' ');
+            header.innerHTML = `<span class="${numClasses}">${dt}</span>`;
+            col.appendChild(header);
+
+            // 이벤트 카드
+            const evBox = document.createElement('div');
+            evBox.className = 'mini-week-events';
+            events.forEach(ev => {
+              const tags = Array.isArray(ev.tags) ? ev.tags : [];
+              const isDayOff  = ev.title.includes('휴방') || tags.includes('휴방');
+              const isContent = tags.includes('콘텐츠') || tags.includes('컨텐츠') || ev.title.includes('콘텐츠') || ev.title.includes('컨텐츠');
+              const cardClass = isDayOff ? 'is-dayoff' : isContent ? 'is-content' : '';
+              const card = document.createElement('div');
+              card.className = `mini-week-event-card ${cardClass}`.trim();
+              card.textContent = ev.title;
+              card.onclick = () => window.location.href = 'calendar.html';
+              evBox.appendChild(card);
+            });
+            col.appendChild(evBox);
+            container.appendChild(col);
+          });
+
+        } catch(err) {
+          console.warn("Mini calendar load err:", err);
+          container.innerHTML = '<div style="color: #ff1a4a; text-align: center; padding: 20px;">일정을 불러오지 못했습니다.</div>';
         }
       })();
     </script>

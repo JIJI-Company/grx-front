@@ -9,8 +9,8 @@ const CONFIG = {
     history: 3600,
     times: 3600,
     posts: 3600,
-    schedule: 60,
-    notion_calendar: 10
+    schedule: 0,
+    notion_calendar: 0
   },
 
   CACHE_VERSION: 9,
@@ -18,8 +18,8 @@ const CONFIG = {
   EVENT_POPUP: {
     enable: true,
     title: "🎉 WELCOME🎉",
-    message: "새로운 혈귀 모야를 환영해주세요!<br>",
-    imageUrl: "img/moya.png",
+    message: "새로운 혈귀 소심해를 환영해주세요<br>",
+    imageUrl: "img/welcome_sosim.png",
     link: ""
   },
 
