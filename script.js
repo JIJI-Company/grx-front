@@ -511,7 +511,8 @@ async function checkLiveStatus() {
       "김옥독": "img/okdok.png",
       "냥쏘": "img/nangsso.png",
       "윤타미": "img/tami.png",
-      "모야": "img/moya.png"
+      "모야": "img/moya.png",
+      "소심해": "img/sosim.jpeg"
     };
 
     function getAvatar(name) {
