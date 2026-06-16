@@ -10,7 +10,7 @@ const members = {
       desc: '지-캐슬의 마스터.',
       keywords: '#지마스터 #무한성주인',
       birthday: '12.25',
-      mbti: 'INTJ',
+      mbti: 'INTP',
       tmi: '무한성을 총괄하며 모든 혈귀들을 관리합니다.',
       color: '#cc0033',
       link: 'https://www.sooplive.com/station/aksen7833',
