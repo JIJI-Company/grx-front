@@ -1311,7 +1311,7 @@
               if (aHasTime && !bHasTime) return -1;
               const aTime = new Date(a.date).getTime();
               const bTime = new Date(b.date).getTime();
-              return bTime - aTime; // 내림차순: 늦은 시간 → 이른 시간
+              return aTime - bTime; // 오름차순: 이른 시간 → 늦은 시간
             });
           });
 
