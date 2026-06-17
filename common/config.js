@@ -17,9 +17,9 @@ const CONFIG = {
 
   EVENT_POPUP: {
     enable: true,
-    title: "🎉 WELCOME🎉",
-    message: "새로운 혈귀 소심해를 환영해주세요<br>",
-    imageUrl: "img/welcome_sosim.png",
+    title: "🎉 I LOVE OKDOK🎉",
+    message: "우리 옥독이를 사랑해주세요<br>",
+    imageUrl: "img/oclove.png",
     link: ""
   },
 
