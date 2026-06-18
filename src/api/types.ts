@@ -85,6 +85,7 @@ export interface LiveStatus {
   isLive: boolean;
   viewerCount: number | null;
   liveTitle: string | null;
+  liveThumbnailUrl: string | null;
   streamUrl: string | null;
   streamStatus: string;
   checkedAt: string | null;

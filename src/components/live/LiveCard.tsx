@@ -5,7 +5,12 @@ interface LiveCardProps {
 }
 
 export default function LiveCard({ stream }: LiveCardProps) {
-  const imageSource = stream.profileImageUrl ?? undefined;
+  // Live snapshot when on-air (cache-busted per render), else the profile image.
+  const liveThumb =
+    stream.isLive && stream.liveThumbnailUrl
+      ? `${stream.liveThumbnailUrl}?t=${Date.now()}`
+      : null;
+  const imageSource = liveThumb ?? stream.profileImageUrl ?? undefined;
 
   const handleClick = () => {
     const url = stream.streamUrl ?? stream.channelUrl;
@@ -24,6 +29,13 @@ export default function LiveCard({ stream }: LiveCardProps) {
             src={imageSource}
             alt={stream.memberName ?? 'member'}
             style={{ objectPosition: 'top' }}
+            onError={(e) => {
+              // Live snapshot can 404 right after a stream ends — fall back to profile.
+              const img = e.currentTarget;
+              if (stream.profileImageUrl && img.src !== stream.profileImageUrl) {
+                img.src = stream.profileImageUrl;
+              }
+            }}
           />
         )}
         <div className={`live-badge ${stream.isLive ? '' : 'offline-badge'}`}>

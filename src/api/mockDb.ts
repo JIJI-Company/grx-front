@@ -244,6 +244,7 @@ export const mockGetLiveStatus = async (): Promise<LiveStatus[]> => {
         isLive: r.status === 'on-air',
         viewerCount: null,
         liveTitle: r.streamTitle || null,
+        liveThumbnailUrl: null, // mock has no broadcast number to derive a snapshot
         streamUrl: r.status === 'on-air' ? (r.link || null) : null,
         streamStatus: r.status === 'on-air' ? 'LIVE' : 'OFFLINE',
         checkedAt: new Date().toISOString(),
