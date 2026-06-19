@@ -11,58 +11,29 @@ export default function LikaCharacterInfo({ member }: LikaCharacterInfoProps) {
   ];
 
   return (
-    <div
-      style={{
-        background: 'var(--card-bg)',
-        border: '1px solid var(--glass-border)',
-        borderRadius: 8,
-        padding: 28,
-        marginBottom: 40,
-      }}
-    >
-      <h2 className="section-title" style={{ marginBottom: 16 }}>CHARACTER INFO</h2>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-          gap: 16,
-        }}
-      >
+    <div className="glass-panel mb-10 rounded-panel p-5 sm:p-7">
+      <h2 className="section-title mb-4">CHARACTER INFO</h2>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {fields.map(({ label, value }) => (
           <div
             key={label}
-            style={{
-              padding: '12px 16px',
-              background: 'rgba(255,255,255,0.03)',
-              borderRadius: 4,
-            }}
+            className="rounded-sm bg-white/3 px-4 py-3"
           >
-            <div
-              style={{
-                fontSize: '0.65rem',
-                letterSpacing: 3,
-                color: 'var(--bright-rose)',
-                textTransform: 'uppercase',
-                marginBottom: 4,
-              }}
-            >
+            <div className="mb-1 text-[0.65rem] tracking-[0.2em] text-ruby-600 uppercase">
               {label}
             </div>
-            <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{value}</div>
+            <div className="text-sm font-bold">{value}</div>
           </div>
         ))}
       </div>
       {member.description && (
-        <div style={{ marginTop: 16 }}>
+        <div className="mt-4">
           {member.description.split('\n').filter(Boolean).map((line, index) => (
             <p
               key={`${line}-${index}`}
-              style={{
-                fontSize: '0.85rem',
-                color: index === 0 ? '#ccc' : '#888',
-                lineHeight: 1.6,
-                marginBottom: 4,
-              }}
+              className={`mb-1 text-sm leading-relaxed ${
+                index === 0 ? 'text-ink-200' : 'text-ink-400'
+              }`}
             >
               {line}
             </p>

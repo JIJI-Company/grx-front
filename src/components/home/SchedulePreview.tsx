@@ -13,7 +13,7 @@ export default function SchedulePreview({ items }: SchedulePreviewProps) {
       <div className="box-header">CASTLE SCHEDULE</div>
       <div className="schedule-list">
         {topItems.length === 0 && (
-          <div style={{ color: '#555', fontSize: '0.85rem' }}>진행 예정인 일정이 없습니다.</div>
+          <div className="text-sm text-ink-600">진행 예정인 일정이 없습니다.</div>
         )}
         {topItems.map((item) => {
           const member = item.contentMembers?.[0]?.member;
@@ -40,11 +40,10 @@ export default function SchedulePreview({ items }: SchedulePreviewProps) {
           );
         })}
       </div>
-      <div style={{ marginTop: 20, textAlign: 'center' }}>
+      <div className="mt-5 text-center">
         <Link
           to="/schedule"
-          className="premium-view-live-btn"
-          style={{ padding: '10px 24px', fontSize: '0.95rem' }}
+          className="premium-view-live-btn px-6 py-2.5 text-sm"
         >
           <span className="pulse-ring" />
           <span>전체 스케줄 보러가기</span>

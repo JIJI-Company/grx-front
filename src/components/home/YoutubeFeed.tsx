@@ -11,7 +11,7 @@ export default function YoutubeFeed() {
       <div className="youtube-box">
         <div className="yt-placeholder" onClick={() => window.open(youtubeChannelUrl, '_blank')}>
           <p>서버 지연으로 영상을 바로 불러올 수 없습니다.</p>
-          <span style={{ fontSize: '0.8rem', color: '#888', marginTop: 5, display: 'block' }}>
+          <span className="mt-1 block text-xs text-ink-400">
             여기를 클릭하여 유튜브에서 직접 확인하세요!
           </span>
         </div>

@@ -11,29 +11,20 @@ export default function LikaDiary() {
   }, [isOpen]);
 
   return (
-    <div style={{ textAlign: 'center', marginTop: 40, paddingBottom: 60 }}>
-      <p style={{ color: '#555', fontSize: '0.78rem', marginBottom: 12 }}>비밀이 있다...</p>
+    <div className="mt-10 pb-15 text-center">
+      <p className="mb-3 text-xs text-ink-600">비밀이 있다...</p>
       <button
         className="premium-view-live-btn"
         onClick={() => setIsOpen(true)}
-        style={{ padding: '12px 28px' }}
       >
         <span>📖 리카의 다이어리 열기</span>
       </button>
       {isOpen && (
         <div
           id="lika-diary-reveal"
-          style={{
-            marginTop: 24,
-            padding: 28,
-            background: '#FFFDE7',
-            borderRadius: 8,
-            color: '#5D4037',
-            textAlign: 'center',
-            animation: 'none',
-          }}
+          className="mt-6 rounded-panel bg-[#FFFDE7] p-5 text-center text-[#5D4037] sm:p-7"
         >
-          <h3 style={{ fontSize: '1.4rem', fontWeight: 900, marginBottom: 8 }}>
+          <h3 className="mb-2 text-xl font-black">
             LIKA&apos;S DIARY
           </h3>
           <p>🦖 항아리 안에 비밀이 있습니다 💖</p>

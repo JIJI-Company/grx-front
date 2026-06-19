@@ -9,7 +9,7 @@ export default function LivePage() {
   const { data: scheduleItems = [] } = useSchedule();
 
   return (
-    <div className="live-page-wrap container">
+    <div className="page-wrap">
       <PageHeader
         title="LIVE CASTLE"
         subtitle="무한성의 대시보드에서 실시간 방송 상태를 확인하십시오."

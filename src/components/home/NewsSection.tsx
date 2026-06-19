@@ -7,7 +7,7 @@ interface NewsSectionProps {
 
 export default function NewsSection({ items }: NewsSectionProps) {
   return (
-    <div className="container news-section animate-fade-in">
+    <div className="page-shell news-section animate-fade-in">
       <div className="section-row">
         <div className="news-main">
           <h2 className="section-title">LATEST ANNOUNCEMENT</h2>
@@ -32,7 +32,7 @@ export default function NewsSection({ items }: NewsSectionProps) {
               </div>
             ))}
             {items.length === 0 && (
-              <p style={{ color: '#666', gridColumn: '1/-1' }}>뉴스를 불러오는 중입니다.</p>
+              <p className="col-span-full text-ink-500">뉴스를 불러오는 중입니다.</p>
             )}
           </div>
         </div>
@@ -41,7 +41,7 @@ export default function NewsSection({ items }: NewsSectionProps) {
           <YoutubeFeed />
         </div>
       </div>
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: 40 }}>
+      <div className="mt-10 flex justify-center">
         <button className="view-all-btn" onClick={() => { window.location.href = '/times'; }}>
           전체 타임즈 보러가기 →
         </button>

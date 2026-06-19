@@ -48,53 +48,33 @@ export default function WeeklyCalendar({ events }: WeeklyCalendarProps) {
   const weekLabel = `${toDateString(days[0])} ~ ${toDateString(days[6])}`;
 
   return (
-    <div
-      className="container calendar-preview-section animate-fade-in"
-      style={{ marginTop: 20, marginBottom: 20 }}
-    >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+    <div className="page-shell calendar-preview-section animate-fade-in my-5 overflow-hidden">
+      <div className="mb-4 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h2 className="section-title" style={{ marginBottom: 4 }}>WEEKLY SCHEDULE</h2>
-          <span style={{ fontSize: '0.85rem', color: '#666' }}>{weekLabel}</span>
+          <h2 className="section-title mb-1">WEEKLY SCHEDULE</h2>
+          <span className="text-xs text-ink-500 sm:text-sm">{weekLabel}</span>
         </div>
         <Link
           to="/calendar"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 6,
-            padding: '8px 20px',
-            fontFamily: "'Oswald', sans-serif",
-            fontSize: '0.85rem',
-            fontWeight: 600,
-            letterSpacing: 1,
-            color: '#f9a8d4',
-            border: '1px solid rgba(225,29,72,0.5)',
-            background: 'rgba(225,29,72,0.08)',
-            borderRadius: 6,
-            textDecoration: 'none',
-          }}
+          className="focus-ring inline-flex items-center gap-1.5 rounded-md border border-ruby-600/50 bg-ruby-600/8 px-4 py-2 font-display text-xs font-semibold tracking-wider text-pink-300 sm:px-5 sm:text-sm"
         >
           전체 캘린더 →
         </Link>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, marginBottom: 4 }}>
+      <div className="grid min-w-[36rem] grid-cols-7 gap-1 pb-1">
         {dayOfWeekLabels.map((label, index) => (
           <div
             key={label}
-            style={{
-              textAlign: 'center',
-              fontSize: '0.75rem',
-              fontWeight: 700,
-              color: index === 0 ? '#f87171' : index === 6 ? '#60a5fa' : '#666',
-              padding: '6px 0',
-            }}
+            className={`py-1.5 text-center text-xs font-bold ${
+              index === 0 ? 'text-red-400' : index === 6 ? 'text-blue-400' : 'text-ink-500'
+            }`}
           >
             {label}
           </div>
         ))}
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
+      <div className="no-scrollbar overflow-x-auto pb-2">
+        <div className="grid min-w-[36rem] grid-cols-7 gap-1">
         {days.map((day) => {
           const key = toDateString(day);
           const dayEvents = eventsByDate[key] ?? [];
@@ -103,59 +83,46 @@ export default function WeeklyCalendar({ events }: WeeklyCalendarProps) {
           return (
             <div
               key={key}
-              style={{
-                background: isToday ? 'rgba(225,29,72,0.1)' : 'rgba(255,255,255,0.03)',
-                border: isToday
-                  ? '1px solid rgba(225,29,72,0.5)'
-                  : '1px solid rgba(255,255,255,0.07)',
-                borderRadius: 8,
-                padding: '8px 6px',
-                minHeight: 80,
-              }}
+              className={`min-h-20 rounded-panel border px-1.5 py-2 ${
+                isToday
+                  ? 'border-ruby-600/50 bg-ruby-600/10'
+                  : 'border-white/7 bg-white/3'
+              }`}
             >
               <div
-                style={{
-                  textAlign: 'center',
-                  fontSize: '0.85rem',
-                  fontWeight: isToday ? 900 : 400,
-                  color: isToday
-                    ? '#e11d48'
+                className={`mb-1.5 text-center text-sm ${
+                  isToday
+                    ? 'font-black text-ruby-600'
                     : day.getDay() === 0
-                      ? '#f87171'
+                      ? 'text-red-400'
                       : day.getDay() === 6
-                        ? '#60a5fa'
-                        : '#ccc',
-                  marginBottom: 6,
-                }}
+                        ? 'text-blue-400'
+                        : 'text-ink-200'
+                }`}
               >
                 {day.getDate()}
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <div className="flex flex-col gap-0.5">
                 {dayEvents.slice(0, 3).map((event) => (
                   <div
                     key={event.id}
                     style={{
                       background: getEventBackground(event),
-                      borderRadius: 3,
-                      padding: '1px 4px',
-                      fontSize: '0.65rem',
-                      color: '#fff',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
                     }}
+                    className="truncate rounded-[3px] px-1 py-px text-[0.65rem] text-white"
                     title={event.title}
                   >
                     {event.title}
                   </div>
                 ))}
                 {dayEvents.length > 3 && (
-                  <div style={{ fontSize: '0.6rem', color: '#888' }}>+{dayEvents.length - 3}</div>
+                  <div className="text-[0.6rem] text-ink-400">+{dayEvents.length - 3}</div>
                 )}
               </div>
             </div>
           );
         })}
+        </div>
       </div>
     </div>
   );

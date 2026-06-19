@@ -19,7 +19,7 @@ export function LoadingState({ message }: LoadingStateProps) {
 export function EmptyState({ icon, message }: EmptyStateProps) {
   return (
     <div className="empty-state">
-      <div style={{ fontSize: '3rem' }}>{icon}</div>
+      <div className="text-5xl" aria-hidden="true">{icon}</div>
       <p>{message}</p>
     </div>
   );

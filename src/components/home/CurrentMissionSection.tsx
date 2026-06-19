@@ -12,7 +12,7 @@ export default function CurrentMissionSection({
   scheduleItems,
 }: CurrentMissionSectionProps) {
   return (
-    <div className="container updates-section animate-fade-in">
+    <div className="page-shell updates-section animate-fade-in">
       <h2 className="section-title">CURRENT MISSION</h2>
       <div className="updates-grid">
         <LiveStatusPanel data={liveData} />

@@ -18,7 +18,13 @@ export default function TimesItem({ item }: TimesItemProps) {
     <div
       className="times-item"
       onClick={() => canOpen && window.open(item.externalUrl!, '_blank')}
-      style={{ cursor: canOpen ? 'pointer' : 'default' }}
+      role={canOpen ? 'link' : undefined}
+      tabIndex={canOpen ? 0 : undefined}
+      onKeyDown={canOpen
+        ? (event) => {
+            if (event.key === 'Enter') window.open(item.externalUrl!, '_blank');
+          }
+        : undefined}
     >
       <div className="times-item-header">
         <span className="times-tag">{item.category?.name ?? item.contentType}</span>

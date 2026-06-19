@@ -36,9 +36,9 @@ export default function Layout() {
     <>
       <SiteBackground />
       <SiteHeader />
-      <div id="main-app">
+      <main id="main-app" className="min-h-screen pt-nav">
         <Outlet />
-      </div>
+      </main>
       <SiteFooter />
     </>
   );

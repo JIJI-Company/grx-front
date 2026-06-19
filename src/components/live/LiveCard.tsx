@@ -16,19 +16,30 @@ export default function LiveCard({ stream }: LiveCardProps) {
     const url = stream.streamUrl ?? stream.channelUrl;
     if (url) window.open(url, '_blank');
   };
+  const canOpen = !!(stream.streamUrl || stream.channelUrl);
+
+  const liveStyle = stream.isLive && stream.personalColor
+    ? ({ '--member-color': stream.personalColor, borderColor: stream.personalColor } as React.CSSProperties)
+    : undefined;
 
   return (
     <div
-      className={`live-card ${stream.isLive ? 'is-live' : ''}`}
+      className={`live-card ${stream.isLive ? 'is-live' : ''} ${canOpen ? 'cursor-pointer' : ''}`}
+      style={liveStyle}
       onClick={handleClick}
-      style={{ cursor: stream.streamUrl || stream.channelUrl ? 'pointer' : 'default' }}
+      role={canOpen ? 'link' : undefined}
+      tabIndex={canOpen ? 0 : undefined}
+      onKeyDown={canOpen
+        ? (event) => {
+            if (event.key === 'Enter') handleClick();
+          }
+        : undefined}
     >
       <div className="live-card-thumb">
         {imageSource && (
           <img
             src={imageSource}
             alt={stream.memberName ?? 'member'}
-            style={{ objectPosition: 'top' }}
             onError={(e) => {
               // Live snapshot can 404 right after a stream ends — fall back to profile.
               const img = e.currentTarget;
@@ -39,7 +50,14 @@ export default function LiveCard({ stream }: LiveCardProps) {
           />
         )}
         <div className={`live-badge ${stream.isLive ? '' : 'offline-badge'}`}>
-          {stream.isLive ? '🔴 ON AIR' : 'OFFLINE'}
+          {stream.isLive ? (
+            <>
+              <span className="live-dot" />
+              ON AIR
+            </>
+          ) : (
+            'OFFLINE'
+          )}
         </div>
       </div>
       <div className="live-card-body">

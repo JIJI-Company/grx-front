@@ -29,11 +29,16 @@ export interface Member {
   slug: string;
   title: string | null;
   description: string | null;
+  tmi?: string | null;
+  mbti?: string | null;
+  birth?: string | null;
+  hashTag?: string | null;
   isActive: boolean;
   displayOrder: number;
   rank: MemberRank | null;
   profileAsset: MediaAsset | null;
   platformAccounts: PlatformAccount[];
+  personalColor?: string | null;
 }
 
 export interface MembersGrouped {
@@ -89,6 +94,7 @@ export interface LiveStatus {
   streamUrl: string | null;
   streamStatus: string;
   checkedAt: string | null;
+  personalColor?: string | null;
 }
 
 export interface YoutubeVideo {

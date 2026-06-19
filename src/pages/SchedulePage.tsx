@@ -15,8 +15,8 @@ export default function SchedulePage() {
   const { data: items = [], isLoading } = useSchedule();
 
   return (
-    <div className="schedule-page-wrap container">
-      <PageHeader title="SCHEDULE" subtitle="꾸한성 크루의 방송 스케줄" />
+    <div className="page-wrap">
+      <PageHeader title="INFINITE SCHEDULE" subtitle="무한성의 모든 작전 일정을 확인하세요" />
       {isLoading && <LoadingState />}
       {!isLoading && items.length === 0 && (
         <EmptyState icon="📅" message="현재 등록된 스케줄이 없습니다." />

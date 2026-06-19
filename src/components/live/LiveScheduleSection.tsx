@@ -10,7 +10,7 @@ export default function LiveScheduleSection({ items }: LiveScheduleSectionProps)
 
   return (
     <>
-      <h2 className="section-title" style={{ marginTop: 60 }}>📅 LIVE SCHEDULE</h2>
+      <h2 className="section-title mt-15">📅 LIVE SCHEDULE</h2>
       <div className="schedule-grid">
         {items.slice(0, 6).map((item) => (
           <ScheduleCard key={item.contentId} item={item} />

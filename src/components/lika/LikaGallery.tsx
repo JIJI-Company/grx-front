@@ -10,25 +10,13 @@ export default function LikaGallery() {
   return (
     <>
       <h2 className="section-title">LIKA GALLERY</h2>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-          gap: 16,
-          marginBottom: 48,
-        }}
-      >
+      <div className="mb-12 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
         {panels.map((panel) => (
           <div
             key={panel.src}
-            style={{
-              background: 'var(--card-bg)',
-              border: '1px solid var(--glass-border)',
-              borderRadius: 8,
-              overflow: 'hidden',
-            }}
+            className="glass-panel overflow-hidden rounded-panel"
           >
-            <img src={panel.src} alt={panel.alt} style={{ width: '100%', display: 'block' }} />
+            <img src={panel.src} alt={panel.alt} className="size-full object-cover" />
           </div>
         ))}
       </div>

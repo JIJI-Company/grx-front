@@ -17,10 +17,10 @@ export default function TimesPage() {
   });
 
   return (
-    <div className="times-page-wrap container">
+    <div className="page-wrap">
       <PageHeader
-        title="TIMES"
-        subtitle="꾸한타임즈 — 무한성의 소식을 전합니다"
+        title="THE INFINITE ARCHIVE"
+        subtitle="무한성 깊숙한 곳에 새겨진 붉은 기록의 궤적"
         subtitleMarginBottom={40}
       />
       {isLoading && <LoadingState />}

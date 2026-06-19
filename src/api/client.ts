@@ -24,11 +24,13 @@ async function get<T>(path: string, params?: Record<string, string | number>): P
 
 // ─── Members ─────────────────────────────────────────────────────────────────
 
-export const apiGetMembers = (): Promise<MembersGrouped> =>
-  USE_MOCK ? mock.mockGetMembers() : get('/members');
+export const apiGetMembers = async (): Promise<MembersGrouped> => {
+  return USE_MOCK ? mock.mockGetMembers() : get<MembersGrouped>('/members');
+};
 
-export const apiGetMember = (slug: string): Promise<Member> =>
-  USE_MOCK ? mock.mockGetMember(slug) : get(`/members/${slug}`);
+export const apiGetMember = async (slug: string): Promise<Member> => {
+  return USE_MOCK ? mock.mockGetMember(slug) : get<Member>(`/members/${slug}`);
+};
 
 // ─── Content ─────────────────────────────────────────────────────────────────
 

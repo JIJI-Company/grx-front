@@ -75,8 +75,9 @@ const R = {
 
 function mkMember(
   id: string, name: string, rank: keyof typeof R, order: number,
-  art: string, desc: string, tmi: string, kw: string,
+  art: string, desc: string, birth: string, mbti: string, tmi: string, kw: string,
   img: string, soopId: string,
+  personalColor?: string,
 ): Member {
   return {
     memberId: `m-${id}`,
@@ -84,6 +85,10 @@ function mkMember(
     slug: id,
     title: art || null,
     description: [desc, tmi, kw].filter(Boolean).join('\n') || null,
+    tmi: tmi || null,
+    mbti: mbti || null,
+    birth: birth || null,
+    hashTag: kw || null,
     isActive: true,
     displayOrder: order,
     rank: R[rank],
@@ -96,25 +101,26 @@ function mkMember(
       isPrimary: true,
       platform: { code: 'SOOP', name: 'SOOP', baseUrl: 'https://www.sooplive.com' },
     }],
+    personalColor: personalColor ?? null,
   };
 }
 
 const ALL_MEMBERS: Member[] = [
-  mkMember('gguu','꾸티뉴','master',1,'무한 연산','지-캐슬의 마스터.','무한성을 총괄하며 모든 혈귀들을 관리합니다.','#지마스터 #무한성주인','img/ggutinho.png','aksen7833'),
-  mkMember('yamuza','야무지','upper',1,'달의 호흡','상현 1위의 검사.','OTT, 잠, 맛있는 음식 좋아함 (콩 싫어함)','#수면괴물 #1등딸래미','img/yamuzi.png','land4968'),
-  mkMember('enju','엔쥬','upper',2,'빙결 혈귀술','빙결의 수호자.','베이킹 고수, 연유라떼 러버,(염소 아님)','#북극여우 #GOAT','img/enju.png','northpole'),
-  mkMember('lika','리카','upper',5,'항아리 소환','항아리 술사.','연프&애니 광팬, 야채와 벌레 혐오','#아프리카딸 #크앙단','img/lika.png','lika07'),
-  mkMember('nanana','난워니','lower',2,'하현 2','하현의 2위.','면 요리 킬러, 배그&마크 좋아함','#기린 #워냥이','img/nanana.png','whiteone325'),
-  mkMember('damu','다뮤','lower',4,'하현 4','하현의 4위.','롤 비틱질과 멤버 놀리기가 주특기','#워터밤 #삼샴뮤','img/damu.jpeg','not15987'),
-  mkMember('ttanttan','딴딴2당','lower',5,'명사수','으에','칭찬에 약하고 도움이 되고 싶은 에겐','#오독이 #말랑이','img/ttanttan.jpeg','dbsk0708'),
-  mkMember('baamya','바먀','lower',6,'바먀','.','미스테리&분탕 취미, 공겜 쥐약','#씨앗아가씨 #바밤바','img/baamya.png','wooyah21'),
-  mkMember('seora0','서라0','lower',7,'눈꽃의 호흡','훈병서라공이라 불리는 신입 혈귀.','방송과 별풍선, 바다를 좋아하는 처녀자리 울보공','#훈병서라공 #울보공 #공단이','img/서라0.jpg','o0opha'),
-  mkMember('mint','임민트','new',1,'양치의 호흡','반올림하면 2m인 배그 요정.','키 2m를 주장하는 장신, 주력은 배그와 라디오','#엄디 #임팔라 #임맹슈','img/mint.png','mint616'),
-  mkMember('okdok','김옥독','new',2,'순간이동술','옥독해옥독해','해산물과 소주를 즐기며 연애프로그램을 싫어함','#옥독해 #표오독 #옥살이','img/okdok.png','niniru'),
-  mkMember('nyangsso','냥쏘','new',3,'분홍 혈귀술','해산물과 매운맛에 진심인 핑크빛 게임 고수.','방송-씻기-잠의 무한 굴레에 빠진 스트리밍 중독자, 미나리와 공겜을 극도로 혐오함.','#냥빵 #ENFJ #모몽가 #게임광인','img/nangsso.png','leesoi34'),
-  mkMember('yuntami','윤타미','new',4,'윤타미의 호흡','지-캐슬의 신입 혈귀.','상세 정보 업데이트 예정입니다.','#윤타미 #타미 #신입','img/tami.png','dbsthdus111'),
-  mkMember('bomsai','봄세이','new',5,'봉인의 호흡','신입 혈귀 봄셍;입니다.','안경 위의 자물쇠에 대한 비밀은 아직 밝혀지지 않았습니다.','#봄세이 #안경 #자물쇠','img/BOMSAI.png','bomsai'),
-  mkMember('moya','모야','new',6,'모야의 호흡','신입 혈귀.','상세 정보 업데이트 예정입니다.','#모야 #신입','img/moya.png','neul0908'),
+  mkMember('gguu','꾸티뉴','master',1,'무한 연산','지-캐슬의 마스터.','12.25','INTJ','무한성을 총괄하며 모든 혈귀들을 관리합니다.','#지마스터 #무한성주인','img/ggutinho.png','aksen7833','#A30000'),
+  mkMember('yamuza','야무지','upper',1,'달의 호흡','상현 1위의 검사.','01.14','INTP','OTT, 잠, 맛있는 음식 좋아함 (콩 싫어함)','#수면괴물 #1등딸래미','img/yamuzi.png','land4968','#7E57C2'),
+  mkMember('enju','엔쥬','upper',2,'빙결 혈귀술','빙결의 수호자.','09.17','ISFP','베이킹 고수, 연유라떼 러버,(염소 아님)','#북극여우 #GOAT','img/enju.png','northpole','#7FB3FF'),
+  mkMember('lika','리카','upper',5,'항아리 소환','항아리 술사.','07.14','ESFJ','연프&애니 광팬, 야채와 벌레 혐오','#아프리카딸 #크앙단','img/lika.png','lika07','#FFD166'),
+  mkMember('nanana','난워니','lower',2,'하현 2','하현의 2위.','03.25','ESFP','면 요리 킬러, 배그&마크 좋아함','#기린 #워냥이','img/nanana.png','whiteone325','#F4A6C0'),
+  mkMember('damu','다뮤','lower',4,'하현 4','하현의 4위.','04.14','ESFP','롤 비틱질과 멤버 놀리기가 주특기','#워터밤 #삼샴뮤','img/damu.jpeg','not15987','#FF7A45'),
+  mkMember('ttanttan','딴딴2당','lower',5,'명사수','으에','07.08','INFP','칭찬에 약하고 도움이 되고 싶은 에겐','#오독이 #말랑이','img/ttanttan.jpeg','dbsk0708','#A0D8B3'),
+  mkMember('baamya','바먀','lower',6,'바먀','.','11.02','INFP','미스테리&분탕 취미, 공겜 쥐약','#씨앗아가씨 #바밤바','img/baamya.png','wooyah21','#C8B6FF'),
+  mkMember('seora0','서라0','lower',7,'눈꽃의 호흡','훈병서라공이라 불리는 신입 혈귀.','08.23','ISFJ','방송과 별풍선, 바다를 좋아하는 처녀자리 울보공','#훈병서라공 #울보공 #공단이','img/서라0.jpg','o0opha','#B0E0FF'),
+  mkMember('mint','임민트','new',1,'양치의 호흡','반올림하면 2m인 배그 요정.','06.16','????','키 2m를 주장하는 장신, 주력은 배그와 라디오','#엄디 #임팔라 #임맹슈','img/mint.png','mint616','#88E0B5'),
+  mkMember('okdok','김옥독','new',2,'순간이동술','옥독해옥독해','02.20','ENTJ','해산물과 소주를 즐기며 연애프로그램을 싫어함','#옥독해 #표오독 #옥살이','img/okdok.png','niniru','#9C6CFF'),
+  mkMember('nyangsso','냥쏘','new',3,'분홍 혈귀술','해산물과 매운맛에 진심인 핑크빛 게임 고수.','12.06','ENFJ','방송-씻기-잠의 무한 굴레에 빠진 스트리밍 중독자, 미나리와 공겜을 극도로 혐오함.','#냥빵 #ENFJ #모몽가 #게임광인','img/nangsso.png','leesoi34','#FF9ECF'),
+  mkMember('yuntami','윤타미','new',4,'윤타미의 호흡','지-캐슬의 신입 혈귀.','??','??','상세 정보 업데이트 예정입니다.','#윤타미 #타미 #신입','img/tami.png','dbsthdus111','#FFD27A'),
+  mkMember('bomsai','봄세이','new',5,'봉인의 호흡','신입 혈귀 봄셍;입니다.','??','??','안경 위의 자물쇠에 대한 비밀은 아직 밝혀지지 않았습니다.','#봄세이 #안경 #자물쇠','img/BOMSAI.png','bomsai','#FFD9A3'),
+  mkMember('moya','모야','new',6,'모야의 호흡','신입 혈귀.','??','??','상세 정보 업데이트 예정입니다.','#모야 #신입','img/moya.png','neul0908','#B8C9FF'),
 ];
 
 const BY_SLUG = Object.fromEntries(ALL_MEMBERS.map(m => [m.slug, m]));
@@ -248,6 +254,7 @@ export const mockGetLiveStatus = async (): Promise<LiveStatus[]> => {
         streamUrl: r.status === 'on-air' ? (r.link || null) : null,
         streamStatus: r.status === 'on-air' ? 'LIVE' : 'OFFLINE',
         checkedAt: new Date().toISOString(),
+        personalColor: member?.personalColor ?? null,
       };
     });
 };

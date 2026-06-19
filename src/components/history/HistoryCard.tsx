@@ -16,17 +16,23 @@ export default function HistoryCard({ item }: HistoryCardProps) {
     <div
       className="history-card"
       onClick={() => canOpen && window.open(item.externalUrl!, '_blank')}
-      style={{ cursor: canOpen ? 'pointer' : 'default' }}
+      role={canOpen ? 'link' : undefined}
+      tabIndex={canOpen ? 0 : undefined}
+      onKeyDown={canOpen
+        ? (event) => {
+            if (event.key === 'Enter') window.open(item.externalUrl!, '_blank');
+          }
+        : undefined}
     >
       {thumbnail && <img src={thumbnail} alt={item.title} className="history-card-thumb" />}
       <div className="history-card-body">
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+        <div className="mb-2 flex items-center justify-between gap-3">
           <span className="card-tag">{item.category?.name ?? item.contentType}</span>
-          <span style={{ fontSize: '0.72rem', color: '#555' }}>{date}</span>
+          <span className="text-[0.72rem] text-ink-600">{date}</span>
         </div>
         <div className="history-card-title">{item.title}</div>
         {members && (
-          <p style={{ fontSize: '0.78rem', color: 'var(--bright-rose)', marginTop: 4 }}>
+          <p className="mt-1 text-xs text-ruby-600">
             {members}
           </p>
         )}

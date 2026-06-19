@@ -1,4 +1,5 @@
 import type { ContentItem } from '../../api/types';
+import { getMemberColor } from '../../utils/memberColor';
 
 interface ScheduleCardProps {
   item: ContentItem;
@@ -41,17 +42,33 @@ export default function ScheduleCard({
     <div
       className="schedule-card"
       onClick={() => canOpen && window.open(item.externalUrl!, '_blank')}
-      style={{ cursor: canOpen ? 'pointer' : 'default' }}
+      role={canOpen ? 'link' : undefined}
+      tabIndex={canOpen ? 0 : undefined}
+      onKeyDown={canOpen
+        ? (event) => {
+            if (event.key === 'Enter') window.open(item.externalUrl!, '_blank');
+          }
+        : undefined}
     >
       <div className="schedule-members">
-        {item.contentMembers.slice(0, memberLimit).map(({ member }) => (
-          <div key={member.memberId} className="schedule-member-chip">
-            {member.profileAsset?.publicUrl && (
-              <img src={member.profileAsset.publicUrl} alt={member.stageName} />
-            )}
-            <span>{member.stageName}</span>
-          </div>
-        ))}
+        {item.contentMembers.slice(0, memberLimit).map(({ member }) => {
+          const color = getMemberColor(member);
+          return (
+            <div
+              key={member.memberId}
+              className="schedule-member-chip"
+              style={{
+                borderColor: `color-mix(in srgb, ${color} 40%, transparent)`,
+                background: `color-mix(in srgb, ${color} 10%, transparent)`,
+              }}
+            >
+              {member.profileAsset?.publicUrl && (
+                <img src={member.profileAsset.publicUrl} alt={member.stageName} />
+              )}
+              <span>{member.stageName}</span>
+            </div>
+          );
+        })}
         {showCrewFallback && item.contentMembers.length === 0 && (
           <div className="schedule-member-chip">
             <span>CREW</span>
@@ -65,7 +82,7 @@ export default function ScheduleCard({
         </div>
       )}
       {showSummary && item.summary && (
-        <p style={{ fontSize: '0.8rem', color: '#777', marginTop: 8, lineHeight: 1.5 }}>
+        <p className="mt-2 text-xs leading-relaxed text-ink-400">
           {item.summary}
         </p>
       )}

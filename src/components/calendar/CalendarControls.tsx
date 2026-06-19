@@ -15,37 +15,11 @@ interface MemberFiltersProps {
 
 export function CalendarHero() {
   return (
-    <div
-      style={{
-        padding: '60px 5% 40px',
-        textAlign: 'center',
-        borderBottom: '1px solid rgba(225,29,72,0.2)',
-        background: 'linear-gradient(to bottom, rgba(5,0,2,0.95), transparent)',
-      }}
-    >
-      <h1
-        style={{
-          fontFamily: "'Oswald', sans-serif",
-          fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
-          color: '#fff',
-          fontWeight: 700,
-          letterSpacing: 3,
-          filter: 'drop-shadow(0 0 30px rgba(225,29,72,0.6))',
-          marginBottom: 8,
-        }}
-      >
+    <div className="border-b border-ruby-600/20 bg-linear-to-b from-castle-950/95 to-transparent px-[5%] py-10 text-center sm:pt-15">
+      <h1 className="mb-2 font-display text-[clamp(2.5rem,7vw,4.5rem)] font-bold tracking-[0.06em] text-white drop-shadow-[0_0_30px_rgb(225_29_72/0.6)]">
         CASTLE CALENDAR
       </h1>
-      <p
-        style={{
-          color: '#e11d48',
-          fontSize: '1rem',
-          letterSpacing: '0.2rem',
-          fontWeight: 700,
-          textTransform: 'uppercase',
-          textShadow: '0 0 10px rgba(225,29,72,0.5)',
-        }}
-      >
+      <p className="text-sm font-bold tracking-[0.2em] text-ruby-600 uppercase [text-shadow:0_0_10px_rgb(225_29_72/0.5)] sm:text-base">
         INFINITE SCHEDULE · GGU-CASTLE
       </p>
     </div>
@@ -61,73 +35,32 @@ export function CalendarControls({
   const headerLabel = `${current.getFullYear()}.${String(current.getMonth() + 1).padStart(2, '0')}`;
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 16,
-        gap: 12,
-        flexWrap: 'wrap',
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
-        <h2
-          style={{
-            fontFamily: "'Oswald', sans-serif",
-            fontSize: '2.5rem',
-            fontWeight: 900,
-            color: '#fff',
-            margin: 0,
-          }}
-        >
+    <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="flex items-baseline gap-3">
+        <h2 className="font-display text-3xl font-black text-white sm:text-4xl">
           {headerLabel}
         </h2>
-        <div style={{ display: 'flex', gap: 4 }}>
+        <div className="flex gap-1">
           {[-1, 1].map((direction) => (
             <button
               key={direction}
               onClick={() => onNavigate(direction)}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: '#888',
-                width: 32,
-                height: 32,
-                borderRadius: 8,
-                cursor: 'pointer',
-                fontSize: '1rem',
-              }}
+              className="focus-ring flex size-8 items-center justify-center rounded-panel text-base text-ink-400 transition hover:bg-white/5 hover:text-white"
+              aria-label={direction < 0 ? '이전 기간' : '다음 기간'}
             >
               {direction < 0 ? '‹' : '›'}
             </button>
           ))}
         </div>
       </div>
-      <div
-        style={{
-          display: 'flex',
-          background: 'rgba(255,255,255,0.05)',
-          padding: 4,
-          borderRadius: 8,
-          gap: 4,
-        }}
-      >
+      <div className="flex gap-1 rounded-panel bg-white/5 p-1">
         {(['month', 'week'] as const).map((mode) => (
           <button
             key={mode}
             onClick={() => onViewModeChange(mode)}
-            style={{
-              background: viewMode === mode ? '#fff' : 'transparent',
-              color: viewMode === mode ? '#000' : '#888',
-              border: 'none',
-              padding: '6px 14px',
-              borderRadius: 6,
-              cursor: 'pointer',
-              fontWeight: 600,
-              fontSize: '0.85rem',
-              transition: 'all 0.2s',
-            }}
+            className={`focus-ring rounded-md px-3 py-1.5 text-sm font-semibold transition sm:px-4 ${
+              viewMode === mode ? 'bg-white text-black' : 'text-ink-400 hover:text-white'
+            }`}
           >
             {mode === 'month' ? '월간' : '주간'}
           </button>
@@ -145,32 +78,16 @@ export function MemberFilters({
   if (members.length === 0) return null;
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: 8,
-        marginBottom: 20,
-        justifyContent: 'center',
-      }}
-    >
+    <div className="no-scrollbar mb-5 flex justify-start gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:justify-center">
       {['ALL', ...members].map((member) => (
         <button
           key={member}
           onClick={() => onSelect(member)}
-          style={{
-            background: selectedMember === member ? '#e11d48' : 'rgba(255,255,255,0.05)',
-            color: selectedMember === member ? '#fff' : '#aaa',
-            border: `1px solid ${
-              selectedMember === member ? '#e11d48' : 'rgba(255,255,255,0.1)'
-            }`,
-            padding: '6px 14px',
-            borderRadius: 20,
-            cursor: 'pointer',
-            fontSize: '0.85rem',
-            fontWeight: 600,
-            transition: 'all 0.2s',
-          }}
+          className={`focus-ring shrink-0 rounded-full border px-3 py-1.5 text-sm font-semibold transition ${
+            selectedMember === member
+              ? 'border-ruby-600 bg-ruby-600 text-white'
+              : 'border-white/10 bg-white/5 text-ink-300 hover:border-ruby-600/40 hover:text-white'
+          }`}
         >
           {member}
         </button>

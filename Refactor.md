@@ -13,6 +13,153 @@
 
 ---
 
+## v2.1.0 - 2026-06-19
+
+### 목표
+
+- 운영 legacy Members 화면(`꾸한성.site/members`)과 현재 React `/members`를 동일 viewport에서 비교한다.
+- Tailwind 전환 과정에서 달라진 Members 전용 레이아웃과 카드·모달 표현을 legacy 디자인에 맞춘다.
+- 현재 API 모델에 없는 정보를 임의로 만들지 않고, 제공되는 멤버 데이터 범위에서 시각적 구조를 복원한다.
+
+### 변경 사항
+
+- Members 페이지 전용 최대 폭을 legacy와 동일한 `1500px`, 좌우 여백을 `6%`로 복원했다.
+- 고정 헤더 아래 페이지 시작 위치를 legacy의 전체 `140px` 간격과 맞췄다.
+- Members 경로에서 과도한 vignette를 제거하고 legacy의 붉은 radial/grid 배경을 표시한다.
+- 계급 제목의 불필요한 하단 구분선을 제거하고 Oswald 700 굵기를 적용했다.
+- 카드 외부 컨테이너에 `320 × 420px` 크기 계약을 복원했다.
+- 인물 이미지에 별도 portrait 영역과 멤버 색상 기반 하단 그라데이션을 추가했다.
+- 카드 계급 라벨을 `MASTER`, `상현 N`, `LOWER N`, `NEW` 형식으로 표시한다.
+- 카드 이름과 혈귀술 색상을 멤버 personal color에 연결했다.
+- 카드에 키보드 Enter/Space 동작과 접근성 라벨을 추가했다.
+- 상세 모달을 legacy의 최대 `850px` 양분 레이아웃으로 재구성했다.
+- 모달에 큰 인물 이미지, 계급·이름·키워드·혈귀술·설명·TMI·SOOP CTA 구조를 복원했다.
+- legacy에만 있고 현재 API 타입에는 없는 생일과 MBTI 배지는 추가하지 않았다.
+
+### 변경 파일
+
+- `src/pages/MembersPage.tsx`
+- `src/components/members/MemberCard.tsx`
+- `src/components/members/MemberModal.tsx`
+- `src/components/members/memberPresentation.ts`
+- `src/styles/global.css`
+
+### Verification
+
+```bash
+npm run build
+```
+
+- Result: PASS
+- TypeScript project build: PASS
+- Tailwind/Vite production build: PASS
+
+```bash
+git diff --check
+```
+
+- Result: PASS
+
+- Chrome desktop visual check:
+  - 운영 legacy `꾸한성.site/members`: 확인
+  - 로컬 `http://localhost:5173/members`: 확인
+  - 페이지 상단 간격, 배경, 제목, 마스터 카드 비율: PASS
+  - 카드 클릭과 legacy형 상세 모달 표시: PASS
+  - 카드 계급 라벨 및 키보드 접근성 트리: PASS
+
+### 미검증 항목
+
+- 인앱 Browser 연결은 현재 세션에서 제공되지 않아 Browser 플러그인 대신 로컬 Chrome 화면으로 검증했다.
+- 모바일 실기기 touch flip 동작은 별도 검증하지 않았다.
+- 운영 API에 생일·MBTI 필드가 없으므로 legacy 모달의 해당 배지는 의도적으로 제외했다.
+
+## v2.0.0 - 2026-06-19
+
+### 목표
+
+- 기존 전역 CSS를 Tailwind CSS 4.3 기반의 CSS-first 디자인 시스템으로 전환한다.
+- 데스크톱 스타일을 축소하는 방식이 아니라 모바일 전용 내비게이션과 안전한 스크롤 구조를 제공한다.
+- 정적 인라인 스타일은 Tailwind utility로 이동하고, 데이터 기반 색상·캘린더 배치처럼 런타임 값만 인라인에 남긴다.
+- 기존 dark red/black castle 시각 언어와 live-card 상태 표현을 유지한다.
+
+### Tailwind 구조
+
+- `@tailwindcss/vite`를 Vite 플러그인으로 연결했다.
+- `src/styles/tokens.css`의 `@theme`에서 color, font, breakpoint, container, spacing, radius, shadow token을 정의했다.
+- `src/styles/global.css`에서 다음 Tailwind 확장 기능을 사용한다.
+  - `@utility`: `page-shell`, `calendar-shell`, `glass-panel`, `no-scrollbar`, `focus-ring`
+  - `@custom-variant`: `nav-active`, `can-hover`
+  - `@variant`: 반응형 page padding과 hover-capable device 상태
+  - `@apply`: 공통 card, button, page, modal, grid 패턴
+  - `--alpha()`: theme color 투명도 조합
+  - `--spacing()`: safe-area padding과 slider scroll padding 계산
+
+### 반응형 변경
+
+- 832px 미만에서는 데스크톱 내비게이션을 숨기고 2열 모바일 메뉴를 제공한다.
+- Live, Schedule, History grid는 모바일 1열, 태블릿 2열, 데스크톱 3열로 전환한다.
+- Members grid는 모바일 2열부터 시작해 화면 너비에 따라 최대 5열까지 확장한다.
+- Weekly Calendar와 전체 Calendar는 7열 내용을 억지로 축소하지 않고 내부 수평 스크롤 컨테이너로 분리해 child clipping을 방지한다.
+- modal, CTA, page padding은 safe area와 작은 화면 높이를 고려하도록 변경했다.
+- `prefers-reduced-motion`에서는 반복 animation과 transition을 최소화한다.
+
+### 접근성 및 상호작용
+
+- 모바일 메뉴에 `aria-expanded`, `aria-controls`, route change 자동 닫기를 추가했다.
+- 클릭 가능한 Live, Schedule, History, Times card에 keyboard focus와 Enter 동작을 추가했다.
+- calendar modal에 dialog role, label, close button label을 추가했다.
+- focus-visible 공통 ring utility를 적용했다.
+
+### 의존성
+
+- Added: `tailwindcss@4.3.1`, `@tailwindcss/vite@4.3.1`
+- Removed: 소스에서 사용되지 않던 `swiper@11.2.10`
+- `swiper` 제거 후 production dependency audit는 취약점 0건이다.
+
+### Verification
+
+```bash
+npm run build
+```
+
+- Result: PASS
+- TypeScript project build: PASS
+- Tailwind/Vite production build: PASS
+
+```bash
+npm audit --omit=dev
+```
+
+- Result: PASS
+- Production vulnerabilities: 0
+
+```bash
+npm audit
+```
+
+- Result: FAIL
+- Remaining: Vite 5 개발 서버 경로의 `esbuild` advisory 2건 (moderate 1, high 1)
+- 자동 수정은 Vite 8 major upgrade를 요구하므로 이번 Tailwind 리팩터링 범위에서는 강제 적용하지 않았다.
+
+```bash
+curl http://127.0.0.1:5173/<route>
+```
+
+- `/`: 200
+- `/live`: 200
+- `/members`: 200
+- `/history`: 200
+- `/times`: 200
+- `/schedule`: 200
+- `/calendar`: 200
+- `/lika`: 200
+- `/maintenance`: 200
+
+### 미검증 항목
+
+- 인앱 브라우저가 제공되지 않았고 로컬 앱 제어 권한도 없어 screenshot 기반 desktop/mobile visual regression은 수행하지 못했다.
+- 백엔드 실데이터가 연결된 상태의 긴 제목, 많은 일정, 이미지 오류 상태는 별도 통합 검증이 필요하다.
+
 ## v1.0.0 - 2026-06-19
 
 ### 목표

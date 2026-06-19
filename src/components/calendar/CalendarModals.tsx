@@ -25,65 +25,38 @@ export function EventModal({ event, onClose }: EventModalProps) {
     <div
       className="cal-modal-backdrop"
       onClick={onClose}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(0,0,0,0.75)',
-        zIndex: 1000,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
+      role="presentation"
     >
       <div
         onClick={(clickEvent) => clickEvent.stopPropagation()}
-        style={{
-          background: '#1a0a12',
-          border: '1px solid rgba(225,29,72,0.4)',
-          borderRadius: 16,
-          padding: '28px 32px',
-          maxWidth: 480,
-          width: '90%',
-        }}
+        className="relative w-full max-w-120 rounded-2xl border border-ruby-600/40 bg-[#1a0a12] p-5 sm:px-8 sm:py-7"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="calendar-event-title"
       >
         <button
           onClick={onClose}
-          style={{
-            float: 'right',
-            background: 'none',
-            border: 'none',
-            color: '#888',
-            fontSize: '1.2rem',
-            cursor: 'pointer',
-          }}
+          className="focus-ring absolute top-3 right-3 flex size-9 items-center justify-center rounded-md text-lg text-ink-400 transition hover:bg-white/5 hover:text-white"
+          aria-label="일정 상세 닫기"
         >
           ✕
         </button>
-        <div
-          style={{
-            color: '#888',
-            fontSize: '0.8rem',
-            marginBottom: 8,
-            fontFamily: "'Oswald', sans-serif",
-            letterSpacing: 1,
-          }}
-        >
+        <div className="mb-2 pr-10 font-display text-xs tracking-wider text-ink-400">
           {event.date.slice(0, 10)}
           {event.endDate ? ` ~ ${event.endDate.slice(0, 10)}` : ''}
           {event.date.includes('T') ? ` · ${formatTime(event.date)}` : ''}
         </div>
         <h3
+          id="calendar-event-title"
+          className="mb-3 font-display text-xl sm:text-2xl"
           style={{
             color: titleColor,
-            fontFamily: "'Oswald', sans-serif",
-            fontSize: '1.4rem',
-            marginBottom: 12,
           }}
         >
           {event.title}
         </h3>
         {event.members.length > 0 && (
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
+          <div className="mb-3 flex flex-wrap gap-1.5">
             {event.members.map((member) => {
               const color = getMemberColor(member);
               return (
@@ -92,10 +65,8 @@ export function EventModal({ event, onClose }: EventModalProps) {
                   style={{
                     background: color.bg,
                     color: color.text,
-                    padding: '3px 10px',
-                    borderRadius: 20,
-                    fontSize: '0.8rem',
                   }}
+                  className="rounded-full px-2.5 py-1 text-xs"
                 >
                   {member}
                 </span>
@@ -104,7 +75,7 @@ export function EventModal({ event, onClose }: EventModalProps) {
           </div>
         )}
         {event.memo && (
-          <p style={{ color: '#bbb', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: 12 }}>
+          <p className="mb-3 text-sm leading-relaxed text-[#bbb]">
             {event.memo}
           </p>
         )}
@@ -113,7 +84,7 @@ export function EventModal({ event, onClose }: EventModalProps) {
             href={event.url}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ color: '#e11d48', fontSize: '0.85rem' }}
+            className="focus-ring inline-flex rounded-sm text-sm text-ruby-600 hover:text-ruby-500"
           >
             🔗 링크 열기
           </a>
@@ -133,53 +104,26 @@ export function DayModal({
     <div
       className="cal-modal-backdrop"
       onClick={onClose}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(0,0,0,0.75)',
-        zIndex: 1000,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
+      role="presentation"
     >
       <div
         onClick={(clickEvent) => clickEvent.stopPropagation()}
-        style={{
-          background: '#1a0a12',
-          border: '1px solid rgba(225,29,72,0.3)',
-          borderRadius: 16,
-          padding: '24px 28px',
-          maxWidth: 440,
-          width: '90%',
-          maxHeight: '80vh',
-          overflowY: 'auto',
-        }}
+        className="relative max-h-[82dvh] w-full max-w-110 overflow-y-auto rounded-2xl border border-ruby-600/30 bg-[#1a0a12] p-5 sm:px-7 sm:py-6"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="calendar-day-title"
       >
         <button
           onClick={onClose}
-          style={{
-            float: 'right',
-            background: 'none',
-            border: 'none',
-            color: '#888',
-            fontSize: '1.2rem',
-            cursor: 'pointer',
-          }}
+          className="focus-ring absolute top-3 right-3 flex size-9 items-center justify-center rounded-md text-lg text-ink-400 transition hover:bg-white/5 hover:text-white"
+          aria-label="일자 일정 닫기"
         >
           ✕
         </button>
-        <div
-          style={{
-            fontFamily: "'Oswald', sans-serif",
-            fontSize: '1.3rem',
-            color: '#fff',
-            marginBottom: 16,
-          }}
-        >
+        <div id="calendar-day-title" className="mb-4 pr-10 font-display text-xl text-white">
           {date.getMonth() + 1}월 {date.getDate()}일 ({DAY_OF_WEEK[date.getDay()]})
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div className="flex flex-col gap-2.5">
           {events.map((event) => {
             const { titleColor, cardBg, border } = getEventStyle(event);
 
@@ -190,23 +134,19 @@ export function DayModal({
                 style={{
                   background: cardBg,
                   border: `1px solid ${border}`,
-                  borderRadius: 10,
-                  padding: '10px 14px',
-                  cursor: 'pointer',
+                }}
+                className="focus-ring cursor-pointer rounded-xl px-3.5 py-2.5"
+                role="button"
+                tabIndex={0}
+                onKeyDown={(keyboardEvent) => {
+                  if (keyboardEvent.key === 'Enter') onEvent(event);
                 }}
               >
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: 4,
-                  }}
-                >
-                  <span style={{ color: '#888', fontSize: '0.8rem' }}>
+                <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-xs text-ink-400">
                     {formatTime(event.date)}
                   </span>
-                  <div style={{ display: 'flex', gap: 4 }}>
+                  <div className="flex flex-wrap gap-1">
                     {event.members.slice(0, 3).map((member) => {
                       const color = getMemberColor(member);
                       return (
@@ -215,10 +155,8 @@ export function DayModal({
                           style={{
                             background: color.bg,
                             color: color.text,
-                            padding: '2px 8px',
-                            borderRadius: 12,
-                            fontSize: '0.75rem',
                           }}
+                          className="rounded-full px-2 py-0.5 text-xs"
                         >
                           {member}
                         </span>
@@ -226,7 +164,7 @@ export function DayModal({
                     })}
                   </div>
                 </div>
-                <div style={{ color: titleColor, fontWeight: 700, fontSize: '0.95rem' }}>
+                <div className="text-sm font-bold" style={{ color: titleColor }}>
                   {event.title}
                 </div>
               </div>

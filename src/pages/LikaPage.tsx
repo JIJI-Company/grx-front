@@ -10,14 +10,14 @@ export default function LikaPage() {
 
   if (isLoading) {
     return (
-      <div className="lika-page-wrap container">
+      <div className="page-wrap">
         <LoadingState message="리카의 공간을 여는 중..." />
       </div>
     );
   }
 
   return (
-    <div className="lika-page-wrap container">
+    <div className="page-wrap">
       <LikaHero member={lika} />
       {lika && <LikaCharacterInfo member={lika} />}
       <LikaGallery />

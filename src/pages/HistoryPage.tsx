@@ -7,10 +7,10 @@ export default function HistoryPage() {
   const { data: items = [], isLoading } = useHistory();
 
   return (
-    <div className="history-page-wrap container">
+    <div className="page-wrap">
       <PageHeader
-        title="HISTORY"
-        subtitle="무한성 크루의 명예의 전당 · 대회 기록"
+        title="GRX|HISTORY"
+        subtitle="꾸한성 크루의 영광스러운 기록들"
       />
       {isLoading && <LoadingState />}
       {!isLoading && items.length === 0 && (
