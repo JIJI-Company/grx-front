@@ -22,13 +22,7 @@ export default function MemberRankSection({
         <h2 className="rank-title">{title}</h2>
         <div className="master-container">
           {members.map((member) => (
-            <div
-              key={member.memberId}
-              className="master-container"
-              style={{ maxWidth: 240, width: '100%' }}
-            >
-              <MemberCard member={member} isGold onClick={() => onSelect(member)} />
-            </div>
+            <MemberCard key={member.memberId} member={member} isGold onClick={() => onSelect(member)} />
           ))}
         </div>
       </>

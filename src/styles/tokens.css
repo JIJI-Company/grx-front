@@ -1,0 +1,52 @@
+/* CSS-first Tailwind design system. Theme variables create matching utilities. */
+@theme {
+  --font-display: 'Oswald', sans-serif;
+  --font-body: 'Noto Sans KR', 'Pretendard', sans-serif;
+
+  --color-castle-950: #050002;
+  --color-castle-900: #0a0002;
+  --color-castle-850: #0f0005;
+  --color-ruby-700: #be123c;
+  --color-ruby-600: #e11d48;
+  --color-ruby-500: #f43f5e;
+  --color-ruby-950: #7f1020;
+  --color-gold-400: #facc15;
+  --color-gold-300: #ffe600;
+  --color-ink-50: #ffffff;
+  --color-ink-200: #cccccc;
+  --color-ink-300: #aaaaaa;
+  --color-ink-400: #888888;
+  --color-ink-500: #666666;
+  --color-ink-600: #555555;
+
+  --breakpoint-xs: 30rem;
+  --breakpoint-nav: 52rem;
+  --breakpoint-wide: 90rem;
+  --container-content: 75rem;
+  --container-calendar: 87.5rem;
+
+  --spacing-nav: 5rem;
+  --radius-panel: 0.5rem;
+  --ease-castle: cubic-bezier(0.22, 1, 0.36, 1);
+  --shadow-ruby: 0 0 30px rgb(225 29 72 / 0.3);
+}
+
+:root {
+  --nav-h: var(--spacing-nav);
+  --main-ruby: var(--color-ruby-700);
+  --bright-rose: var(--color-ruby-600);
+  --rose-accent: var(--color-ruby-500);
+  --name-gold: var(--color-gold-400);
+  --gold: var(--color-gold-300);
+  --dark-bg: var(--color-castle-950);
+  --card-bg: rgb(15 0 5 / 0.64);
+  --glass-border: rgb(225 29 72 / 0.15);
+  --border-red: rgb(225 29 72 / 0.4);
+  --glass-blur: blur(20px) saturate(180%);
+  --text: var(--color-ink-50);
+  --text-subtle: var(--color-ink-300);
+  --text-muted: var(--color-ink-400);
+  --live: var(--color-ruby-600);
+  --live-dot: var(--color-ruby-500);
+  --live-dot-dim: var(--color-ruby-950);
+}
