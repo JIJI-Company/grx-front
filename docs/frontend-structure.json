@@ -1,0 +1,147 @@
+{
+  "root": "frontend (grx/)",
+  "description": "React 18 + Vite 5 SPA. TanStack Query로 데이터 페칭·캐싱, TailwindCSS 4로 스타일링, React Router v6으로 라우팅. VITE_MOCK=true 시 CSV 기반 Mock 모드 지원.",
+  "tree": [
+    { "path": "index.html", "type": "file", "description": "Vite 엔트리포인트. div#root 마운트 포인트." },
+    { "path": "vite.config.ts", "type": "file", "description": "Vite 빌드 설정. 개발 시 /api/* → localhost:3000 리버스 프록시 설정." },
+    { "path": "netlify.toml", "type": "file", "description": "Netlify 배포 설정 (_redirects, build 명령어)." },
+    {
+      "path": "public",
+      "type": "dir",
+      "description": "정적 에셋 (빌드 결과물에 그대로 복사)",
+      "children": [
+        { "path": "public/img", "type": "dir", "description": "멤버 프로필 이미지 (메인)." },
+        { "path": "public/img2", "type": "dir", "description": "멤버 보조 이미지." },
+        { "path": "public/rika", "type": "dir", "description": "리카 팬페이지 전용 이미지·오디오 에셋." },
+        { "path": "public/mock", "type": "dir", "description": "백엔드 없이 개발할 때 사용하는 Mock CSV 파일 (Times, Schedule, History, Live, Gallery)." }
+      ]
+    },
+    {
+      "path": "src",
+      "type": "dir",
+      "description": "앱 소스 루트",
+      "children": [
+        { "path": "src/main.tsx", "type": "file", "description": "React 앱 부트스트랩 (ReactDOM.createRoot)." },
+        { "path": "src/App.tsx", "type": "file", "description": "TanStack QueryClientProvider + RouterProvider 마운트." },
+        { "path": "src/router.tsx", "type": "file", "description": "React Router v6 createBrowserRouter. 9개 페이지 라우트 정의." },
+        {
+          "path": "src/api",
+          "type": "dir",
+          "description": "데이터 페칭 계층",
+          "children": [
+            { "path": "src/api/types.ts", "type": "file", "description": "백엔드 응답 TypeScript 타입 정의 (Member, LiveStatus, ContentItem, CalendarEvent 등)." },
+            { "path": "src/api/client.ts", "type": "file", "description": "fetch 기반 API 호출 함수. VITE_MOCK=true 시 mockDb로 전환하는 스위치 포함." },
+            { "path": "src/api/mockDb.ts", "type": "file", "description": "public/mock/ CSV를 파싱해 client.ts와 동일한 인터페이스를 구현하는 Mock 어댑터." }
+          ]
+        },
+        {
+          "path": "src/hooks",
+          "type": "dir",
+          "description": "TanStack Query 커스텀 훅",
+          "children": [
+            { "path": "src/hooks/useMembers.ts", "type": "file", "description": "멤버 목록 조회 훅 (staleTime: 5분)." },
+            { "path": "src/hooks/useContent.ts", "type": "file", "description": "뉴스·스케줄·히스토리·유튜브 ContentItem 조회 훅." },
+            { "path": "src/hooks/useLive.ts", "type": "file", "description": "라이브 상태 조회 훅 (refetchInterval: 60초)." },
+            { "path": "src/hooks/useCalendar.ts", "type": "file", "description": "Notion 연동 캘린더 이벤트 조회 훅." }
+          ]
+        },
+        {
+          "path": "src/components",
+          "type": "dir",
+          "description": "UI 컴포넌트 계층",
+          "children": [
+            { "path": "src/components/Layout.tsx", "type": "file", "description": "Navbar + Footer + Lenis 부드러운 스크롤 래퍼." },
+            {
+              "path": "src/components/layout",
+              "type": "dir",
+              "description": "전역 레이아웃 컴포넌트",
+              "children": [
+                { "path": "src/components/layout/SiteHeader.tsx", "type": "file", "description": "네비게이션 바." },
+                { "path": "src/components/layout/SiteFooter.tsx", "type": "file", "description": "푸터." },
+                { "path": "src/components/layout/SiteBackground.tsx", "type": "file", "description": "배경 스타일 컴포넌트." }
+              ]
+            },
+            {
+              "path": "src/components/home",
+              "type": "dir",
+              "description": "홈페이지 전용 컴포넌트 8개 (Hero, LiveStatusPanel, MemberSlider, NewsSection, SchedulePreview, WeeklyCalendar, YoutubeFeed 등)"
+            },
+            {
+              "path": "src/components/members",
+              "type": "dir",
+              "description": "멤버 페이지 컴포넌트",
+              "children": [
+                { "path": "src/components/members/MemberRankSection.tsx", "type": "file", "description": "계급별 섹션 렌더링." },
+                { "path": "src/components/members/MemberCard.tsx", "type": "file", "description": "멤버 카드 (프로필 이미지, stageName, personalColor)." },
+                { "path": "src/components/members/MemberModal.tsx", "type": "file", "description": "멤버 상세 정보 모달 (MBTI, hashTag, 플랫폼 계정 등)." },
+                { "path": "src/components/members/memberPresentation.ts", "type": "file", "description": "멤버 데이터 표시 로직 유틸 (순수 함수)." }
+              ]
+            },
+            {
+              "path": "src/components/live",
+              "type": "dir",
+              "description": "라이브 페이지 컴포넌트 (LiveGrid, LiveCard, LiveScheduleSection)"
+            },
+            {
+              "path": "src/components/calendar",
+              "type": "dir",
+              "description": "캘린더 페이지 컴포넌트",
+              "children": [
+                { "path": "src/components/calendar/CalendarControls.tsx", "type": "file", "description": "월/주 뷰 토글 컨트롤." },
+                { "path": "src/components/calendar/CalendarViews.tsx", "type": "file", "description": "월간/주간 그리드 뷰." },
+                { "path": "src/components/calendar/CalendarModals.tsx", "type": "file", "description": "이벤트 상세 모달." },
+                { "path": "src/components/calendar/calendarUtils.ts", "type": "file", "description": "Greedy Interval Scheduling 알고리즘으로 이벤트 행 충돌 방지 배치." }
+              ]
+            },
+            { "path": "src/components/times", "type": "dir", "description": "뉴스(꾸한타임즈) 페이지 컴포넌트." },
+            { "path": "src/components/history", "type": "dir", "description": "게임 수상 내역 페이지 컴포넌트." },
+            {
+              "path": "src/components/lika",
+              "type": "dir",
+              "description": "리카 팬페이지 전용 컴포넌트 (Hero, CharacterInfo, Diary, Gallery)."
+            },
+            {
+              "path": "src/components/common",
+              "type": "dir",
+              "description": "공통 컴포넌트",
+              "children": [
+                { "path": "src/components/common/AsyncState.tsx", "type": "file", "description": "TanStack Query 로딩·에러·성공 상태 분기 래퍼." },
+                { "path": "src/components/common/PageHeader.tsx", "type": "file", "description": "페이지 상단 헤더 공통 컴포넌트." },
+                { "path": "src/components/common/ScheduleCard.tsx", "type": "file", "description": "방송공지 카드 공통 컴포넌트." }
+              ]
+            }
+          ]
+        },
+        {
+          "path": "src/pages",
+          "type": "dir",
+          "description": "라우트 단위 페이지 컴포넌트 9개",
+          "children": [
+            { "path": "src/pages/HomePage.tsx", "type": "file", "description": "홈 페이지 (Hero, LivePanel, MemberSlider, News, Schedule, Calendar, Youtube)." },
+            { "path": "src/pages/MembersPage.tsx", "type": "file", "description": "멤버 목록 페이지 (계급별 그룹 표시)." },
+            { "path": "src/pages/LivePage.tsx", "type": "file", "description": "실시간 라이브 대시보드 (60초 자동 갱신)." },
+            { "path": "src/pages/SchedulePage.tsx", "type": "file", "description": "방송공지 목록 페이지." },
+            { "path": "src/pages/CalendarPage.tsx", "type": "file", "description": "Notion 연동 월/주간 캘린더 페이지." },
+            { "path": "src/pages/HistoryPage.tsx", "type": "file", "description": "게임 수상 내역 타임라인 페이지." },
+            { "path": "src/pages/TimesPage.tsx", "type": "file", "description": "꾸한타임즈 뉴스 피드 페이지." },
+            { "path": "src/pages/LikaPage.tsx", "type": "file", "description": "리카 팬페이지 (이스터에그)." },
+            { "path": "src/pages/MaintenancePage.tsx", "type": "file", "description": "서비스 점검 안내 페이지." }
+          ]
+        },
+        {
+          "path": "src/styles",
+          "type": "dir",
+          "description": "전역 CSS",
+          "children": [
+            { "path": "src/styles/global.css", "type": "file", "description": "CSS 변수 및 공통 유틸리티 클래스." },
+            { "path": "src/styles/tokens.css", "type": "file", "description": "디자인 토큰 (색상, 타이포, 간격)." }
+          ]
+        },
+        { "path": "src/utils/memberColor.ts", "type": "file", "description": "멤버별 personalColor hex 매핑 유틸." }
+      ]
+    },
+    { "path": "netlify/functions", "type": "dir", "description": "Netlify Edge Functions (notion-calendar.mjs, notion-bj.mjs). 프로덕션 환경에서 Notion API 프록시 역할." },
+    { "path": "legacy", "type": "dir", "description": "리팩토링 이전 Vanilla HTML 레거시 코드 (참조용, 서비스 미사용)." },
+    { "path": "stock", "type": "dir", "description": "스톡 이미지·리소스 보관." }
+  ]
+}
