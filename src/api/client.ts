@@ -10,7 +10,9 @@ import type {
 import * as mock from './mockDb';
 
 const USE_MOCK = import.meta.env.VITE_MOCK === 'true';
-const BASE = '/api';
+// Prod: absolute backend URL (e.g. https://<railway>/api) via VITE_API_BASE_URL.
+// Dev: unset -> '/api', served by the vite proxy to localhost:3000.
+const BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
 async function get<T>(path: string, params?: Record<string, string | number>): Promise<T> {
   const url = new URL(BASE + path, window.location.origin);
