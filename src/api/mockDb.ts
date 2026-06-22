@@ -10,6 +10,8 @@ import type {
   LiveStatus,
   YoutubeVideo,
   CalendarEvent,
+  HistoryAchievement,
+  NoticeStreamer,
 } from './types';
 
 // ─── CSV parser ───────────────────────────────────────────────────────────────
@@ -208,25 +210,49 @@ export const mockGetSchedule = async (): Promise<ContentItem[]> => {
   });
 };
 
-// ─── History CSV → ContentItem[] ─────────────────────────────────────────────
+// ─── Schedule CSV → NoticeStreamer[] (멤버별 공지 그룹) ────────────────────────
 
-export const mockGetHistory = async (): Promise<ContentItem[]> => {
+export const mockGetNotice = async (): Promise<NoticeStreamer[]> => {
+  const rows = await fetchCsv('Schedule');
+  const byMember = new Map<string, NoticeStreamer>();
+  rows.forEach((r, i) => {
+    const name = r.Member;
+    if (!name) return;
+    if (!byMember.has(name)) {
+      const member = BY_NAME[name] ?? null;
+      byMember.set(name, {
+        soopId: name,
+        name,
+        color: member?.personalColor ?? '#ff1a4a',
+        avatar: imgUrl(r.Avatar) ?? '',
+        boardUrl: r.Link || '#',
+        notices: [],
+      });
+    }
+    byMember.get(name)!.notices.push({
+      id: `notice-${i}`,
+      title: r.Title || '방송공지',
+      date: r.Time || '',
+      thumbnail: r.Thumbnail ? imgUrl(r.Thumbnail) : null,
+      url: r.Link || '#',
+      readCount: 0,
+      commentCount: 0,
+    });
+  });
+  return [...byMember.values()];
+};
+
+// ─── History CSV → HistoryAchievement[] ──────────────────────────────────────
+
+export const mockGetHistory = async (): Promise<HistoryAchievement[]> => {
   const rows = await fetchCsv('History');
   return rows.map((r, i) => ({
-    contentId: `hist-${i}`,
-    contentType: 'GAME_EVENT' as const,
-    status: 'PUBLISHED' as const,
-    title: `[${(r.medal ?? '').toUpperCase()}] ${r.achievement}`,
-    summary: `${r.team} · ${r.type}`,
-    body: null,
-    externalUrl: null,
-    publishedAt: parseDate(r.date),
-    eventStartAt: null,
-    eventEndAt: null,
-    displayOrder: i + 1,
-    category: r.type ? { name: r.type, slug: r.category } : null,
-    thumbnailAsset: null,
-    contentMembers: [],
+    id: `hist-${i}`,
+    title: r.achievement ?? '',
+    category: r.category ?? '',
+    medal: (r.medal ?? '').toLowerCase() as HistoryAchievement['medal'],
+    date: r.date ?? '',
+    members: [],
   }));
 };
 

@@ -105,6 +105,34 @@ export interface YoutubeVideo {
   link: string;
 }
 
+export interface HistoryAchievement {
+  id: string;
+  title: string;       // 수상명 (예: "육창서버")
+  category: string;    // Notion category (예: "롤", "멀티")
+  medal: 'gold' | 'silver' | 'bronze' | '';
+  date: string;        // ISO — "2025-10-26"
+  members: string[];   // member names
+}
+
+export interface NoticeItem {
+  id: string;          // SOOP title_no
+  title: string;
+  date: string;        // "2026-06-22 18:28:32"
+  thumbnail: string | null;
+  url: string;         // 개별 글 링크
+  readCount: number;
+  commentCount: number;
+}
+
+export interface NoticeStreamer {
+  soopId: string;
+  name: string;
+  color: string;
+  avatar: string;
+  boardUrl: string;    // 게시판 링크
+  notices: NoticeItem[];
+}
+
 export interface CalendarEvent {
   id: string;
   title: string;

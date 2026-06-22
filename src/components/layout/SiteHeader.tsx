@@ -6,7 +6,7 @@ const navigation = [
   { to: '/members', label: 'MEMBERS' },
   { to: '/history', label: 'HISTORY' },
   { to: '/times', label: 'TIMES' },
-  { to: '/schedule', label: 'SCHEDULE' },
+  { to: '/notice', label: 'NOTICE' },
   { to: '/calendar', label: 'CALENDAR' },
 ];
 

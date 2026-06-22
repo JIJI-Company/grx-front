@@ -6,6 +6,8 @@ import type {
   LiveStatus,
   YoutubeVideo,
   CalendarEvent,
+  HistoryAchievement,
+  NoticeStreamer,
 } from './types';
 import * as mock from './mockDb';
 
@@ -56,8 +58,13 @@ export const apiGetSchedule = (_upcomingOnly = false): Promise<ContentItem[]> =>
 
 // ─── History ──────────────────────────────────────────────────────────────────
 
-export const apiGetHistory = (limit = 50): Promise<ContentItem[]> =>
-  USE_MOCK ? mock.mockGetHistory() : get('/history', { limit });
+export const apiGetHistory = (): Promise<HistoryAchievement[]> =>
+  USE_MOCK ? mock.mockGetHistory() : get('/history');
+
+// ─── Notice (SOOP 공지) ─────────────────────────────────────────────────────────
+
+export const apiGetNotice = (): Promise<NoticeStreamer[]> =>
+  USE_MOCK ? mock.mockGetNotice() : get('/notice');
 
 // ─── Live ─────────────────────────────────────────────────────────────────────
 

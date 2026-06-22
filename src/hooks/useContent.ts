@@ -3,6 +3,7 @@ import {
   apiGetContent,
   apiGetSchedule,
   apiGetHistory,
+  apiGetNotice,
   apiGetYoutubeLatest,
 } from '../api/client';
 
@@ -35,6 +36,14 @@ export function useHistory() {
     queryKey: ['history'],
     queryFn: () => apiGetHistory(),
     staleTime: 1000 * 60 * 60,
+  });
+}
+
+export function useNotice() {
+  return useQuery({
+    queryKey: ['notice'],
+    queryFn: apiGetNotice,
+    staleTime: 1000 * 60 * 3,
   });
 }
 

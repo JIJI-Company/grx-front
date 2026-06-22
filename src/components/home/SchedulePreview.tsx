@@ -42,11 +42,11 @@ export default function SchedulePreview({ items }: SchedulePreviewProps) {
       </div>
       <div className="mt-5 text-center">
         <Link
-          to="/schedule"
+          to="/notice"
           className="premium-view-live-btn px-6 py-2.5 text-sm"
         >
           <span className="pulse-ring" />
-          <span>전체 스케줄 보러가기</span>
+          <span>전체 공지 보러가기</span>
           <span> ►</span>
         </Link>
       </div>

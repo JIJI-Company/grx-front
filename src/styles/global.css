@@ -1337,30 +1337,405 @@
   @apply line-clamp-2 text-[0.82rem] leading-relaxed text-ink-400;
 }
 
-.history-card {
-  @apply transition duration-300;
+/* ── History · Hall of Fame ───────────────────────────────────────────── */
+.hof-section {
+  padding: 3.5rem 0;
+}
+
+.hof-header {
+  display: flex;
+  align-items: center;
+  gap: 1.875rem;
+  margin-bottom: 1.25rem;
+}
+
+.hof-header-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(225 29 72 / 0.6), transparent);
+  box-shadow: 0 0 10px rgb(225 29 72 / 0.4);
+}
+
+.hof-header-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+  font-weight: 500;
+  letter-spacing: 0.4rem;
+  color: #fff;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-shadow: 0 0 10px rgb(255 255 255 / 0.3);
+}
+
+.hof-header-desc {
+  margin-bottom: 3rem;
+  text-align: center;
+  color: var(--color-ink-400);
+  font-size: 0.8rem;
+  letter-spacing: 0.25rem;
+  text-transform: uppercase;
+}
+
+/* 전체 통계 */
+.hof-stats {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin: 0 0 3rem;
+  overflow: hidden;
+  background: var(--card-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: 1rem;
+  box-shadow: 0 20px 50px rgb(0 0 0 / 0.5), inset 0 0 20px rgb(225 29 72 / 0.05);
+}
+
+.hof-stats::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--bright-rose) 30%,
+    var(--gold) 50%,
+    var(--bright-rose) 70%,
+    transparent
+  );
+}
+
+.hof-stat {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2.25rem 1rem;
+  transition: background 0.4s;
+}
+
+.hof-stat:hover {
+  background: rgb(225 29 72 / 0.1);
+}
+
+.hof-stat:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 20%;
+  height: 60%;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, rgb(255 255 255 / 0.1), transparent);
+}
+
+.hof-stat-num {
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 7vw, 4rem);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.hof-stat-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.3rem;
+  text-transform: uppercase;
+  color: var(--color-ink-300);
+}
+
+.hof-stat.gold .hof-stat-num {
+  color: var(--gold);
+  text-shadow: 0 0 30px rgb(255 230 0 / 0.6);
+}
+
+.hof-stat.silver .hof-stat-num {
+  color: var(--silver);
+  text-shadow: 0 0 30px rgb(226 232 240 / 0.5);
+}
+
+.hof-stat.bronze .hof-stat-num {
+  color: var(--bronze);
+  text-shadow: 0 0 30px rgb(230 126 34 / 0.6);
+}
+
+.hof-stat.total .hof-stat-num {
+  color: #fff;
+  text-shadow: 0 0 30px rgb(255 255 255 / 0.4);
+}
+
+/* 슬라이더 */
+.hof-slider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hof-track {
+  flex: 1;
+  display: flex;
+  gap: 1.875rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 1.25rem 0.625rem 3rem;
+  scrollbar-width: none;
+}
+
+.hof-track::-webkit-scrollbar {
+  display: none;
+}
+
+.hof-arrow {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: rgb(10 0 4 / 0.8);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgb(0 0 0 / 0.5);
+  transition: all 0.4s var(--ease-castle);
+}
+
+.hof-arrow:hover {
+  background: var(--bright-rose);
+  box-shadow: 0 0 20px rgb(225 29 72 / 0.6);
+  transform: scale(1.1);
+}
+
+/* 메달 카드 */
+.medal-card {
+  position: relative;
+  flex: 0 0 16rem;
+  min-height: 22rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1.875rem 1.5rem;
+  overflow: hidden;
+  background: var(--card-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: 1.25rem;
+  box-shadow: 0 15px 35px rgb(0 0 0 / 0.5), inset 0 0 0 1px rgb(255 255 255 / 0.04);
+  transition: all 0.5s var(--ease-castle);
 }
 
 @media (hover: hover) {
-  .history-card:hover {
-    @apply -translate-y-1 border-ruby-600/40;
+  .medal-card:hover {
+    transform: translateY(-12px);
+    border-color: rgb(225 29 72 / 0.7);
+    box-shadow:
+      20px 35px 60px rgb(0 0 0 / 0.7),
+      0 0 40px rgb(225 29 72 / 0.35),
+      inset 0 0 0 1px rgb(255 255 255 / 0.15);
+  }
+
+  .medal-card:hover .medal-card-icon {
+    transform: scale(1.12);
   }
 }
 
-.history-card-thumb {
-  @apply aspect-video w-full bg-neutral-900 object-cover;
+.medal-card-label {
+  margin-bottom: 0.9rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.25rem;
+  text-transform: uppercase;
 }
 
-.history-card-body {
-  @apply p-5;
+.medal-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 5rem;
+  height: 5rem;
+  margin-bottom: 1.5rem;
+  border-radius: 50%;
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+  transition: transform 0.5s var(--ease-castle);
 }
 
-.history-card-title {
-  @apply mb-2 text-base font-bold;
+.medal-card-title {
+  margin-bottom: 0.9rem;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.05rem;
+  color: #fff;
 }
 
-.history-card-desc {
-  @apply mt-2 text-[0.82rem] leading-relaxed text-ink-400;
+.medal-card-detail {
+  flex: 1;
+  margin-bottom: 1.25rem;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--color-ink-200);
+}
+
+.medal-card-divider {
+  width: 50%;
+  height: 2px;
+  margin-bottom: 0.9rem;
+  border-radius: 2px;
+  background: linear-gradient(to right, transparent, rgb(225 29 72 / 0.6), transparent);
+  box-shadow: 0 0 8px rgb(225 29 72 / 0.4);
+}
+
+.medal-card-date {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  letter-spacing: 0.1rem;
+  color: var(--color-ink-400);
+}
+
+.medal-card-type {
+  margin-top: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1rem;
+  text-transform: uppercase;
+  color: var(--rose-accent);
+}
+
+.medal-card.gold .medal-card-label {
+  color: var(--gold);
+}
+
+.medal-card.silver .medal-card-label {
+  color: var(--silver);
+}
+
+.medal-card.bronze .medal-card-label {
+  color: var(--bronze);
+}
+
+.medal-card.gold .medal-card-icon {
+  background: linear-gradient(135deg, #fff3a0 0%, #ffd700 50%, #b8860b 100%);
+  box-shadow: 0 10px 20px rgb(255 215 0 / 0.4), inset 0 0 15px rgb(255 255 255 / 0.5);
+  color: #3a2200;
+}
+
+.medal-card.silver .medal-card-icon {
+  background: linear-gradient(135deg, #fff 0%, #e2e8f0 50%, #94a3b8 100%);
+  box-shadow: 0 10px 20px rgb(192 192 192 / 0.3), inset 0 0 15px rgb(255 255 255 / 0.5);
+  color: #1e293b;
+}
+
+.medal-card.bronze .medal-card-icon {
+  background: linear-gradient(135deg, #fbc687 0%, #e67e22 50%, #935116 100%);
+  box-shadow: 0 10px 20px rgb(230 126 34 / 0.4), inset 0 0 15px rgb(255 255 255 / 0.5);
+  color: #3e1f00;
+}
+
+/* 카테고리 탭 */
+.hof-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.625rem;
+  margin-bottom: 1.875rem;
+}
+
+.hof-tab {
+  padding: 0.75rem 1.5rem;
+  border-radius: 1.875rem;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  background: rgb(20 0 5 / 0.5);
+  backdrop-filter: blur(10px);
+  color: var(--color-ink-300);
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  letter-spacing: 0.12rem;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.4s var(--ease-castle);
+}
+
+.hof-tab:hover {
+  transform: translateY(-2px);
+  background: rgb(225 29 72 / 0.15);
+  border-color: rgb(225 29 72 / 0.4);
+  color: #fff;
+}
+
+.hof-tab.active {
+  background: var(--bright-rose);
+  border-color: var(--bright-rose);
+  color: #fff;
+  box-shadow: 0 8px 25px rgb(225 29 72 / 0.5);
+}
+
+/* 카테고리 통계 뱃지 */
+.hof-cat-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 2.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.hof-cat-badge {
+  padding: 0.625rem 1.375rem;
+  border-radius: 0.75rem;
+  background: rgb(10 0 4 / 0.7);
+  backdrop-filter: blur(10px);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12rem;
+  box-shadow: 0 4px 15px rgb(0 0 0 / 0.3);
+}
+
+.hof-cat-badge.gold {
+  border: 1px solid rgb(255 215 0 / 0.4);
+  color: var(--gold);
+}
+
+.hof-cat-badge.silver {
+  border: 1px solid rgb(192 192 192 / 0.4);
+  color: var(--silver);
+}
+
+.hof-cat-badge.bronze {
+  border: 1px solid rgb(205 127 50 / 0.4);
+  color: var(--bronze);
+}
+
+.hof-cat-badge.total {
+  border: 1px solid rgb(225 29 72 / 0.4);
+  color: #fff;
+}
+
+/* 빈 상태 */
+.hof-empty {
+  flex: 0 0 100%;
+  padding: 5rem 2.5rem;
+  text-align: center;
+  color: var(--color-ink-600);
+}
+
+.hof-empty span {
+  display: block;
+  margin-bottom: 1rem;
+  font-size: 3.5rem;
+  opacity: 0.25;
 }
 
 .empty-state {
@@ -1369,6 +1744,170 @@
 
 .empty-state p {
   @apply mt-4 text-sm;
+}
+
+/* ── Notice · 스트리머 공지 모음 ──────────────────────────────────────────── */
+.notice-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.625rem;
+  margin-bottom: 2.5rem;
+}
+
+.notice-tab {
+  padding: 0.625rem 1.25rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  background: rgb(255 255 255 / 0.05);
+  color: var(--color-ink-300);
+  font-weight: 600;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.3s var(--ease-castle);
+}
+
+.notice-tab:hover,
+.notice-tab.active {
+  background: rgb(225 29 72 / 0.2);
+  border-color: var(--bright-rose);
+  color: #fff;
+}
+
+.notice-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 3.5rem;
+}
+
+.notice-group-header {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid rgb(225 29 72 / 0.3);
+}
+
+.notice-group-header img {
+  width: 3.125rem;
+  height: 3.125rem;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--bright-rose);
+  background: #000;
+}
+
+.notice-group-header h2 {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.notice-group-header h2 span {
+  margin-left: 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 300;
+  color: var(--color-ink-400);
+}
+
+.notice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: 1.5rem;
+}
+
+.notice-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 1rem;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  border-top: 1px solid rgb(225 29 72 / 0.3);
+  background: linear-gradient(135deg, rgb(8 0 2 / 0.95), rgb(15 0 5 / 0.85));
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.6);
+  cursor: pointer;
+  transition: all 0.4s ease;
+}
+
+@media (hover: hover) {
+  .notice-card:hover {
+    transform: translateY(-8px);
+    border-color: rgb(225 29 72 / 0.8);
+    box-shadow: 0 20px 50px rgb(0 0 0 / 0.8), 0 0 30px rgb(225 29 72 / 0.2);
+  }
+}
+
+.notice-thumb {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #000;
+}
+
+.notice-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.notice-content {
+  padding: 0.9rem 1.25rem;
+}
+
+.notice-card.no-thumbnail {
+  min-height: 13.75rem;
+}
+
+.notice-card.no-thumbnail .notice-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.875rem 1.25rem;
+  text-align: center;
+  background: linear-gradient(135deg, rgb(225 29 72 / 0.15), transparent);
+}
+
+.notice-title {
+  margin: 0;
+  font-family: var(--font-body);
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: keep-all;
+}
+
+.notice-card.no-thumbnail .notice-title {
+  font-size: 1.25rem;
+  text-shadow: 0 0 15px rgb(225 29 72 / 0.4);
+}
+
+.notice-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: rgb(0 0 0 / 0.25);
+}
+
+.notice-flag {
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.notice-meta {
+  font-size: 0.72rem;
+  color: var(--color-ink-400);
 }
 
 .maintenance-page {
