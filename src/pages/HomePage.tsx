@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useCalendar } from '../hooks/useCalendar';
-import { useNews, useSchedule } from '../hooks/useContent';
+import { useNews, useNotice } from '../hooks/useContent';
 import { useLiveStatus } from '../hooks/useLive';
 import CurrentMissionSection from '../components/home/CurrentMissionSection';
 import HomeHero from '../components/home/HomeHero';
@@ -17,7 +17,7 @@ export default function HomePage() {
   const entered = useRef(sessionStorage.getItem('ggu-entered') === '1');
   const { data: liveData = [] } = useLiveStatus();
   const { data: newsData } = useNews(6);
-  const { data: scheduleData = [] } = useSchedule();
+  const { data: noticeData = [] } = useNotice();
   const { data: calendarData = [] } = useCalendar();
 
   useEffect(() => {
@@ -66,7 +66,7 @@ export default function HomePage() {
     <>
       {!entered.current && <IntroGate onEnter={handleEnter} />}
       <HomeHero />
-      <CurrentMissionSection liveData={liveData} scheduleItems={scheduleData} />
+      <CurrentMissionSection liveData={liveData} notices={noticeData} />
       <WeeklyCalendar events={calendarData} />
       <NewsSection items={newsData?.items ?? []} />
       <MemberSlider />

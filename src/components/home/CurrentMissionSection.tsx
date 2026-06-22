@@ -1,22 +1,22 @@
-import type { ContentItem, LiveStatus } from '../../api/types';
+import type { LiveStatus, NoticeStreamer } from '../../api/types';
 import LiveStatusPanel from './LiveStatusPanel';
-import SchedulePreview from './SchedulePreview';
+import NoticePreview from './NoticePreview';
 
 interface CurrentMissionSectionProps {
   liveData: LiveStatus[];
-  scheduleItems: ContentItem[];
+  notices: NoticeStreamer[];
 }
 
 export default function CurrentMissionSection({
   liveData,
-  scheduleItems,
+  notices,
 }: CurrentMissionSectionProps) {
   return (
     <div className="page-shell updates-section animate-fade-in">
       <h2 className="section-title">CURRENT MISSION</h2>
       <div className="updates-grid">
         <LiveStatusPanel data={liveData} />
-        <SchedulePreview items={scheduleItems} />
+        <NoticePreview streamers={notices} />
       </div>
     </div>
   );
