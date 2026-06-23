@@ -25,38 +25,35 @@ export default function LiveStatusPanel({ data }: LiveStatusPanelProps) {
         </div>
       ) : (
         <>
-          <div className="mb-2 text-xs text-ink-300">
-            현재 <span className="font-bold text-ruby-500">{active.length}명</span>의 멤버가 라이브 중입니다 📡
+          <div className="mb-4 text-center text-sm text-ink-200">
+            현재 <span className="font-black text-ruby-500">{active.length}명</span>의 멤버가 라이브 중입니다 📡
           </div>
-          <div className="schedule-list">
+          <div className="live-avatar-grid">
             {active.map((stream) => {
               const url = stream.streamUrl ?? stream.channelUrl ?? undefined;
               const open = () => url && window.open(url, '_blank', 'noopener');
               return (
                 <div
                   key={stream.accountId}
-                  className="schedule-compact-item cursor-pointer"
+                  className="live-avatar-item"
                   onClick={open}
                   role={url ? 'link' : undefined}
                   tabIndex={url ? 0 : undefined}
                   onKeyDown={url ? (event) => event.key === 'Enter' && open() : undefined}
+                  title={stream.liveTitle ?? stream.memberName ?? ''}
                 >
-                  {stream.profileImageUrl && (
-                    <img
-                      src={stream.profileImageUrl}
-                      alt={stream.memberName ?? ''}
-                      className="sc-avatar"
-                      style={stream.personalColor ? { borderColor: stream.personalColor } : undefined}
-                    />
-                  )}
-                  <div className="sc-info">
-                    <div className="sc-name">{stream.memberName ?? 'CREW'}</div>
-                    <div className="sc-time truncate">
-                      {stream.liveTitle ?? '방송 중'}
-                      {stream.viewerCount != null && ` · 👁 ${stream.viewerCount.toLocaleString()}`}
-                    </div>
+                  <div className="live-avatar-shell">
+                    {stream.profileImageUrl ? (
+                      <img src={stream.profileImageUrl} alt={stream.memberName ?? ''} />
+                    ) : (
+                      <div className="live-avatar-fallback">
+                        {(stream.memberName ?? 'C').charAt(0)}
+                      </div>
+                    )}
+                    <span className="live-avatar-dot" />
                   </div>
-                  <span className="sc-live-badge">LIVE</span>
+                  <span className="live-avatar-name">{stream.memberName ?? 'CREW'}</span>
+                  <span className="live-avatar-plat">{stream.platform}</span>
                 </div>
               );
             })}

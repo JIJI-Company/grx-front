@@ -461,6 +461,100 @@
   @apply shrink-0 rounded-sm bg-ruby-600 px-1.5 py-0.5 font-display text-[0.6rem] tracking-wider text-white;
 }
 
+/* ── Home · 라이브 스트리머 프로필 그리드 ─────────────────────────────────── */
+.live-avatar-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.25rem 1rem;
+  padding: 0.25rem 0 0.5rem;
+}
+
+.live-avatar-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 4.75rem;
+  cursor: pointer;
+  transition: transform 0.3s var(--ease-castle);
+}
+
+@media (hover: hover) {
+  .live-avatar-item:hover {
+    transform: translateY(-6px);
+  }
+}
+
+.live-avatar-shell {
+  position: relative;
+  width: 4.25rem;
+  height: 4.25rem;
+}
+
+.live-avatar-shell img,
+.live-avatar-fallback {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid transparent;
+  background-image: linear-gradient(var(--dark-bg), var(--dark-bg)),
+    linear-gradient(135deg, var(--bright-rose), #ff4d6d);
+  background-origin: border-box;
+  background-clip: content-box, border-box;
+  box-shadow: 0 5px 15px rgb(225 29 72 / 0.2);
+  transition: box-shadow 0.3s;
+}
+
+.live-avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+@media (hover: hover) {
+  .live-avatar-item:hover .live-avatar-shell img,
+  .live-avatar-item:hover .live-avatar-fallback {
+    box-shadow: 0 10px 25px rgb(225 29 72 / 0.45);
+  }
+}
+
+.live-avatar-dot {
+  position: absolute;
+  bottom: 0.1rem;
+  right: 0.1rem;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: var(--bright-rose);
+  border: 3px solid var(--dark-bg);
+  animation: live-dot-blink 1.3s ease-in-out infinite;
+}
+
+.live-avatar-name {
+  max-width: 100%;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #eee;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.live-avatar-plat {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-ink-400);
+}
+
 .news-section {
   @apply pb-20;
 }
