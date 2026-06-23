@@ -253,6 +253,7 @@ export const mockGetHistory = async (): Promise<HistoryAchievement[]> => {
     medal: (r.medal ?? '').toLowerCase() as HistoryAchievement['medal'],
     date: r.date ?? '',
     members: [],
+    image: null,
   }));
 };
 

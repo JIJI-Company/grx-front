@@ -1,12 +1,21 @@
-import type { HistoryAchievement } from '../../api/types';
+import type {
+  HistoryAchievement,
+  MembersGrouped,
+  NoticeStreamer,
+} from '../../api/types';
+import { getMemberColor } from '../../utils/memberColor';
 
 // ── 메달 상수 ──
 export const MEDAL_ORDER: Record<string, number> = { gold: 0, silver: 1, bronze: 2 };
-export const MEDAL_NUM: Record<string, string> = { gold: '1', silver: '2', bronze: '3' };
 export const MEDAL_LABEL: Record<string, string> = {
   gold: 'GOLD',
   silver: 'SILVER',
   bronze: 'BRONZE',
+};
+export const MEDAL_ICON: Record<string, string> = {
+  gold: '/img/icons/gold.png',
+  silver: '/img/icons/silver.png',
+  bronze: '/img/icons/bronze.png',
 };
 
 // ── 카테고리 표시 메타 (Notion category 이름 → 이모지/라벨) ──
@@ -67,4 +76,73 @@ export function formatDate(iso: string): string {
   if (!iso) return '';
   const [year, month] = iso.split('-');
   return month ? `${year}.${Number(month)}` : year;
+}
+
+export interface HistoryMemberProfile {
+  name: string;
+  personalColor: string;
+  labelTextColor: string;
+  avatar: string;
+}
+
+export type HistoryMemberProfileMap = Record<string, HistoryMemberProfile>;
+
+export function buildHistoryMemberProfileMap(
+  groupedMembers: MembersGrouped | undefined,
+  streamers: NoticeStreamer[],
+): HistoryMemberProfileMap {
+  if (!groupedMembers) return {};
+
+  const members = [
+    ...groupedMembers.master,
+    ...groupedMembers.upper,
+    ...groupedMembers.lower,
+    ...groupedMembers.new,
+    ...(groupedMembers.other ?? []),
+  ];
+  const streamerByName = new Map(
+    streamers.map((streamer) => [streamer.name.trim(), streamer]),
+  );
+
+  return Object.fromEntries(
+    members.flatMap((member) => {
+      const name = member.stageName.trim();
+      const streamer = streamerByName.get(name);
+      if (!streamer?.avatar) return [];
+      const personalColor = getMemberColor(member);
+
+      return [
+        [
+          name,
+          {
+            name,
+            personalColor,
+            labelTextColor: getLabelTextColor(personalColor),
+            avatar: streamer.avatar,
+          },
+        ],
+      ];
+    }),
+  );
+}
+
+export function getAchievementMemberProfiles(
+  memberNames: string[],
+  profileMap: HistoryMemberProfileMap,
+): HistoryMemberProfile[] {
+  return memberNames.flatMap((name) => {
+    const profile = profileMap[name.trim()];
+    return profile ? [profile] : [];
+  });
+}
+
+function getLabelTextColor(hexColor: string): string {
+  const hex = hexColor.replace('#', '');
+  if (!/^[\da-f]{6}$/i.test(hex)) return '#ffffff';
+
+  const [red, green, blue] = [0, 2, 4].map((offset) =>
+    Number.parseInt(hex.slice(offset, offset + 2), 16),
+  );
+  const luminance = (red * 299 + green * 587 + blue * 114) / 1000;
+  return luminance >= 150 ? '#08080a' : '#ffffff';
 }

@@ -114,7 +114,7 @@ export default function MemberModal({ member, onClose }: MemberModalProps) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="member-modal-visit"
-                style={{ background: color }}
+                style={{ border: `2px ${color}` }}
               >
                 SOOP STATION
               </a>

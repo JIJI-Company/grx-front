@@ -5,7 +5,7 @@ const navigation = [
   { to: '/live', label: 'LIVE' },
   { to: '/members', label: 'MEMBERS' },
   { to: '/history', label: 'HISTORY' },
-  { to: '/times', label: 'TIMES' },
+  //{ to: '/times', label: 'TIMES' },
   { to: '/notice', label: 'NOTICE' },
   { to: '/calendar', label: 'CALENDAR' },
 ];

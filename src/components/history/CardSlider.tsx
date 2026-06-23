@@ -1,13 +1,15 @@
 import { useRef } from 'react';
 import type { HistoryAchievement } from '../../api/types';
 import AchievementCard from './AchievementCard';
+import type { HistoryMemberProfileMap } from './historyPresentation';
 import { sortByMedal } from './historyPresentation';
 
 interface CardSliderProps {
   items: HistoryAchievement[];
+  memberProfiles: HistoryMemberProfileMap;
 }
 
-export default function CardSlider({ items }: CardSliderProps) {
+export default function CardSlider({ items, memberProfiles }: CardSliderProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const sorted = sortByMedal(items);
 
@@ -27,7 +29,13 @@ export default function CardSlider({ items }: CardSliderProps) {
             <p>아직 수상 기록이 없습니다</p>
           </div>
         ) : (
-          sorted.map((item) => <AchievementCard key={item.id} item={item} />)
+          sorted.map((item) => (
+            <AchievementCard
+              key={item.id}
+              item={item}
+              memberProfiles={memberProfiles}
+            />
+          ))
         )}
       </div>
       <button className="hof-arrow right" onClick={() => slide(1)} aria-label="다음 기록">

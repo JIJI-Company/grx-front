@@ -21,7 +21,7 @@ export const router = createBrowserRouter([
       { path: 'notice', element: <NoticePage /> },
       { path: 'calendar', element: <CalendarPage /> },
       { path: 'history', element: <HistoryPage /> },
-      { path: 'times', element: <TimesPage /> },
+      //{ path: 'times', element: <TimesPage /> },
       { path: 'lika', element: <LikaPage /> },
       { path: 'maintenance', element: <MaintenancePage /> },
     ],

@@ -3,14 +3,16 @@ import type { NoticeStreamer } from '../api/types';
 import { EmptyState, LoadingState } from '../components/common/AsyncState';
 import PageHeader from '../components/common/PageHeader';
 import NoticeCard from '../components/notice/NoticeCard';
+import { getLatestNotices } from '../components/notice/noticePresentation';
 import { useNotice } from '../hooks/useContent';
 
 export default function NoticePage() {
   const { data: streamers = [], isLoading, isError } = useNotice();
   const [activeId, setActiveId] = useState('ALL');
+  const latestNotices = useMemo(() => getLatestNotices(streamers), [streamers]);
 
   const visible = useMemo(
-    () => (activeId === 'ALL' ? streamers : streamers.filter((s) => s.soopId === activeId)),
+    () => streamers.filter((streamer) => streamer.soopId === activeId),
     [streamers, activeId],
   );
 
@@ -45,9 +47,23 @@ export default function NoticePage() {
           </div>
 
           <div className="notice-groups">
-            {visible.map((streamer) => (
-              <StreamerGroup key={streamer.soopId} streamer={streamer} />
-            ))}
+            {activeId === 'ALL' ? (
+              <div className="notice-grid" aria-label="전체 공지 최신순">
+                {latestNotices.map(({ notice, streamer }) => (
+                  <NoticeCard
+                    key={`${streamer.soopId}-${notice.id}`}
+                    notice={notice}
+                    accent={streamer.color}
+                    streamerName={streamer.name}
+                    streamerAvatar={streamer.avatar}
+                  />
+                ))}
+              </div>
+            ) : (
+              visible.map((streamer) => (
+                <StreamerGroup key={streamer.soopId} streamer={streamer} />
+              ))
+            )}
           </div>
         </>
       )}
@@ -76,7 +92,12 @@ function StreamerGroup({ streamer }: { streamer: NoticeStreamer }) {
       </header>
       <div className="notice-grid">
         {streamer.notices.map((notice) => (
-          <NoticeCard key={notice.id} notice={notice} accent={streamer.color} />
+          <NoticeCard
+            key={notice.id}
+            notice={notice}
+            accent={streamer.color}
+            streamerAvatar={streamer.avatar}
+          />
         ))}
       </div>
     </section>

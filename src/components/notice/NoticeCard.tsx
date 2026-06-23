@@ -3,6 +3,8 @@ import type { NoticeItem } from '../../api/types';
 interface NoticeCardProps {
   notice: NoticeItem;
   accent: string;
+  streamerName?: string;
+  streamerAvatar?: string;
 }
 
 // "2026-06-22 18:28:32" → "2026.06.22"
@@ -11,7 +13,12 @@ function formatDate(raw: string): string {
   return datePart ? datePart.replace(/-/g, '.') : raw;
 }
 
-export default function NoticeCard({ notice, accent }: NoticeCardProps) {
+export default function NoticeCard({
+  notice,
+  accent,
+  streamerName,
+  streamerAvatar,
+}: NoticeCardProps) {
   const open = () => window.open(notice.url, '_blank', 'noopener');
   const hasThumb = !!notice.thumbnail;
 
@@ -33,7 +40,15 @@ export default function NoticeCard({ notice, accent }: NoticeCardProps) {
       </div>
       <div className="notice-footer">
         <span className="notice-flag" style={{ color: accent }}>
-          새 소식 📡
+          {streamerAvatar && (
+            <img
+              src={streamerAvatar}
+              alt=""
+              className="notice-flag-avatar"
+              style={{ borderColor: accent }}
+            />
+          )}
+          {streamerName ? `${streamerName} · ` : ''}새 소식 📡
         </span>
         <span className="notice-meta">
           {formatDate(notice.date)} · 👁 {notice.readCount} · 💬 {notice.commentCount}

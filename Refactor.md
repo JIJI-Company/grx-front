@@ -13,6 +13,92 @@
 
 ---
 
+## v2.2.0 - 2026-06-23
+
+### 목표
+
+- History 메달 카드의 참가 멤버 텍스트를 오래 호버하면 참가 스트리머의 프로필을 시각적으로 확인할 수 있게 한다.
+
+### 변경 사항
+
+- History의 멤버 이름을 Member 응답의 `personalColor`, Notice 응답의 `streamer.avatar`와 결합하는 순수 표현 로직을 추가했다.
+- `.medal-card`에 약 0.5초간 호버하면 원형 아바타와 멤버 색상 이름표를 포털 툴팁으로 표시한다.
+- `.medal-card-detail`을 제거하고 참가자 정보는 카드 호버 툴팁에서만 제공한다.
+- 메달 숫자 UI를 `public/img/icons/gold.png`, `silver.png`, `bronze.png` 이미지로 교체했다.
+- 메달 이미지를 확대하고 카드 제목 크기를 줄였다.
+- 스트리머 툴팁은 카드 중앙이 아니라 호버 중인 마우스 위치를 기준으로 표시한다.
+- Notion History 데이터베이스의 `image` 속성을 History API 계약에 추가했다.
+- 이미지가 있는 메달 카드는 클릭 또는 Enter/Space 입력 시 Y축 flip 애니메이션으로 전환된다.
+- 카드 뒷면은 해당 경기의 팬아트 이미지를 전체 영역에 표시한다.
+- 가로 슬라이더 overflow에 툴팁이 잘리지 않도록 화면 좌표 기반으로 배치한다.
+- 키보드 포커스에서는 지연 없이 툴팁을 표시하고, 데이터가 매칭되지 않으면 기존 멤버 텍스트만 유지한다.
+
+### 변경 파일
+
+- `src/pages/HistoryPage.tsx`
+- `src/components/history/AchievementCard.tsx`
+- `src/components/history/CardSlider.tsx`
+- `src/components/history/historyPresentation.ts`
+- `src/styles/global.css`
+- `src/api/types.ts`
+- `src/api/mockDb.ts`
+- `../backend/src/modules/history/history.service.ts`
+
+### Verification
+
+- 사용자 요청에 따라 실행하지 않음
+
+### 미검증 항목
+
+- 빌드, 운영 데이터 기반 멤버 이름 매칭, 실제 호버 지연과 팝오버 위치는 미검증
+
+## v2.1.1 - 2026-06-23
+
+### 목표
+
+- Notice 페이지의 `전체 보기`에서 스트리머별 그룹 순서가 아니라 전체 공지를 최신순으로 확인할 수 있게 한다.
+
+### 변경 사항
+
+- 전체 스트리머의 공지를 하나의 목록으로 펼치고 `date` 내림차순으로 정렬하는 순수 함수를 추가했다.
+- `전체 보기` 탭은 정렬된 통합 공지 목록을 렌더링한다.
+- 통합 목록에서는 각 카드에 스트리머 이름을 표시해 공지 출처를 유지한다.
+- 공지 카드의 `.notice-flag` 앞에 스트리머 원형 아바타를 표시한다.
+- 개별 스트리머 탭의 기존 그룹 UI와 공지 순서는 변경하지 않았다.
+
+### 변경 파일
+
+- `src/pages/NoticePage.tsx`
+- `src/components/notice/NoticeCard.tsx`
+- `src/components/notice/noticePresentation.ts`
+
+### Verification
+
+```bash
+npm run build
+```
+
+- Result: PASS
+- TypeScript project build: PASS
+- Vite production build: PASS
+
+```bash
+git diff --check
+```
+
+- Result: PASS
+
+- 인앱 브라우저 `/notice` 검증:
+  - `전체 보기` 활성 상태와 통합 공지 grid 표시: PASS
+  - 첫 20개 공지 날짜 내림차순(`06.18` → `06.17`): PASS
+  - 통합 카드의 스트리머 이름 표시: PASS
+  - 개별 스트리머 탭의 단일 그룹 렌더링: PASS
+  - 브라우저 콘솔 오류 없음: PASS
+
+### 미검증 항목
+
+- Mock 데이터로 브라우저 동작을 검증했으며, 운영 백엔드 실데이터 연결 상태는 별도 통합 검증이 필요하다.
+
 ## v2.1.0 - 2026-06-19
 
 ### 목표

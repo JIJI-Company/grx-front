@@ -1167,11 +1167,12 @@
 }
 
 .member-modal-visit {
+  color: rgb(17, 17, 17);
   align-self: flex-start;
   margin-top: auto;
   padding: 12px 30px;
   border-radius: 30px;
-  color: #fff;
+  background-color: #fff;
   font-family: var(--font-display);
   font-size: 0.85rem;
   font-weight: 800;
@@ -1613,29 +1614,91 @@
   position: relative;
   flex: 0 0 16rem;
   min-height: 22rem;
+  perspective: 75rem;
+  transition: all 0.5s var(--ease-castle);
+}
+
+.medal-card[tabindex='0'] {
+  outline: none;
+}
+
+.medal-card[role='button'] {
+  cursor: pointer;
+}
+
+.medal-card[tabindex='0']:focus-visible {
+  border-radius: 1.25rem;
+  box-shadow: 0 0 0 3px rgb(225 29 72 / 0.45);
+}
+
+.medal-card-inner {
+  position: relative;
+  width: 100%;
+  min-height: 22rem;
+  transform-style: preserve-3d;
+  transition: transform 0.7s var(--ease-castle);
+}
+
+.medal-card.is-flipped .medal-card-inner {
+  transform: rotateY(180deg);
+}
+
+.medal-card-face {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
-  padding: 1.875rem 1.5rem;
   overflow: hidden;
-  background: var(--card-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--glass-border);
   border-radius: 1.25rem;
+  background: var(--card-bg);
   box-shadow: 0 15px 35px rgb(0 0 0 / 0.5), inset 0 0 0 1px rgb(255 255 255 / 0.04);
-  transition: all 0.5s var(--ease-castle);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.medal-card-front {
+  padding: 1.875rem 1.5rem;
+  text-align: center;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+.medal-card-back {
+  transform: rotateY(180deg);
+  background: #050305;
+}
+
+.medal-card-back img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.medal-card-back-caption {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 2.5rem 1rem 1rem;
+  background: linear-gradient(to top, rgb(0 0 0 / 0.9), transparent);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-align: center;
 }
 
 @media (hover: hover) {
   .medal-card:hover {
     transform: translateY(-12px);
+  }
+
+  .medal-card:hover .medal-card-face {
     border-color: rgb(225 29 72 / 0.7);
-    box-shadow:
-      20px 35px 60px rgb(0 0 0 / 0.7),
-      0 0 40px rgb(225 29 72 / 0.35),
-      inset 0 0 0 1px rgb(255 255 255 / 0.15);
+    box-shadow: 20px 35px 60px rgb(0 0 0 / 0.7), 0 0 40px rgb(225 29 72 / 0.35);
   }
 
   .medal-card:hover .medal-card-icon {
@@ -1655,32 +1718,107 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 5rem;
-  height: 5rem;
-  margin-bottom: 1.5rem;
-  border-radius: 50%;
-  font-family: var(--font-display);
-  font-size: 2rem;
-  font-weight: 700;
+  width: 8rem;
+  height: 7rem;
+  margin-bottom: 1rem;
+  overflow: visible;
   transition: transform 0.5s var(--ease-castle);
 }
 
+.medal-card-icon img {
+  width: 145%;
+  height: 145%;
+  max-width: none;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 14px rgb(0 0 0 / 0.45));
+}
+
+.medal-card-icon span {
+  font-size: 4rem;
+}
+
 .medal-card-title {
+  flex: 1;
   margin-bottom: 0.9rem;
   font-family: var(--font-display);
-  font-size: 1.6rem;
+  font-size: 1.35rem;
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: 0.05rem;
   color: #fff;
 }
 
-.medal-card-detail {
-  flex: 1;
-  margin-bottom: 1.25rem;
-  font-size: 0.85rem;
-  line-height: 1.6;
-  color: var(--color-ink-200);
+.history-member-popover {
+  position: fixed;
+  z-index: 1000;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.8rem;
+  width: max-content;
+  max-width: min(30rem, calc(100vw - 2rem));
+  padding: 1rem;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  border-radius: 1rem;
+  background: rgb(12 11 14 / 0.96);
+  box-shadow: 0 18px 50px rgb(0 0 0 / 0.65), 0 0 28px rgb(225 29 72 / 0.16);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  pointer-events: none;
+  animation: history-member-popover-in 0.2s ease-out both;
+}
+
+.history-member-popover.above {
+  transform: translate(-50%, -100%);
+  transform-origin: bottom center;
+}
+
+.history-member-popover.below {
+  transform: translateX(-50%);
+  transform-origin: top center;
+}
+
+.history-member-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  width: 3.875rem;
+}
+
+.history-member-avatar {
+  width: 3.625rem;
+  height: 3.625rem;
+  border: 3px solid var(--bright-rose);
+  border-radius: 50%;
+  object-fit: cover;
+  background: #111;
+  box-shadow: 0 6px 16px rgb(0 0 0 / 0.45);
+}
+
+.history-member-name {
+  max-width: 100%;
+  padding: 0.25rem 0.55rem;
+  border-radius: 0.4rem;
+  overflow: hidden;
+  font-size: 0.78rem;
+  font-weight: 900;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 0 rgb(255 255 255 / 0.18);
+  white-space: nowrap;
+}
+
+@keyframes history-member-popover-in {
+  from {
+    opacity: 0;
+    scale: 0.96;
+  }
+
+  to {
+    opacity: 1;
+    scale: 1;
+  }
 }
 
 .medal-card-divider {
@@ -1718,24 +1856,6 @@
 
 .medal-card.bronze .medal-card-label {
   color: var(--bronze);
-}
-
-.medal-card.gold .medal-card-icon {
-  background: linear-gradient(135deg, #fff3a0 0%, #ffd700 50%, #b8860b 100%);
-  box-shadow: 0 10px 20px rgb(255 215 0 / 0.4), inset 0 0 15px rgb(255 255 255 / 0.5);
-  color: #3a2200;
-}
-
-.medal-card.silver .medal-card-icon {
-  background: linear-gradient(135deg, #fff 0%, #e2e8f0 50%, #94a3b8 100%);
-  box-shadow: 0 10px 20px rgb(192 192 192 / 0.3), inset 0 0 15px rgb(255 255 255 / 0.5);
-  color: #1e293b;
-}
-
-.medal-card.bronze .medal-card-icon {
-  background: linear-gradient(135deg, #fbc687 0%, #e67e22 50%, #935116 100%);
-  box-shadow: 0 10px 20px rgb(230 126 34 / 0.4), inset 0 0 15px rgb(255 255 255 / 0.5);
-  color: #3e1f00;
 }
 
 /* 카테고리 탭 */
@@ -1989,14 +2109,28 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
   gap: 0.5rem;
   padding: 0.75rem 1.25rem;
   background: rgb(0 0 0 / 0.25);
 }
 
 .notice-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   font-weight: 700;
   font-size: 0.8rem;
+}
+
+.notice-flag-avatar {
+  width: 1.6rem;
+  height: 1.6rem;
+  flex-shrink: 0;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #111;
 }
 
 .notice-meta {

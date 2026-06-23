@@ -3,16 +3,24 @@ import { LoadingState } from '../components/common/AsyncState';
 import PageHeader from '../components/common/PageHeader';
 import CardSlider from '../components/history/CardSlider';
 import {
+  buildHistoryMemberProfileMap,
   categoriesInData,
   categoryMeta,
   countMedals,
 } from '../components/history/historyPresentation';
-import { useHistory } from '../hooks/useContent';
+import { useHistory, useNotice } from '../hooks/useContent';
+import { useMembers } from '../hooks/useMembers';
 
 export default function HistoryPage() {
   const { data: items = [], isLoading } = useHistory();
+  const { data: groupedMembers } = useMembers();
+  const { data: streamers = [] } = useNotice();
   const [activeCat, setActiveCat] = useState('all');
 
+  const memberProfiles = useMemo(
+    () => buildHistoryMemberProfileMap(groupedMembers, streamers),
+    [groupedMembers, streamers],
+  );
   const totals = useMemo(() => countMedals(items), [items]);
   const categories = useMemo(() => categoriesInData(items), [items]);
   const filtered = useMemo(
@@ -35,7 +43,7 @@ export default function HistoryPage() {
           <Stat tone="bronze" value={totals.bronze} label="🥉 BRONZE" />
           <Stat tone="total" value={totals.total} label="🏆 TOTAL" />
         </div>
-        <CardSlider items={items} />
+        <CardSlider items={items} memberProfiles={memberProfiles} />
       </section>
 
       {/* ── 카테고리별 기록 ── */}
@@ -75,7 +83,7 @@ export default function HistoryPage() {
             <span className="hof-cat-badge total">🏆 총 {catCounts.total}개</span>
           )}
         </div>
-        <CardSlider items={filtered} />
+        <CardSlider items={filtered} memberProfiles={memberProfiles} />
       </section>
     </div>
   );

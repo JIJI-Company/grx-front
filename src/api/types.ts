@@ -112,6 +112,7 @@ export interface HistoryAchievement {
   medal: 'gold' | 'silver' | 'bronze' | '';
   date: string;        // ISO — "2025-10-26"
   members: string[];   // member names
+  image: string | null;
 }
 
 export interface NoticeItem {
