@@ -5,10 +5,10 @@ interface LiveCardProps {
 }
 
 export default function LiveCard({ stream }: LiveCardProps) {
-  // Live snapshot when on-air (cache-busted per render), else the profile image.
+  // Live snapshot when on-air (cache-busted per poll), else the profile image.
   const liveThumb =
     stream.isLive && stream.liveThumbnailUrl
-      ? `${stream.liveThumbnailUrl}?t=${Date.now()}`
+      ? `${stream.liveThumbnailUrl}?t=${encodeURIComponent(stream.checkedAt ?? stream.accountId)}`
       : null;
   const imageSource = liveThumb ?? stream.profileImageUrl ?? undefined;
 
@@ -43,9 +43,16 @@ export default function LiveCard({ stream }: LiveCardProps) {
             onError={(e) => {
               // Live snapshot can 404 right after a stream ends — fall back to profile.
               const img = e.currentTarget;
-              if (stream.profileImageUrl && img.src !== stream.profileImageUrl) {
-                img.src = stream.profileImageUrl;
+              const profileImageUrl = stream.profileImageUrl;
+              if (profileImageUrl) {
+                const profileUrl = new URL(profileImageUrl, window.location.href).href;
+                if (img.src !== profileUrl) {
+                  img.src = profileImageUrl;
+                  return;
+                }
               }
+              img.removeAttribute('src');
+              img.style.visibility = 'hidden';
             }}
           />
         )}
