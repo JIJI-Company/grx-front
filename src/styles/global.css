@@ -1253,15 +1253,11 @@
   display: flex;
   width: 24px;
   height: 24px;
-  align-items: center;
+  /*align-items: center;*/
   justify-content: center;
   color: #ccc;
   font-size: 0.9rem;
   font-weight: 700;
-}
-
-.cal-cell.today .cal-date-num {
-  color: #fff;
 }
 
 .cal-cell.sunday .cal-date-num {
@@ -1270,6 +1266,13 @@
 
 .cal-cell.saturday .cal-date-num {
   color: #60a5fa;
+}
+
+.cal-cell.today .cal-date-num {
+  border-radius: 50%;
+  background: #e11d48;
+  box-shadow: 0 0 14px rgb(225 29 72 / 45%);
+  color: #fff;
 }
 
 .cal-count-badge,
@@ -1390,6 +1393,24 @@
   color: #aaa;
   font-family: var(--font-body);
   font-size: 1rem;
+}
+
+.cal-weekly-header .cal-weekly-date-num {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  margin: 0 -6px;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+}
+
+.cal-weekly-header .cal-weekly-date-num.today {
+  border-radius: 50%;
+  background: #e11d48;
+  box-shadow: 0 0 14px rgb(225 29 72 / 45%);
 }
 
 .cal-weekly-events {
