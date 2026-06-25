@@ -1484,7 +1484,9 @@
 }
 
 .day-modal-content {
+  display: flex;
   max-height: 82dvh;
+  flex-direction: column;
   overflow: hidden;
   padding: 35px;
 }
@@ -1562,11 +1564,15 @@
 
 .day-modal-body {
   display: flex;
+  min-height: 0;
   max-height: 380px;
+  flex: 1;
   flex-direction: column;
   gap: 16px;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding-right: 6px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .day-modal-body::-webkit-scrollbar {
