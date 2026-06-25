@@ -5,6 +5,7 @@ export function useCalendar() {
   return useQuery({
     queryKey: ['calendar'],
     queryFn: apiGetCalendar,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 }
