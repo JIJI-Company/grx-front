@@ -57,7 +57,14 @@ export interface ContentAssetEntry {
 
 export interface ContentItem {
   contentId: string;
-  contentType: 'NEWS' | 'SCHEDULE' | 'GALLERY' | 'YOUTUBE' | 'NOTICE' | 'GAME_EVENT';
+  contentType:
+    | 'NEWS'
+    | 'SCHEDULE'
+    | 'CALENDAR'
+    | 'GALLERY'
+    | 'YOUTUBE'
+    | 'NOTICE'
+    | 'GAME_EVENT';
   status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
   title: string;
   summary: string | null;
