@@ -63,7 +63,7 @@ export default function ScheduleCard({
               }}
             >
               {member.profileAsset?.publicUrl && (
-                <img src={member.profileAsset.publicUrl} alt={member.stageName} />
+                <img src={member.profileAsset.publicUrl} alt={member.stageName} loading="lazy" decoding="async" />
               )}
               <span>{member.stageName}</span>
             </div>

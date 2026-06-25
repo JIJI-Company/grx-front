@@ -48,7 +48,7 @@ export default function MemberModal({ member, onClose }: MemberModalProps) {
         <div className="member-modal-layout">
           <div className="member-modal-left">
             {member.profileAsset?.publicUrl && (
-              <img src={member.profileAsset.publicUrl} alt={member.stageName} />
+              <img src={member.profileAsset.publicUrl} alt={member.stageName} loading="lazy" decoding="async" />
             )}
           </div>
 

@@ -39,7 +39,7 @@ export default function MemberCard({
         <div className="flip-front">
           <div className="member-portrait">
             {member.profileAsset?.publicUrl && (
-              <img src={member.profileAsset.publicUrl} alt={member.stageName} />
+              <img src={member.profileAsset.publicUrl} alt={member.stageName} loading="lazy" decoding="async" />
             )}
             <div className={`rank-overlay ${isGold ? 'rank-overlay-gold' : ''}`}>
               {rankLabel}

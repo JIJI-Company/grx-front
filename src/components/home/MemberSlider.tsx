@@ -67,7 +67,7 @@ export default function MemberSlider() {
               : undefined}
           >
             {member.profileAsset?.publicUrl && (
-              <img src={member.profileAsset.publicUrl} alt={member.stageName} />
+              <img src={member.profileAsset.publicUrl} alt={member.stageName} loading="lazy" decoding="async" />
             )}
             <div className="mini-card-info">
               <p className="mini-name">{member.stageName}</p>
