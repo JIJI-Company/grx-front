@@ -62,25 +62,54 @@ export function buildScheduleMap(events: CalendarEvent[], memberFilter: string):
   return map;
 }
 
-const memberPalette = [
-  { bg: 'rgba(225,29,72,0.25)', text: '#fda4af' },
-  { bg: 'rgba(59,130,246,0.25)', text: '#93c5fd' },
-  { bg: 'rgba(16,185,129,0.25)', text: '#6ee7b7' },
-  { bg: 'rgba(245,158,11,0.25)', text: '#fcd34d' },
-  { bg: 'rgba(168,85,247,0.25)', text: '#d8b4fe' },
-  { bg: 'rgba(236,72,153,0.25)', text: '#f9a8d4' },
-  { bg: 'rgba(14,165,233,0.25)', text: '#7dd3fc' },
-  { bg: 'rgba(234,179,8,0.25)', text: '#fde047' },
-];
-const memberColorCache: Record<string, { bg: string; text: string }> = {};
-let memberColorIndex = 0;
+const memberBadgeColors: Record<string, { bg: string; text: string }> = {
+  서라0: { bg: '#4FC3F7', text: '#0F172A' },
+  임민트: { bg: '#00C9A7', text: '#FFFFFF' },
+  김옥독: { bg: '#9CD5C2', text: '#0F172A' },
+  냥쏘: { bg: '#FFB6C1', text: '#0F172A' },
+  윤타미: { bg: '#87CEEB', text: '#0F172A' },
+  봄세이: { bg: '#5DADE2', text: '#FFFFFF' },
+  꾸티뉴: { bg: '#F87171', text: '#FFFFFF' },
+  야무지: { bg: '#FCA5A5', text: '#7F1D1D' },
+  엔쥬: { bg: '#FFFFFF', text: '#0F172A' },
+  리카: { bg: '#FDE047', text: '#713F12' },
+  난워니: { bg: '#FEF08A', text: '#713F12' },
+  다뮤: { bg: '#93C5FD', text: '#1E3A8A' },
+  딴딴2당: { bg: '#FBCFE8', text: '#701A75' },
+  바먀: { bg: '#D97706', text: '#FFFFFF' },
+  란다: { bg: '#FDBA74', text: '#7C2D12' },
+  모야: { bg: '#B8C9FF', text: '#1E1B4B' },
+  소심해: { bg: '#F472B6', text: '#FFFFFF' },
+  컨텐츠: { bg: '#8B5CF6', text: '#FFFFFF' },
+  합방: { bg: '#EC4899', text: '#FFFFFF' },
+};
+
+const memberAvatarMap: Record<string, string> = {
+  꾸티뉴: '/img/ggutinho.png',
+  야무지: '/img/yamuzi.png',
+  엔쥬: '/img/enju.png',
+  리카: '/img/lika.png',
+  난워니: '/img/nanana.png',
+  다뮤: '/img/damu.jpeg',
+  딴딴2당: '/img/ttanttan.jpeg',
+  바먀: '/img/baamya.png',
+  서라0: '/img/서라0.jpg',
+  임민트: '/img/mint.png',
+  김옥독: '/img/okdok.png',
+  냥쏘: '/img/nangsso.png',
+  윤타미: '/img/tami.png',
+  봄세이: '/img/BOMSAI.png',
+  모야: '/img/moya.png',
+  소심해: '/img/sosim.jpeg',
+  란다: '/img/randa.jpg',
+};
 
 export function getMemberColor(name: string) {
-  if (!memberColorCache[name]) {
-    memberColorCache[name] = memberPalette[memberColorIndex++ % memberPalette.length];
-  }
+  return memberBadgeColors[name] || { bg: '#444', text: '#aaa' };
+}
 
-  return memberColorCache[name];
+export function getMemberAvatar(name: string) {
+  return memberAvatarMap[name] || `/img/${name}.png`;
 }
 
 export function getEventStyle(

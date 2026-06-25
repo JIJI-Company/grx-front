@@ -128,6 +128,7 @@
     background-clip: text;
     color: transparent;
     filter: drop-shadow(0 0 12px --alpha(var(--color-ruby-500) / 40%));
+    padding: 1rem 0;
   }
 
   .nav-link {
@@ -370,42 +371,59 @@
 }
 
 .hero {
-  @apply relative flex h-[calc(100svh-var(--nav-h))] min-h-[38rem] items-center justify-center overflow-hidden;
+  @apply relative flex h-[calc(100svh-var(--nav-h))] min-h-[38rem] items-center justify-center overflow-hidden text-center;
+  perspective: 1200px;
+  transform-style: preserve-3d;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(circle at center, rgb(130 0 30 / 15%) 0%, rgb(5 0 2 / 88%) 100%);
 }
 
 .hero-bg {
-  @apply absolute inset-0 scale-[1.08] bg-cover bg-center brightness-[0.35] saturate-70;
+  @apply absolute bg-cover bg-center;
+  top: -5%;
+  left: -5%;
+  width: 110%;
+  height: 110%;
   background-image: url('/img/ggu_title.jpg');
+  filter: brightness(0.72) saturate(0.95) contrast(1.02);
 }
 
 .hero-content-wrap {
-  @apply relative z-[2] flex flex-col items-center gap-3 px-4 text-center;
-}
-
-.hero-vertical-text {
-  @apply absolute top-1/2 -left-15 hidden -translate-y-1/2 font-display text-[0.65rem] tracking-[0.35em] text-white/30 nav:block;
-  writing-mode: vertical-rl;
+  @apply relative z-[10] flex flex-col items-center px-4;
 }
 
 .hero-label {
-  @apply font-display text-xs tracking-[0.35em] text-ruby-700 uppercase;
+  @apply mb-[30px] font-display text-[0.85rem] font-bold tracking-[0.8rem] text-ruby-500 uppercase;
 }
 
 .hero h1 {
-  @apply font-display text-[clamp(4rem,14vw,10rem)] leading-[0.85] font-bold tracking-[0.05em];
+  @apply font-display text-[clamp(4.8rem,14vw,10rem)] leading-[0.9] font-bold;
+  letter-spacing: -3px;
+  background: linear-gradient(180deg, #fff 0%, #ffcbd1 100%);
+  background-clip: text;
+  filter: drop-shadow(0 0 40px rgb(255 26 74 / 60%));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .hero p {
-  @apply text-[0.7rem] tracking-[0.2em] text-ink-400 uppercase sm:text-xs;
+  @apply mt-[50px] text-[0.85rem] font-medium tracking-[0.28rem] text-[#ccc] uppercase sm:text-[1.1rem] sm:tracking-[0.4rem];
+  text-shadow: 0 0 15px rgb(0 0 0 / 80%);
 }
 
 .scroll-indicator {
-  @apply absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-[0.6rem] tracking-[0.2em] text-ink-500 uppercase;
+  @apply absolute bottom-10 left-1/2 z-[10] flex -translate-x-1/2 flex-col items-center gap-[15px] font-bold text-[0.7rem] tracking-[0.5rem] text-ruby-500/80 uppercase;
 }
 
 .scroll-line {
-  @apply h-12 w-px;
-  background: linear-gradient(to bottom, var(--border-red), transparent);
+  @apply relative h-[60px] w-px overflow-hidden;
+  background: linear-gradient(to bottom, var(--color-ruby-500), transparent);
   animation: scroll-line 2s ease-in-out infinite;
 }
 
@@ -462,97 +480,137 @@
 }
 
 /* ── Home · 라이브 스트리머 프로필 그리드 ─────────────────────────────────── */
-.live-avatar-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1.25rem 1rem;
-  padding: 0.25rem 0 0.5rem;
+.premium-live-multi {
+  width: 100%;
+  max-width: 100%;
+  margin-top: 0.9375rem;
+  padding: 1.25rem;
+  border: 1px solid rgb(255 26 74 / 8%);
+  border-radius: 20px;
+  background: rgb(255 26 74 / 2%);
 }
 
-.live-avatar-item {
+.multi-header {
+  margin-bottom: 1.5625rem;
+  color: #ddd;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.multi-header .highlight {
+  color: var(--color-ruby-500);
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
+.multi-avatar-grid {
   display: flex;
+  flex-flow: row nowrap;
+  justify-content: flex-start;
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0 0 0.9375rem;
+  cursor: grab;
+  scrollbar-width: none;
+  touch-action: pan-x;
+  user-select: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.multi-avatar-grid:active {
+  cursor: grabbing;
+}
+
+.multi-avatar-grid::-webkit-scrollbar {
+  display: none;
+}
+
+.premium-multi-item {
+  display: flex;
+  flex: 0 0 5rem;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
-  width: 4.75rem;
+  gap: 0.625rem;
+  min-width: 5rem;
   cursor: pointer;
-  transition: transform 0.3s var(--ease-castle);
+  transition: transform 0.3s;
 }
 
 @media (hover: hover) {
-  .live-avatar-item:hover {
-    transform: translateY(-6px);
+  .premium-multi-item:hover {
+    transform: translateY(-8px);
   }
 }
 
-.live-avatar-shell {
+.multi-avatar-shell {
   position: relative;
-  width: 4.25rem;
-  height: 4.25rem;
+  width: 4.6875rem;
+  height: 4.6875rem;
 }
 
-.live-avatar-shell img,
-.live-avatar-fallback {
+.multi-avatar-shell img,
+.multi-avatar-fallback {
   width: 100%;
   height: 100%;
+  border: 2px solid transparent;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid transparent;
   background-image: linear-gradient(var(--dark-bg), var(--dark-bg)),
-    linear-gradient(135deg, var(--bright-rose), #ff4d6d);
+    linear-gradient(135deg, var(--color-ruby-500), #ff4d6d);
   background-origin: border-box;
   background-clip: content-box, border-box;
-  box-shadow: 0 5px 15px rgb(225 29 72 / 0.2);
+  box-shadow: 0 5px 15px rgb(255 26 74 / 20%);
   transition: box-shadow 0.3s;
 }
 
-.live-avatar-fallback {
+.multi-avatar-fallback {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 700;
   color: #fff;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 700;
 }
 
 @media (hover: hover) {
-  .live-avatar-item:hover .live-avatar-shell img,
-  .live-avatar-item:hover .live-avatar-fallback {
-    box-shadow: 0 10px 25px rgb(225 29 72 / 0.45);
+  .premium-multi-item:hover .multi-avatar-shell img,
+  .premium-multi-item:hover .multi-avatar-fallback {
+    box-shadow: 0 10px 25px rgb(255 26 74 / 40%);
   }
 }
 
-.live-avatar-dot {
+.multi-live-dot {
   position: absolute;
-  bottom: 0.1rem;
-  right: 0.1rem;
-  width: 1rem;
-  height: 1rem;
-  border-radius: 50%;
-  background: var(--bright-rose);
+  right: 0;
+  bottom: 0;
+  width: 1.25rem;
+  height: 1.25rem;
   border: 3px solid var(--dark-bg);
-  animation: live-dot-blink 1.3s ease-in-out infinite;
+  border-radius: 50%;
+  background: var(--color-ruby-500);
+  animation: live-dot-blink 1.5s infinite;
 }
 
-.live-avatar-name {
+.premium-multi-name {
   max-width: 100%;
-  font-size: 0.8rem;
-  font-weight: 800;
-  color: #eee;
-  text-align: center;
   overflow: hidden;
+  color: #eee;
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.live-avatar-plat {
-  font-size: 0.6rem;
+.premium-multi-plat {
+  color: #888;
+  font-size: 0.65rem;
   font-weight: 700;
-  letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--color-ink-400);
 }
 
 .news-section {
@@ -637,6 +695,62 @@
 
 .yt-placeholder {
   @apply cursor-pointer px-5 py-10 text-center text-sm text-ink-500;
+}
+
+.contents-preview-section {
+  @apply mt-8 overflow-hidden border-y border-ruby-600/20 py-6;
+}
+
+.contents-preview-grid {
+  @apply grid grid-cols-2 gap-2.5 lg:grid-cols-4;
+}
+
+.contents-preview-card {
+  @apply focus-ring glass-panel overflow-hidden rounded-sm transition duration-300;
+}
+
+@media (hover: hover) {
+  .contents-preview-card:hover {
+    @apply -translate-y-1 border-ruby-600;
+  }
+}
+
+.contents-preview-thumb {
+  @apply aspect-[4/5] overflow-hidden bg-white/5;
+}
+
+.contents-preview-thumb img {
+  @apply size-full object-cover transition duration-300;
+}
+
+@media (hover: hover) {
+  .contents-preview-card:hover .contents-preview-thumb img {
+    @apply scale-105;
+  }
+}
+
+.contents-preview-copy {
+  @apply p-3;
+}
+
+.contents-preview-copy span {
+  @apply font-display text-[0.68rem] font-semibold tracking-[0.16em] text-pink-300 uppercase;
+}
+
+.contents-preview-copy h3 {
+  @apply mt-1.5 line-clamp-2 text-sm leading-snug font-black;
+}
+
+.contents-preview-copy p {
+  @apply mt-2 flex flex-wrap gap-1.5;
+}
+
+.contents-preview-copy b {
+  @apply text-xs font-extrabold text-blue-300;
+}
+
+.contents-preview-empty {
+  @apply rounded-sm border border-white/10 bg-white/4 px-4 py-8 text-center text-sm font-bold text-ink-500;
 }
 
 .member-section {
@@ -889,17 +1003,6 @@
   -webkit-box-orient: vertical;
 }
 
-.rank-overlay {
-  @apply absolute top-2 right-2 z-10 border bg-black/80 px-1.5 py-1 font-display text-[0.6rem] tracking-wider uppercase;
-  border-color: color-mix(in srgb, var(--member-color, #ff1a4a) 55%, transparent);
-  color: var(--member-color, #ff1a4a);
-}
-
-.rank-overlay-gold {
-  border-color: var(--gold);
-  color: var(--gold);
-}
-
 .back-keywords {
   color: var(--member-color, #ff1a4a);
   font-size: 0.75rem;
@@ -934,6 +1037,750 @@
 
 .cal-modal-backdrop {
   @apply fixed inset-0 z-[9000] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm;
+}
+
+/* Calendar page, matched to the legacy grx/calendar.html structure */
+.calendar-hero {
+  position: relative;
+  z-index: 10;
+  padding: 140px 5% 60px;
+  border-bottom: 1px solid rgb(225 29 72 / 20%);
+  background: linear-gradient(to bottom, rgb(5 0 2 / 95%), transparent);
+  text-align: center;
+}
+
+.cal-title-main {
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 9vw, 4.5rem);
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  filter: drop-shadow(0 0 30px rgb(225 29 72 / 60%));
+}
+
+.calendar-container {
+  position: relative;
+  z-index: 10;
+  max-width: 1400px;
+  margin: 40px auto 100px;
+  padding: 0 5%;
+}
+
+.cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.cal-nav {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.cal-current-date {
+  margin: 0;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 6vw, 2.5rem);
+  font-weight: 900;
+  letter-spacing: -1px;
+}
+
+.cal-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cal-toggle-group {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 5%);
+}
+
+.cal-toggle-btn,
+.cal-nav-btn {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cal-toggle-btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  color: #888;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.cal-toggle-btn.active,
+.cal-toggle-btn:hover {
+  background: #fff;
+  color: #000;
+}
+
+.cal-nav-btn {
+  display: flex;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: #aaa;
+  font-size: 1rem;
+}
+
+.cal-nav-btn:hover {
+  background: rgb(255 255 255 / 10%);
+  color: #fff;
+}
+
+.cal-panel {
+  /* Scroll horizontally on narrow screens instead of clipping the 44rem-wide
+     grid (the inner wrapper sets min-width). Unlayered, so it overrides the
+     Tailwind overflow-x-auto utility which would otherwise lose to overflow. */
+  overflow-x: auto;
+  overflow-y: hidden;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 16px;
+  background: rgb(15 15 15 / 60%);
+  backdrop-filter: blur(10px);
+}
+
+.cal-grid-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
+  background: rgb(255 255 255 / 2%);
+}
+
+.cal-grid-header div {
+  padding: 12px;
+  color: #888;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.cal-grid-header .sunday,
+.cal-grid-header div:first-child {
+  color: #f87171;
+}
+
+.cal-grid-header .saturday,
+.cal-grid-header div:last-child {
+  color: #60a5fa;
+}
+
+.cal-weeks-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-top: 1px solid rgb(255 255 255 / 6%);
+  border-left: 1px solid rgb(255 255 255 / 6%);
+}
+
+.cal-week-row {
+  position: relative;
+  border-bottom: 1px solid rgb(255 255 255 / 6%);
+  background: #111;
+}
+
+.cal-week-grid-bg {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.cal-week-events-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px 0;
+  box-sizing: border-box;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.cal-cell {
+  display: flex;
+  height: 100%;
+  cursor: pointer;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: 8px;
+  border-right: 1px solid rgb(255 255 255 / 6%);
+  background: #111;
+  transition: background 0.2s;
+}
+
+.cal-cell.empty {
+  background: rgb(17 17 17 / 40%);
+}
+
+.cal-cell.empty .cal-date-num {
+  opacity: 0.3;
+}
+
+.cal-cell:not(.empty):hover {
+  background: #1a1a1a;
+}
+
+.cal-cell-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.cal-date-num {
+  display: flex;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  color: #ccc;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.cal-cell.today .cal-date-num {
+  color: #fff;
+}
+
+.cal-cell.sunday .cal-date-num {
+  color: #f87171;
+}
+
+.cal-cell.saturday .cal-date-num {
+  color: #60a5fa;
+}
+
+.cal-count-badge,
+.cal-more-count {
+  color: #666;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.cal-cell:hover .cal-count-badge,
+.cal-more-count:hover {
+  color: #aaa;
+}
+
+.cal-more-count {
+  cursor: pointer;
+  padding: 0 6px;
+  color: var(--color-ruby-500);
+  pointer-events: auto;
+  user-select: none;
+}
+
+.cal-event-card {
+  display: flex;
+  height: 100%;
+  min-width: 0;
+  cursor: pointer;
+  flex-direction: column;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  gap: 4px;
+  overflow: hidden;
+  padding: 3px 7px;
+  border-radius: 0;
+  pointer-events: auto;
+  transition: filter 0.2s;
+}
+
+.cal-event-card:hover {
+  filter: brightness(1.25);
+}
+
+.cal-event-title-row {
+  overflow: hidden;
+  color: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cal-event-member-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+.cal-member-badge {
+  display: inline-block;
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.cal-member-badge-more {
+  background-color: #444;
+  color: #aaa;
+}
+
+.cal-event-time {
+  flex-shrink: 0;
+  color: rgb(255 255 255 / 60%);
+  font-size: 0.7rem;
+}
+
+.cal-weekly-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+}
+
+.cal-weekly-day {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 20px;
+  border: 1px solid rgb(255 255 255 / 5%);
+  border-left: 4px solid #333;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgb(22 3 7 / 60%), rgb(10 0 3 / 80%));
+  transition: transform 0.3s, border-color 0.3s;
+}
+
+.cal-weekly-day.today {
+  border-left-color: #3b82f6;
+  background: linear-gradient(135deg, rgb(22 3 7 / 60%), rgb(10 0 3 / 80%));
+}
+
+.cal-weekly-day:hover {
+  border-color: rgb(255 255 255 / 15%);
+  transform: translateX(5px);
+}
+
+.cal-weekly-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+}
+
+.cal-weekly-header span {
+  color: #aaa;
+  font-family: var(--font-body);
+  font-size: 1rem;
+}
+
+.cal-weekly-events {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cal-weekly-event-card {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid rgb(255 255 255 / 4%);
+  border-radius: 8px;
+  background: rgb(0 0 0 / 30%);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.3s;
+}
+
+.cal-weekly-event-card:hover {
+  background: rgb(225 29 72 / 15%);
+}
+
+.cal-weekly-empty {
+  padding: 10px 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
+  display: flex;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 10%);
+  color: #fff;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+  background: rgb(225 29 72 / 50%);
+  transform: rotate(90deg);
+}
+
+.day-modal-content,
+.detail-modal-content {
+  position: relative;
+  width: 90%;
+  max-width: 500px;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 24px;
+  background: #121214;
+  box-shadow: 0 25px 70px rgb(0 0 0 / 80%);
+}
+
+.day-modal-content {
+  max-height: 82dvh;
+  overflow: hidden;
+  padding: 35px;
+}
+
+.detail-modal-content {
+  padding: 40px;
+}
+
+.day-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgb(255 255 255 / 6%);
+}
+
+.day-modal-badge {
+  display: flex;
+  width: 65px;
+  height: 65px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  border: 1px solid rgb(255 255 255 / 6%);
+  border-radius: 16px;
+  background: rgb(255 255 255 / 3%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 5%);
+}
+
+.day-modal-badge-num {
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.day-modal-badge-day {
+  margin-top: 2px;
+  color: #888;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.day-modal-title-area {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.day-modal-sub,
+.detail-modal-sub {
+  color: #ec4899;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.day-modal-title,
+.detail-modal-main-title {
+  margin: 0;
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+
+.day-modal-count {
+  color: #777;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.day-modal-body {
+  display: flex;
+  max-height: 380px;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.day-modal-body::-webkit-scrollbar {
+  width: 4px;
+}
+
+.day-modal-body::-webkit-scrollbar-thumb {
+  border-radius: 2px;
+  background: rgb(255 255 255 / 10%);
+}
+
+.day-schedule-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px;
+  border: 1px solid rgb(255 255 255 / 4%);
+  border-radius: 16px;
+  background: rgb(255 255 255 / 2%);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.day-schedule-item:hover {
+  border-color: rgb(255 255 255 / 10%);
+  background: rgb(255 255 255 / 5%);
+  transform: translateY(-2px);
+}
+
+.day-schedule-avatar {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border: 1.5px solid rgb(255 255 255 / 10%);
+  border-radius: 50%;
+  background: #000;
+  object-fit: cover;
+}
+
+.day-schedule-content {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.day-schedule-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.day-schedule-time {
+  color: #ec4899;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.day-schedule-title {
+  overflow: hidden;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.day-schedule-memo {
+  overflow: hidden;
+  color: #888;
+  font-size: 0.8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.day-schedule-arrow {
+  color: #444;
+  font-size: 0.8rem;
+  transition: color 0.3s, transform 0.3s;
+}
+
+.day-schedule-item:hover .day-schedule-arrow {
+  color: #fff;
+  transform: translateX(3px);
+}
+
+.detail-modal-sub {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.detail-modal-main-title {
+  margin-bottom: 30px;
+}
+
+.detail-modal-profile-area {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.detail-modal-avatar-group {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.detail-modal-avatar-group img,
+.detail-modal-extra-avatar {
+  width: 76px;
+  height: 76px;
+  margin-left: -18px;
+  border: 3px solid #121214;
+  border-radius: 50%;
+  background: #000;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 40%);
+  object-fit: cover;
+}
+
+.detail-modal-avatar-group img:first-child {
+  margin-left: 0;
+}
+
+.detail-modal-extra-avatar {
+  z-index: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #333;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.detail-modal-badge-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.detail-modal-member-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.detail-modal-event-title {
+  margin: 0 0 10px;
+  color: #fff;
+  font-size: 1.4rem;
+  font-weight: 800;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.detail-modal-time-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 30px;
+  color: #888;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.detail-modal-divider {
+  margin: 0 0 25px;
+  border: 0;
+  border-top: 1px solid rgb(255 255 255 / 6%);
+}
+
+.detail-modal-memo {
+  margin-bottom: 25px;
+  padding: 0 10px;
+  color: #aaa;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .calendar-hero {
+    padding: 120px 5% 48px;
+  }
+
+  .cal-header {
+    align-items: center;
+    flex-direction: row;
+    gap: 16px;
+  }
+
+  .cal-nav {
+    align-items: center;
+  }
+
+  .cal-panel {
+    border-radius: 14px;
+  }
+
+  .cal-grid-header div {
+    padding: 10px;
+    font-size: 0.78rem;
+  }
+
+  .cal-cell {
+    padding: 10px;
+  }
+
+  .cal-event-card {
+    font-size: 0.72rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .cal-current-date {
+    font-size: 2.5rem;
+  }
+
+  .cal-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .cal-toggle-btn {
+    padding: 6px 12px;
+  }
+
+  .cal-controls {
+    gap: 10px;
+  }
 }
 
 .member-modal-content {
@@ -1430,6 +2277,117 @@
 
 .times-desc {
   @apply line-clamp-2 text-[0.82rem] leading-relaxed text-ink-400;
+}
+
+/* ── History hero — ported from legacy .hof-hero (RECORD OF GLORY) ─────── */
+.hof-hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: var(--nav-h);
+  min-height: 70vh;
+  overflow: hidden;
+}
+
+.hof-hero .hof-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 26, 74, 0.15) 0%, transparent 60%);
+  animation: hofGlowPulse 4s infinite alternate;
+}
+
+.hof-hero .hof-label {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 20px;
+  color: #ff8095;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1rem;
+  text-transform: uppercase;
+  animation: hofFadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hof-hero .hof-title {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  line-height: 1;
+  letter-spacing: -2px;
+  font-size: clamp(3rem, 12vw, 9rem);
+  font-weight: 700;
+  background: linear-gradient(180deg, #fff 0%, #ffcbd1 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 30px rgba(255, 26, 74, 0.4));
+  animation: hofSplitFade 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+
+.hof-hero .hof-title .bar {
+  margin: 0 20px;
+  color: #ff1a4a;
+  -webkit-text-fill-color: #ff1a4a;
+  font-weight: 300;
+  text-shadow: 0 0 30px #ff1a4a, 0 0 60px rgba(255, 26, 74, 0.6);
+  animation: hofNeonPulse 2s ease-in-out infinite alternate;
+}
+
+.hof-hero .hof-sub {
+  position: relative;
+  z-index: 1;
+  margin-top: 30px;
+  color: #ccc;
+  font-size: 0.9rem;
+  letter-spacing: 0.4rem;
+  animation: hofFadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+}
+
+.hof-hero .hof-scroll {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.hof-hero .hof-scroll span {
+  display: block;
+  width: 2px;
+  height: 80px;
+  background: linear-gradient(to bottom, #ff1a4a, transparent);
+  animation: hofScrollLine 2s cubic-bezier(0.77, 0, 0.175, 1) infinite;
+}
+
+@keyframes hofGlowPulse {
+  from { opacity: 0.55; }
+  to { opacity: 1; }
+}
+@keyframes hofFadeUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes hofSplitFade {
+  from { opacity: 0; transform: scale(1.1) translateY(20px); filter: blur(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+}
+@keyframes hofNeonPulse {
+  from { text-shadow: 0 0 20px #ff1a4a, 0 0 40px rgba(255, 26, 74, 0.5); }
+  to { text-shadow: 0 0 40px #ff1a4a, 0 0 80px rgba(255, 26, 74, 1); }
+}
+@keyframes hofScrollLine {
+  0% { transform: scaleY(0); transform-origin: top; opacity: 0; }
+  50% { transform: scaleY(1); transform-origin: top; opacity: 1; }
+  100% { transform: scaleY(0); transform-origin: bottom; opacity: 0; }
+}
+
+@media (max-width: 768px) {
+  .hof-hero { min-height: 60vh; }
+  .hof-hero .hof-sub { font-size: 0.75rem; letter-spacing: 0.2rem; }
 }
 
 /* ── History · Hall of Fame ───────────────────────────────────────────── */

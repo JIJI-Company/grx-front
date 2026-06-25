@@ -5,6 +5,7 @@ import MembersPage from './pages/MembersPage';
 import LivePage from './pages/LivePage';
 import NoticePage from './pages/NoticePage';
 import CalendarPage from './pages/CalendarPage';
+import ContentsPage from './pages/ContentsPage';
 import HistoryPage from './pages/HistoryPage';
 import TimesPage from './pages/TimesPage';
 import LikaPage from './pages/LikaPage';
@@ -20,6 +21,7 @@ export const router = createBrowserRouter([
       { path: 'live', element: <LivePage /> },
       { path: 'notice', element: <NoticePage /> },
       { path: 'calendar', element: <CalendarPage /> },
+      { path: 'contents', element: <ContentsPage /> },
       { path: 'history', element: <HistoryPage /> },
       //{ path: 'times', element: <TimesPage /> },
       { path: 'lika', element: <LikaPage /> },

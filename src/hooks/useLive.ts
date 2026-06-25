@@ -5,8 +5,9 @@ export function useLiveStatus() {
   return useQuery({
     queryKey: ['live-status'],
     queryFn: apiGetLiveStatus,
-    // Refresh every 60 seconds on home page; live page does its own interval
-    staleTime: 1000 * 60,
-    refetchInterval: 1000 * 60,
+    // Refresh only when the user visits (component mount). No timer / background
+    // polling, no window-focus refetch — keeps backend live polls and DB reads down.
+    staleTime: 1000 * 30,
+    refetchOnWindowFocus: false,
   });
 }

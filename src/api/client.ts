@@ -6,6 +6,7 @@ import type {
   LiveStatus,
   YoutubeVideo,
   CalendarEvent,
+  ContentsArchiveItem,
   HistoryAchievement,
   NoticeStreamer,
 } from './types';
@@ -77,6 +78,21 @@ export const apiGetLiveStatus = (): Promise<LiveStatus[]> =>
 
 export const apiGetCalendar = (): Promise<CalendarEvent[]> =>
   USE_MOCK ? mock.mockGetCalendar() : get('/calendar');
+
+// ─── Contents Archive (Notion) ───────────────────────────────────────────────
+
+export const apiGetContentsArchive = async (): Promise<ContentsArchiveItem[]> => {
+  if (USE_MOCK) return mock.mockGetContentsArchive();
+
+  try {
+    return await get('/contents');
+  } catch (error) {
+    if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+      return mock.mockGetContentsArchive();
+    }
+    throw error;
+  }
+};
 
 // ─── YouTube ──────────────────────────────────────────────────────────────────
 

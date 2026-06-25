@@ -5,9 +5,12 @@ import {
   formatTime,
   getEventStyle,
   getGreedySlots,
+  getMemberAvatar,
+  getMemberColor,
   getWeekDays,
   toDateString,
 } from './calendarUtils';
+import { useMemberLookup } from '../../hooks/useMembers';
 
 interface CalendarViewProps {
   current: Date;
@@ -16,10 +19,10 @@ interface CalendarViewProps {
   onEventClick: (event: CalendarEvent) => void;
 }
 
-const monthEventRowHeight = 22;
-const monthDatePadding = 42;
+const monthEventRowHeight = 54;
+const monthDatePadding = 34;
 const monthCellMinimumHeight = 80;
-const maxVisibleMonthSlots = 2;
+const maxVisibleMonthSlots = 3;
 
 export function MonthView({
   current,
@@ -27,6 +30,7 @@ export function MonthView({
   onDayClick,
   onEventClick,
 }: CalendarViewProps) {
+  const lookup = useMemberLookup();
   const year = current.getFullYear();
   const month = current.getMonth();
   const firstDayOfWeek = new Date(year, month, 1).getDay();
@@ -56,9 +60,10 @@ export function MonthView({
   }
 
   return (
-    <div>
+    <div className="cal-grid">
       <DayOfWeekHeader />
-      {Array.from({ length: cells.length / 7 }, (_, weekIndex) => {
+      <div className="cal-weeks-container">
+        {Array.from({ length: cells.length / 7 }, (_, weekIndex) => {
         const week = cells.slice(weekIndex * 7, weekIndex * 7 + 7);
         const seenEvents = new Map<string, CalendarEvent>();
 
@@ -92,89 +97,51 @@ export function MonthView({
         return (
           <div
             key={weekIndex}
+            className="cal-week-row"
             style={{
-              position: 'relative',
               minHeight: rowHeight,
-              borderBottom: '1px solid rgba(255,255,255,0.06)',
             }}
           >
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                display: 'grid',
-                gridTemplateColumns: 'repeat(7, 1fr)',
-              }}
-            >
+            <div className="cal-week-grid-bg">
               {week.map((cell) => {
                 const key = toDateString(cell.date);
                 const dayEvents = scheduleMap[key] ?? [];
                 const isToday = key === todayString;
                 const dayOfWeek = cell.date.getDay();
+                const className = [
+                  'cal-cell',
+                  cell.isEmpty ? 'empty' : '',
+                  isToday ? 'today' : '',
+                  dayOfWeek === 0 ? 'sunday' : '',
+                  dayOfWeek === 6 ? 'saturday' : '',
+                ].filter(Boolean).join(' ');
 
                 return (
                   <div
                     key={key}
+                    className={className}
                     onClick={() => {
                       if (dayEvents.length > 0 && !cell.isEmpty) {
                         onDayClick(cell.date, dayEvents);
                       }
                     }}
-                    style={{
-                      height: '100%',
-                      background: cell.isEmpty ? 'rgba(17,17,17,0.4)' : '#111',
-                      borderRight: '1px solid rgba(255,255,255,0.06)',
-                      opacity: cell.isEmpty ? 0.5 : 1,
-                      cursor: dayEvents.length > 0 && !cell.isEmpty ? 'pointer' : 'default',
-                      padding: '6px 8px 0',
-                      boxSizing: 'border-box',
-                    }}
-                    onMouseEnter={(event) => {
-                      if (!cell.isEmpty) event.currentTarget.style.background = '#1a0a12';
-                    }}
-                    onMouseLeave={(event) => {
-                      if (!cell.isEmpty) event.currentTarget.style.background = '#111';
-                    }}
                   >
-                    <span
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: 24,
-                        height: 24,
-                        borderRadius: '50%',
-                        fontSize: '0.82rem',
-                        fontWeight: isToday ? 900 : 400,
-                        color: isToday
-                          ? '#fff'
-                          : dayOfWeek === 0
-                            ? '#f87171'
-                            : dayOfWeek === 6
-                              ? '#60a5fa'
-                              : '#ccc',
-                        background: isToday ? '#e11d48' : 'transparent',
-                      }}
-                    >
-                      {cell.date.getDate()}
-                    </span>
+                    <div className="cal-cell-header">
+                      <span className="cal-date-num">{cell.date.getDate()}</span>
+                      {dayEvents.length > 0 && !cell.isEmpty && (
+                        <span className="cal-count-badge">{dayEvents.length} &gt;</span>
+                      )}
+                    </div>
                   </div>
                 );
               })}
             </div>
 
             <div
+              className="cal-week-events-overlay"
               style={{
-                position: 'absolute',
-                inset: 0,
-                display: 'grid',
-                gridTemplateColumns: 'repeat(7, 1fr)',
                 gridAutoRows: `${monthEventRowHeight}px`,
-                gap: '2px 0',
-                padding: `${monthDatePadding}px 0 16px`,
-                pointerEvents: 'none',
-                zIndex: 2,
-                boxSizing: 'border-box',
+                padding: `${monthDatePadding}px 0 14px`,
               }}
             >
               {slottedEvents
@@ -186,8 +153,8 @@ export function MonthView({
                     startCol={startCol}
                     span={span}
                     slotIndex={slotIndex}
-                    rowHeight={monthEventRowHeight}
                     onClick={onEventClick}
+                    lookup={lookup}
                   />
                 ))}
 
@@ -207,15 +174,9 @@ export function MonthView({
                     style={{
                       gridColumn: `${column + 1} / span 1`,
                       gridRow: maxVisibleMonthSlots + 1,
-                      fontSize: '0.68rem',
-                      color: '#e11d48',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      pointerEvents: 'auto',
-                      padding: '0 6px',
                       lineHeight: `${monthEventRowHeight - 2}px`,
-                      userSelect: 'none',
                     }}
+                    className="cal-more-count"
                   >
                     +{count}개
                   </div>
@@ -224,163 +185,121 @@ export function MonthView({
             </div>
           </div>
         );
-      })}
-    </div>
-  );
-}
-
-const weekEventRowHeight = 28;
-const weekDatePadding = 52;
-const weekMinimumHeight = 220;
-
-export function WeekView({
-  current,
-  scheduleMap,
-  onEventClick,
-  onDayClick,
-}: CalendarViewProps) {
-  const days = getWeekDays(current);
-  const todayString = toDateString(new Date());
-  const seenEvents = new Map<string, CalendarEvent>();
-
-  days.forEach((day) => {
-    (scheduleMap[toDateString(day)] ?? []).forEach((event) => {
-      seenEvents.set(event.id, event);
-    });
-  });
-
-  const slottedEvents = getGreedySlots(Array.from(seenEvents.values()), days[0]);
-  const maxSlot = slottedEvents.length > 0
-    ? Math.max(...slottedEvents.map((slot) => slot.slotIndex))
-    : -1;
-  const rowHeight = Math.max(
-    weekMinimumHeight,
-    weekDatePadding + (maxSlot + 1) * weekEventRowHeight + 32,
-  );
-
-  return (
-    <div>
-      <DayOfWeekHeader />
-      <div
-        style={{
-          position: 'relative',
-          minHeight: rowHeight,
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
-        }}
-      >
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            display: 'grid',
-            gridTemplateColumns: 'repeat(7, 1fr)',
-          }}
-        >
-          {days.map((day) => {
-            const key = toDateString(day);
-            const dayEvents = scheduleMap[key] ?? [];
-            const isToday = key === todayString;
-            const dayOfWeek = day.getDay();
-
-            return (
-              <div
-                key={key}
-                onClick={() => dayEvents.length > 0 && onDayClick(day, dayEvents)}
-                style={{
-                  height: '100%',
-                  background: '#111',
-                  borderRight: '1px solid rgba(255,255,255,0.06)',
-                  cursor: dayEvents.length > 0 ? 'pointer' : 'default',
-                  padding: '8px 10px 0',
-                  boxSizing: 'border-box',
-                }}
-                onMouseEnter={(event) => {
-                  event.currentTarget.style.background = '#1a0a12';
-                }}
-                onMouseLeave={(event) => {
-                  event.currentTarget.style.background = '#111';
-                }}
-              >
-                <span
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: 30,
-                    height: 30,
-                    borderRadius: '50%',
-                    fontSize: '1rem',
-                    fontWeight: isToday ? 900 : 500,
-                    color: isToday
-                      ? '#fff'
-                      : dayOfWeek === 0
-                        ? '#f87171'
-                        : dayOfWeek === 6
-                          ? '#60a5fa'
-                          : '#ddd',
-                    background: isToday ? '#e11d48' : 'transparent',
-                  }}
-                >
-                  {day.getDate()}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            display: 'grid',
-            gridTemplateColumns: 'repeat(7, 1fr)',
-            gridAutoRows: `${weekEventRowHeight}px`,
-            gap: '3px 0',
-            padding: `${weekDatePadding}px 0 16px`,
-            pointerEvents: 'none',
-            zIndex: 2,
-            boxSizing: 'border-box',
-          }}
-        >
-          {slottedEvents.map(({ startCol, span, slotIndex, event }) => (
-            <CalendarEventBar
-              key={event.id}
-              event={event}
-              startCol={startCol}
-              span={span}
-              slotIndex={slotIndex}
-              rowHeight={weekEventRowHeight}
-              showTime
-              onClick={onEventClick}
-            />
-          ))}
-        </div>
+        })}
       </div>
     </div>
   );
 }
 
-function DayOfWeekHeader() {
+export function WeekView({
+  current,
+  scheduleMap,
+  onEventClick,
+}: CalendarViewProps) {
+  const days = getWeekDays(current);
+  const todayString = toDateString(new Date());
+  const lookup = useMemberLookup();
+
   return (
-    <div
+    <div className="cal-weekly-list">
+      {days.map((day) => {
+        const key = toDateString(day);
+        const dayEvents = scheduleMap[key] ?? [];
+        const isToday = key === todayString;
+
+        return (
+          <div key={key} className={`cal-weekly-day ${isToday ? 'today' : ''}`}>
+            <div className="cal-weekly-header">
+              {day.getMonth() + 1}월 {day.getDate()}일
+              <span>({DAY_OF_WEEK[day.getDay()]})</span>
+            </div>
+            <div className="cal-weekly-events">
+              {dayEvents.length === 0 ? (
+                <div className="cal-weekly-empty">예정된 일정이 없습니다.</div>
+              ) : dayEvents.map((event) => (
+                <WeeklyEventCard
+                  key={event.id}
+                  event={event}
+                  onClick={onEventClick}
+                  lookup={lookup}
+                />
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function WeeklyEventCard({
+  event,
+  onClick,
+  lookup,
+}: {
+  event: CalendarEvent;
+  onClick: (event: CalendarEvent) => void;
+  lookup: ReturnType<typeof useMemberLookup>;
+}) {
+  const { titleColor } = getEventStyle(event);
+  const isDayOff = event.title.includes('휴방') || event.tags.includes('휴방');
+  const primaryMember = event.members[0] ?? 'All';
+
+  return (
+    <button
+      type="button"
+      className="cal-weekly-event-card"
+      onClick={() => onClick(event)}
       style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(7, 1fr)',
-        borderBottom: '1px solid rgba(255,255,255,0.1)',
-        background: 'rgba(255,255,255,0.02)',
+        background: isDayOff ? 'rgba(250, 204, 21, 0.15)' : undefined,
       }}
     >
-      {DAY_OF_WEEK.map((label, index) => (
+      <img
+        className="day-schedule-avatar"
+        src={lookup.getAvatar(primaryMember, getMemberAvatar(primaryMember))}
+        alt={primaryMember}
+        onError={(error) => {
+          error.currentTarget.src = '/img/ggu_title.jpg';
+        }}
+      />
+      <div className="day-schedule-content">
+        <div className="day-schedule-title-row">
+          <span className="day-schedule-time">{formatTime(event.date)}</span>
+          {event.members.map((member) => {
+            const color = lookup.getColor(member, getMemberColor(member));
+            return (
+              <span
+                key={member}
+                className="cal-member-badge"
+                style={{ backgroundColor: color.bg, color: color.text }}
+              >
+                {member}
+              </span>
+            );
+          })}
+        </div>
         <div
-          key={label}
+          className="day-schedule-title"
           style={{
-            padding: '12px',
-            textAlign: 'center',
-            fontSize: '0.85rem',
-            fontWeight: 700,
-            color: index === 0 ? '#f87171' : index === 6 ? '#60a5fa' : '#888',
+            color: isDayOff ? '#facc15' : titleColor,
+            textDecoration: isDayOff ? 'line-through' : undefined,
+            textDecorationColor: isDayOff ? 'rgba(250,204,21,0.5)' : undefined,
+            marginTop: 4,
           }}
         >
+          {event.title}
+        </div>
+        {event.memo && <div className="day-schedule-memo">{event.memo}</div>}
+      </div>
+    </button>
+  );
+}
+
+function DayOfWeekHeader() {
+  return (
+    <div className="cal-grid-header">
+      {DAY_OF_WEEK.map((label, index) => (
+        <div key={label} className={index === 0 ? 'sunday' : index === 6 ? 'saturday' : ''}>
           {label}
         </div>
       ))}
@@ -393,9 +312,8 @@ interface CalendarEventBarProps {
   startCol: number;
   span: number;
   slotIndex: number;
-  rowHeight: number;
-  showTime?: boolean;
   onClick: (event: CalendarEvent) => void;
+  lookup: ReturnType<typeof useMemberLookup>;
 }
 
 function CalendarEventBar({
@@ -403,16 +321,17 @@ function CalendarEventBar({
   startCol,
   span,
   slotIndex,
-  rowHeight,
-  showTime = false,
   onClick,
+  lookup,
 }: CalendarEventBarProps) {
   const { cardBg, titleColor, border } = getEventStyle(event);
-  const isMultiDay = span > 1;
-  const time = showTime && event.date.includes('T') ? formatTime(event.date) : '';
+  const isDayOff = event.title.includes('휴방') || event.tags.includes('휴방');
+  const shownMembers = event.members.slice(0, span > 1 ? 6 : 3);
+  const hiddenMemberCount = event.members.length - shownMembers.length;
 
   return (
     <div
+      className="cal-event-card"
       onClick={(clickEvent) => {
         clickEvent.stopPropagation();
         onClick(event);
@@ -422,33 +341,40 @@ function CalendarEventBar({
         gridColumn: `${startCol + 1} / span ${span}`,
         gridRow: slotIndex + 1,
         background: cardBg,
-        borderTop: `1px solid ${border}`,
-        borderBottom: `1px solid ${border}`,
-        borderLeft: `${isMultiDay ? '3px' : '1px'} solid ${border}`,
-        borderRight: `1px solid ${border}`,
-        borderRadius: isMultiDay ? '4px 2px 2px 4px' : 4,
-        padding: showTime ? '0 7px' : '0 5px',
-        fontSize: showTime ? '0.78rem' : '0.72rem',
+        borderLeft: `3px solid ${border}`,
         color: titleColor,
-        fontWeight: 700,
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        cursor: 'pointer',
-        pointerEvents: 'auto',
-        lineHeight: `${rowHeight - 2}px`,
-        margin: showTime ? '0 2px' : '0 1px',
-        display: showTime ? 'flex' : undefined,
-        alignItems: showTime ? 'center' : undefined,
-        gap: showTime ? 5 : undefined,
       }}
     >
-      {time && (
-        <span style={{ opacity: 0.6, fontSize: '0.7rem', flexShrink: 0 }}>{time}</span>
+      <span
+        className="cal-event-title-row"
+        style={{
+          textDecoration: isDayOff ? 'line-through' : undefined,
+          textDecorationColor: isDayOff ? 'rgba(250,204,21,0.5)' : undefined,
+        }}
+      >
+        {event.title}
+      </span>
+      {shownMembers.length > 0 && (
+        <div className="cal-event-member-badges">
+          {shownMembers.map((member) => {
+            const color = lookup.getColor(member, getMemberColor(member));
+            return (
+              <span
+                key={member}
+                className="cal-member-badge"
+                style={{ backgroundColor: color.bg, color: color.text }}
+              >
+                {member}
+              </span>
+            );
+          })}
+          {hiddenMemberCount > 0 && (
+            <span className="cal-member-badge cal-member-badge-more">
+              +{hiddenMemberCount}
+            </span>
+          )}
+        </div>
       )}
-      {showTime ? (
-        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{event.title}</span>
-      ) : event.title}
     </div>
   );
 }

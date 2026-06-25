@@ -145,3 +145,13 @@ export interface CalendarEvent {
   url: string;
   memo: string;
 }
+
+export interface ContentsArchiveItem {
+  id: string;
+  title: string;
+  date: string;
+  imageUrl: string | null;
+  members: string[];
+  tags: string[];
+  url: string;
+}
