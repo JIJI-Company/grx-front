@@ -14,3 +14,13 @@ export function getMemberRankLabel(member: Member): string {
   if (rankSlug === 'new') return 'NEW';
   return member.rank?.name ?? '';
 }
+
+// TMI text uses mixed separators in the source data: some members use `<br>`,
+// others end sentences with `.`. Split on both into clean lines for display.
+// ponytail: also splits decimals like "3.5" — no such data today; revisit if added.
+export function getTmiLines(tmi: string | null | undefined): string[] {
+  return (tmi ?? '')
+    .split(/<br\s*\/?>|\./)
+    .map((line) => line.trim())
+    .filter(Boolean);
+}

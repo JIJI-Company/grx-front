@@ -12,6 +12,8 @@
   justify-content: center;
   align-items: center;
   overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
   background:
     radial-gradient(circle at 50% 54%, rgba(255, 92, 38, 0.14), transparent 36rem),
     #000;
@@ -51,15 +53,24 @@
   background-position: center;
   background-repeat: no-repeat;
   background-size: contain;
-  filter:
-    brightness(calc(0.82 + var(--approach) * 0.22 + var(--open) * 0.12))
-    contrast(calc(1.06 + var(--approach) * 0.08))
-    saturate(calc(1.08 + var(--open) * 0.18));
+  filter: contrast(1.1) saturate(1.18);
   transform:
     translateY(calc(var(--approach) * -8vh + var(--fall) * -38vh))
     scale(calc(1 + var(--approach) * 0.26 + var(--fall) * 1.06));
   transform-origin: 50% 55%;
-  will-change: transform, filter;
+  will-change: transform;
+}
+
+/* Depth darkening moved off `filter` (animating brightness re-rasters the
+   scaled full-screen bg every frame → flicker, worst on zoom-out) onto a
+   compositor-only opacity overlay. `--open` keeps the ready brightening. */
+.castleBg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: calc((1 - var(--approach)) * 0.2 - var(--open) * 0.05);
+  pointer-events: none;
 }
 
 .viewport {
@@ -101,7 +112,7 @@
     rotateZ(var(--room-rotate))
     scale(calc(0.54 + var(--approach) * 0.06 + var(--fall) * 0.2));
   transform-style: preserve-3d;
-  will-change: transform, opacity, filter;
+  will-change: transform, opacity;
 }
 
 .roomLayer::before,

@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Lenis from 'lenis';
 import { setLenis } from '../utils/lenisInstance';
+import { trackPageView } from '../utils/analytics';
 import SiteBackground from './layout/SiteBackground';
 import SiteHeader from './layout/SiteHeader';
 import SiteFooter from './layout/SiteFooter';
@@ -42,6 +43,11 @@ export default function Layout() {
   // Scroll to top on route change
   useEffect(() => {
     lenisRef.current?.scrollTo(0, { immediate: true });
+  }, [pathname]);
+
+  // GA4 page_view per SPA route (incl. first load; auto page_view is off).
+  useEffect(() => {
+    trackPageView(pathname);
   }, [pathname]);
 
   useEffect(() => {

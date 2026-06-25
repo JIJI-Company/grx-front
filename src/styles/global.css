@@ -335,6 +335,12 @@
   opacity: 0;
 }
 
+#intro-gate{
+  h1{
+    padding: 1rem 0;
+  }
+}
+
 .intro-content {
   @apply relative z-[5] flex flex-col items-center gap-4 px-4 text-center;
 }
