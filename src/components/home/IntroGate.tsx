@@ -47,9 +47,15 @@ export default function IntroGate() {
     const gate = gateRef.current;
     if (!gate) return undefined;
 
+    const unlockScroll = () => {
+      document.documentElement.style.removeProperty('overflow');
+      document.documentElement.style.removeProperty('overscroll-behavior');
+    };
+
     const showMainApp = () => {
       // Intro ends → main app must start at the very top. Reset Lenis (it owns
       // window scroll) and the window, then resume smooth scroll.
+      unlockScroll();
       scrollLenisTop();
       window.scrollTo(0, 0);
       startLenis();
@@ -71,6 +77,11 @@ export default function IntroGate() {
     // drives --approach, so the scroll-to-fall effect is unaffected.
     stopLenis();
     window.scrollTo(0, 0);
+
+    // Lock the document so trackpad/touch overscroll can't rubber-band ("튕김")
+    // behind the fixed gate at the scroll extremes. Restored on intro end/unmount.
+    document.documentElement.style.overflow = 'hidden';
+    document.documentElement.style.overscrollBehavior = 'none';
 
     const enterButton = gate.querySelector<HTMLButtonElement>('[data-intro-enter]');
     let dropTimeline: gsap.core.Timeline | undefined;
@@ -101,6 +112,7 @@ export default function IntroGate() {
       enterButton?.removeEventListener('click', onEnter);
       cleanupScroll();
       dropTimeline?.kill();
+      unlockScroll();
       // Don't leave smooth scroll frozen if we unmount mid-intro (e.g. route
       // change). Idempotent with the startLenis() in showMainApp().
       startLenis();

@@ -1,7 +1,8 @@
 import type { CSSProperties } from 'react';
 import type { Member } from '../../api/types';
 import { getMemberColor } from '../../utils/memberColor';
-import { getMemberRankLabel } from './memberPresentation';
+import { Fragment } from 'react';
+import { getMemberRankLabel, getTmiLines } from './memberPresentation';
 
 interface MemberModalProps {
   member: Member;
@@ -104,7 +105,14 @@ export default function MemberModal({ member, onClose }: MemberModalProps) {
                 }}
               >
                 <span style={{ color }}>TMI / 특이사항</span>
-                <p>{member.tmi}</p>
+                <p>
+                  {getTmiLines(member.tmi).map((line, index) => (
+                    <Fragment key={index}>
+                      {index > 0 && <br />}
+                      {line}
+                    </Fragment>
+                  ))}
+                </p>
               </div>
             )}
 

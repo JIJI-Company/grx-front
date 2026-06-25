@@ -1,6 +1,7 @@
+import { Fragment } from 'react';
 import type { Member } from '../../api/types';
 import { getMemberColor } from '../../utils/memberColor';
-import { getMemberRankLabel } from './memberPresentation';
+import { getMemberRankLabel, getTmiLines } from './memberPresentation';
 
 interface MemberCardProps {
   member: Member;
@@ -55,7 +56,16 @@ export default function MemberCard({
           <p className="text-xs leading-snug text-ink-300">
             {summary}
           </p>
-          {tmi && <p className="mt-2 text-xs leading-snug text-ink-400">{tmi}</p>}
+          {tmi && (
+            <p className="mt-2 text-xs leading-snug text-ink-400">
+              {getTmiLines(tmi).map((line, index) => (
+                <Fragment key={index}>
+                  {index > 0 && <br />}
+                  {line}
+                </Fragment>
+              ))}
+            </p>
+          )}
           <span className="click-hint">CLICK FOR RECORD</span>
         </div>
       </div>
