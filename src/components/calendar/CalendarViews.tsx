@@ -210,7 +210,11 @@ export function WeekView({
         return (
           <div key={key} className={`cal-weekly-day ${isToday ? 'today' : ''}`}>
             <div className="cal-weekly-header">
-              {day.getMonth() + 1}월 {day.getDate()}일
+              {day.getMonth() + 1}월{' '}
+              <span className={isToday ? 'cal-weekly-date-num today' : 'cal-weekly-date-num'}>
+                {day.getDate()}
+              </span>
+              일
               <span>({DAY_OF_WEEK[day.getDay()]})</span>
             </div>
             <div className="cal-weekly-events">
