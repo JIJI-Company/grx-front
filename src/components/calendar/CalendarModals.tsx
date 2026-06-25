@@ -133,6 +133,7 @@ export function DayModal({
       <div
         onClick={(clickEvent) => clickEvent.stopPropagation()}
         className="day-modal-content"
+        data-lenis-prevent
         role="dialog"
         aria-modal="true"
         aria-labelledby="calendar-day-title"
