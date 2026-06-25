@@ -13,6 +13,39 @@
 
 ---
 
+## v2.3.0 - 2026-06-25
+
+### 목표
+
+- 인트로 진행 중 페이지를 고정하고, 라이브 상태·멤버 이미지 로딩 비용을 줄인다.
+
+### 변경 사항
+
+- 단일 Lenis 인스턴스 핸들을 `src/utils/lenisInstance.ts`로 분리해 Layout과 IntroGate가 부드러운 스크롤을 일시정지·재개하도록 했다(자식 effect 선실행 순서를 stopped 플래그로 보정).
+- IntroGate 표시 중 스크롤을 멈추고, 인트로 종료 시 메인을 최상단에서 시작한다. HomeHero 정리.
+- 라이브 상태를 마운트 시 1회만 페칭하도록 `useLive`를 조정하고, 멤버 이미지를 lazy-load로 전환했다.
+
+### 변경 파일
+
+- `src/utils/lenisInstance.ts` (신규)
+- `src/components/Layout.tsx`
+- `src/components/home/IntroGate.tsx`
+- `src/components/home/HomeHero.tsx`
+- `src/components/home/MemberSlider.tsx`
+- `src/components/members/MemberCard.tsx`
+- `src/components/members/MemberModal.tsx`
+- `src/components/common/ScheduleCard.tsx`
+- `src/hooks/useLive.ts`
+- `src/styles/global.css`
+
+### Verification
+
+- 빌드·런타임 미실행 (구조 동기화 루프가 커밋 `03fc4bf`, `4d3b54c` 기준으로 자동 기록)
+
+### 미검증 항목
+
+- 인트로 freeze 동작, 멤버 이미지 lazy-load 체감, 라이브 마운트 1회 페칭의 실제 동작은 미검증
+
 ## v2.2.0 - 2026-06-23
 
 ### 목표

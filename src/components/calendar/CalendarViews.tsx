@@ -19,7 +19,7 @@ interface CalendarViewProps {
   onEventClick: (event: CalendarEvent) => void;
 }
 
-const monthEventRowHeight = 44;
+const monthEventRowHeight = 54;
 const monthDatePadding = 34;
 const monthCellMinimumHeight = 80;
 const maxVisibleMonthSlots = 3;

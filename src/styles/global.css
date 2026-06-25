@@ -1003,17 +1003,6 @@
   -webkit-box-orient: vertical;
 }
 
-.rank-overlay {
-  @apply absolute top-2 right-2 z-10 border bg-black/80 px-1.5 py-1 font-display text-[0.6rem] tracking-wider uppercase;
-  border-color: color-mix(in srgb, var(--member-color, #ff1a4a) 55%, transparent);
-  color: var(--member-color, #ff1a4a);
-}
-
-.rank-overlay-gold {
-  border-color: var(--gold);
-  color: var(--gold);
-}
-
 .back-keywords {
   color: var(--member-color, #ff1a4a);
   font-size: 0.75rem;
@@ -1154,7 +1143,11 @@
 }
 
 .cal-panel {
-  overflow: hidden;
+  /* Scroll horizontally on narrow screens instead of clipping the 44rem-wide
+     grid (the inner wrapper sets min-width). Unlayered, so it overrides the
+     Tailwind overflow-x-auto utility which would otherwise lose to overflow. */
+  overflow-x: auto;
+  overflow-y: hidden;
   border: 1px solid rgb(255 255 255 / 10%);
   border-radius: 16px;
   background: rgb(15 15 15 / 60%);
@@ -1299,7 +1292,7 @@
   min-width: 0;
   cursor: pointer;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   box-sizing: border-box;
   gap: 4px;
   overflow: hidden;
@@ -2284,6 +2277,117 @@
 
 .times-desc {
   @apply line-clamp-2 text-[0.82rem] leading-relaxed text-ink-400;
+}
+
+/* ── History hero — ported from legacy .hof-hero (RECORD OF GLORY) ─────── */
+.hof-hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: var(--nav-h);
+  min-height: 70vh;
+  overflow: hidden;
+}
+
+.hof-hero .hof-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 26, 74, 0.15) 0%, transparent 60%);
+  animation: hofGlowPulse 4s infinite alternate;
+}
+
+.hof-hero .hof-label {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 20px;
+  color: #ff8095;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1rem;
+  text-transform: uppercase;
+  animation: hofFadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hof-hero .hof-title {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  line-height: 1;
+  letter-spacing: -2px;
+  font-size: clamp(3rem, 12vw, 9rem);
+  font-weight: 700;
+  background: linear-gradient(180deg, #fff 0%, #ffcbd1 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 30px rgba(255, 26, 74, 0.4));
+  animation: hofSplitFade 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+
+.hof-hero .hof-title .bar {
+  margin: 0 20px;
+  color: #ff1a4a;
+  -webkit-text-fill-color: #ff1a4a;
+  font-weight: 300;
+  text-shadow: 0 0 30px #ff1a4a, 0 0 60px rgba(255, 26, 74, 0.6);
+  animation: hofNeonPulse 2s ease-in-out infinite alternate;
+}
+
+.hof-hero .hof-sub {
+  position: relative;
+  z-index: 1;
+  margin-top: 30px;
+  color: #ccc;
+  font-size: 0.9rem;
+  letter-spacing: 0.4rem;
+  animation: hofFadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+}
+
+.hof-hero .hof-scroll {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.hof-hero .hof-scroll span {
+  display: block;
+  width: 2px;
+  height: 80px;
+  background: linear-gradient(to bottom, #ff1a4a, transparent);
+  animation: hofScrollLine 2s cubic-bezier(0.77, 0, 0.175, 1) infinite;
+}
+
+@keyframes hofGlowPulse {
+  from { opacity: 0.55; }
+  to { opacity: 1; }
+}
+@keyframes hofFadeUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes hofSplitFade {
+  from { opacity: 0; transform: scale(1.1) translateY(20px); filter: blur(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+}
+@keyframes hofNeonPulse {
+  from { text-shadow: 0 0 20px #ff1a4a, 0 0 40px rgba(255, 26, 74, 0.5); }
+  to { text-shadow: 0 0 40px #ff1a4a, 0 0 80px rgba(255, 26, 74, 1); }
+}
+@keyframes hofScrollLine {
+  0% { transform: scaleY(0); transform-origin: top; opacity: 0; }
+  50% { transform: scaleY(1); transform-origin: top; opacity: 1; }
+  100% { transform: scaleY(0); transform-origin: bottom; opacity: 0; }
+}
+
+@media (max-width: 768px) {
+  .hof-hero { min-height: 60vh; }
+  .hof-hero .hof-sub { font-size: 0.75rem; letter-spacing: 0.2rem; }
 }
 
 /* ── History · Hall of Fame ───────────────────────────────────────────── */

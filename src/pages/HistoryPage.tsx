@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import { LoadingState } from '../components/common/AsyncState';
-import PageHeader from '../components/common/PageHeader';
 import CardSlider from '../components/history/CardSlider';
 import {
   buildHistoryMemberProfileMap,
@@ -30,9 +29,21 @@ export default function HistoryPage() {
   const catCounts = useMemo(() => countMedals(filtered), [filtered]);
 
   return (
-    <div className="page-wrap">
-      <PageHeader title="GRX|HISTORY" subtitle="꾸한성 크루의 영광스러운 기록들" />
-      {isLoading && <LoadingState />}
+    <>
+      <header className="hof-hero text-center">
+        <div className="hof-glow" aria-hidden="true" />
+        <span className="hof-label">RECORD OF GLORY</span>
+        <h1 className="hof-title font-display">
+          GRX<span className="bar">|</span>HISTORY
+        </h1>
+        <p className="hof-sub">꾸한성 크루의 영광스러운 기록들</p>
+        <div className="hof-scroll" aria-hidden="true">
+          <span />
+        </div>
+      </header>
+
+      <div className="page-wrap">
+        {isLoading && <LoadingState />}
 
       {/* ── 명예의 전당 ── */}
       <section className="hof-section">
@@ -85,7 +96,8 @@ export default function HistoryPage() {
         </div>
         <CardSlider items={filtered} memberProfiles={memberProfiles} />
       </section>
-    </div>
+      </div>
+    </>
   );
 }
 
