@@ -1,0 +1,524 @@
+.gate {
+  --bright-red: #ff1a4a;
+  --approach: 0;
+  --fall: 0;
+  --drift-x: 0deg;
+  --drift-z: 0deg;
+  --open: 0;
+  position: fixed;
+  inset: 0;
+  z-index: 6000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 54%, rgba(255, 92, 38, 0.14), transparent 36rem),
+    #000;
+  perspective: 1200px;
+}
+
+.gate::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 54%, rgba(255, 176, 92, 0.12), transparent 21rem),
+    radial-gradient(circle at 50% 54%, transparent 0 34%, rgba(0,0,0,0.16) 68%, rgba(0,0,0,0.42) 100%),
+    linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.22));
+}
+
+.gate::after {
+  display: none;
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  perspective: 1100px;
+  transform-style: preserve-3d;
+}
+
+.castleBg {
+  position: absolute;
+  inset: 0;
+  background-image: url('/img/infinite-castle-abyss-v2.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  filter:
+    brightness(calc(0.82 + var(--approach) * 0.22 + var(--open) * 0.12))
+    contrast(calc(1.06 + var(--approach) * 0.08))
+    saturate(calc(1.08 + var(--open) * 0.18));
+  transform:
+    translateY(calc(var(--approach) * -8vh + var(--fall) * -38vh))
+    scale(calc(1 + var(--approach) * 0.26 + var(--fall) * 1.06));
+  transform-origin: 50% 55%;
+  will-change: transform, filter;
+}
+
+.viewport {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  perspective: 980px;
+  perspective-origin: 50% calc(52% + var(--approach) * 5% + var(--fall) * 6%);
+  transform-style: preserve-3d;
+}
+
+.world {
+  position: absolute;
+  inset: 0;
+  transform:
+    rotateX(calc(62deg - var(--approach) * 10deg - var(--fall) * 18deg + var(--drift-x)))
+    rotateZ(calc(var(--approach) * -5deg - var(--fall) * 18deg + var(--drift-z)))
+    translateY(calc(var(--approach) * -6vh - var(--fall) * 22vh))
+    scale(calc(0.88 + var(--approach) * 0.1 + var(--fall) * 0.42));
+  transform-origin: 50% 56%;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.roomLayer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(84vw, 1180px);
+  height: min(52vh, 580px);
+  opacity: calc(0.1 + var(--approach) * 0.38 + var(--fall) * 0.44);
+  filter: brightness(calc(0.68 + var(--room-glow) * 0.42));
+  transform:
+    translate3d(
+      calc(-50% + var(--room-x)),
+      calc(-50% + var(--room-y)),
+      calc(var(--room-z) + var(--approach) * 1150px + var(--fall) * 5400px)
+    )
+    rotateZ(var(--room-rotate))
+    scale(calc(0.54 + var(--approach) * 0.06 + var(--fall) * 0.2));
+  transform-style: preserve-3d;
+  will-change: transform, opacity, filter;
+}
+
+.roomLayer::before,
+.roomLayer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(255, 151, 82, 0.24);
+  box-shadow:
+    inset 0 0 42px rgba(0,0,0,0.7),
+    0 0 calc(28px + var(--room-glow) * 36px) rgba(255, 87, 34, 0.16);
+}
+
+.roomLayer::after {
+  inset: 22%;
+  border-color: rgba(255, 208, 151, 0.22);
+  box-shadow: 0 0 42px rgba(255, 109, 42, 0.12);
+}
+
+.roomWall {
+  position: absolute;
+  display: block;
+  border: 1px solid rgba(255, 147, 77, 0.14);
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255, 127, 58, 0.18), rgba(0,0,0,0.5)),
+    repeating-linear-gradient(90deg, rgba(255, 170, 94, 0.16) 0 1px, transparent 1px 26px),
+    repeating-linear-gradient(0deg, rgba(255, 202, 142, 0.1) 0 2px, transparent 2px 34px),
+    rgba(16, 7, 4, 0.82);
+  box-shadow: inset 0 0 26px rgba(0,0,0,0.78);
+}
+
+.roomWallTop,
+.roomWallBottom {
+  left: -8%;
+  width: 116%;
+  height: 19%;
+}
+
+.roomWallTop {
+  top: -17%;
+  transform: rotateX(68deg) translateZ(-56px);
+}
+
+.roomWallBottom {
+  bottom: -17%;
+  transform: rotateX(-68deg) translateZ(-56px);
+}
+
+.roomWallLeft,
+.roomWallRight {
+  top: -7%;
+  width: 14%;
+  height: 114%;
+}
+
+.roomWallLeft {
+  left: -9%;
+  transform: rotateY(-66deg) translateZ(-54px);
+}
+
+.roomWallRight {
+  right: -9%;
+  transform: rotateY(66deg) translateZ(-54px);
+}
+
+.roomBridge {
+  position: absolute;
+  right: 12%;
+  left: 12%;
+  z-index: 2;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, rgba(255, 194, 128, 0.34), transparent);
+  box-shadow: 0 0 18px rgba(255, 99, 43, 0.4);
+}
+
+.roomBridgeA {
+  top: 30%;
+  transform: rotateZ(-5deg);
+}
+
+.roomBridgeB {
+  bottom: 24%;
+  transform: rotateZ(7deg);
+}
+
+.roomWindow {
+  position: absolute;
+  z-index: 3;
+  width: 9%;
+  height: 18%;
+  border: 1px solid rgba(255, 177, 99, 0.22);
+  background:
+    linear-gradient(180deg, rgba(255, 91, 32, 0.24), rgba(255, 178, 91, 0.06)),
+    rgba(0,0,0,0.48);
+  box-shadow:
+    inset 0 0 18px rgba(0,0,0,0.8),
+    0 0 calc(18px + var(--room-glow) * 24px) rgba(255, 84, 32, 0.28);
+}
+
+.roomWindowA { top: 10%; left: 9%; }
+.roomWindowB { right: 12%; bottom: 14%; }
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  background:
+    radial-gradient(circle at 50% 54%, transparent 0 28%, rgba(0,0,0,0.18) 66%, rgba(0,0,0,0.5) 100%),
+    linear-gradient(180deg, rgba(0,0,0,0.12), transparent 48%, rgba(0,0,0,0.34));
+  opacity: 0.62;
+}
+
+.horizon {
+  display: none;
+}
+
+.crows {
+  position: absolute;
+  inset: 0;
+  z-index: 11;
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+
+.leadCrow {
+  position: absolute;
+  top: calc(18% + var(--approach) * 18% + var(--fall) * 42%);
+  left: calc(13% + var(--approach) * 34% + var(--fall) * 10%);
+  z-index: 16;
+  width: clamp(82px, 9vw, 148px);
+  height: clamp(50px, 5.8vw, 92px);
+  opacity: calc(0.82 + var(--approach) * 0.18 - var(--fall) * 0.34);
+  filter:
+    drop-shadow(0 20px 24px rgba(0,0,0,0.88))
+    drop-shadow(0 0 24px rgba(255, 89, 37, 0.16));
+  transform:
+    translate3d(
+      calc(var(--approach) * -11vw + var(--fall) * -8vw),
+      calc(var(--approach) * 3vh + var(--fall) * 32vh),
+      calc(-40px + var(--approach) * 280px + var(--fall) * 960px)
+    )
+    rotate(calc(-8deg + var(--approach) * 12deg + var(--fall) * 6deg))
+    scale(calc(0.84 + var(--approach) * 0.38 + var(--fall) * 1.22));
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+}
+
+.leadCrowBody {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: url('/img/crow-silhouette.svg') center / contain no-repeat;
+  animation: lead-crow-float 1.2s ease-in-out infinite;
+}
+
+@keyframes lead-crow-float {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(7px) rotate(3deg); }
+}
+
+.crow {
+  position: absolute;
+  display: block;
+  opacity: 0.74;
+  background: url('/img/crow-silhouette.svg') center / contain no-repeat;
+  filter: drop-shadow(0 12px 14px rgba(0,0,0,0.72));
+  animation: crow-drift 5.8s ease-in-out infinite;
+  animation-delay: var(--crow-delay);
+  transform-style: preserve-3d;
+}
+
+@keyframes crow-drift {
+  0%, 100% {
+    transform:
+      translate3d(0, calc(var(--fall) * 34vh), calc(var(--crow-z) + var(--approach) * 360px + var(--fall) * 1220px))
+      rotateZ(calc(var(--crow-drift) * -7deg))
+      scale(calc(0.62 + var(--approach) * 0.55 + var(--fall) * 0.5));
+  }
+  50% {
+    transform:
+      translate3d(calc(var(--crow-drift) * 34px), calc(-20px + var(--fall) * 48vh), calc(var(--crow-z) + var(--approach) * 460px + var(--fall) * 1440px))
+      rotateZ(calc(var(--crow-drift) * 10deg))
+      scale(calc(0.72 + var(--approach) * 0.62 + var(--fall) * 0.58));
+  }
+}
+
+.dropLines {
+  position: absolute;
+  inset: 0;
+  z-index: 14;
+  pointer-events: none;
+}
+
+.dropLine {
+  position: absolute;
+  top: -24%;
+  width: 1px;
+  border-radius: 999px;
+  opacity: 0;
+  background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.86), rgba(255, 103, 48, 0.18), transparent);
+  box-shadow: 0 0 16px rgba(255, 103, 48, 0.72);
+  transform-origin: 50% 50%;
+}
+
+.scrollCopy {
+  position: absolute;
+  right: clamp(28px, 5vw, 96px);
+  bottom: clamp(52px, 9vh, 120px);
+  z-index: 140;
+  display: grid;
+  gap: 8px;
+  min-width: 210px;
+  max-width: min(360px, 44vw);
+  padding: 14px 16px;
+  border-right: 2px solid rgba(255, 180, 107, 0.9);
+  color: #fff;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0), rgba(8, 4, 2, 0.62));
+  font-family: 'Oswald', sans-serif;
+  text-align: right;
+  opacity: calc(1 - var(--approach) * 0.08 - var(--fall) * 0.42);
+  pointer-events: none;
+  text-shadow:
+    0 0 22px rgba(255, 111, 48, 0.9),
+    0 2px 16px rgba(0, 0, 0, 1);
+}
+
+.scrollCopy::after {
+  content: '↓';
+  color: rgba(255, 209, 164, 0.96);
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.scrollCopy span {
+  color: #ffb46b;
+  font-size: clamp(0.76rem, 0.82vw, 0.94rem);
+  font-weight: 700;
+  letter-spacing: 0.24rem;
+}
+
+.scrollCopy b {
+  color: #fff;
+  font-size: clamp(1.12rem, 1.35vw, 1.45rem);
+  font-weight: 900;
+  letter-spacing: 0.08rem;
+}
+
+.flash {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  opacity: 0;
+  background: radial-gradient(circle at 50% 52%, rgba(255, 134, 74, 0.34), rgba(166, 38, 26, 0.16) 24%, transparent 62%);
+  mix-blend-mode: soft-light;
+}
+
+.content {
+  position: relative;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  text-align: center;
+  opacity: calc(0.78 + var(--approach) * 0.22);
+  transform:
+    translateY(calc(22px + var(--approach) * -40px))
+    scale(calc(0.9 + var(--approach) * 0.14));
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.falling .content {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.85);
+}
+
+.subTitle {
+  position: relative;
+  display: block;
+  margin-bottom: 24px;
+  color: var(--bright-red);
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.7rem;
+  text-shadow: 0 0 15px rgba(255, 26, 74, 0.8);
+}
+
+.subTitle::before,
+.subTitle::after {
+  display: none;
+}
+
+.subTitle::before { right: calc(100% + 15px); }
+.subTitle::after { left: calc(100% + 15px); }
+
+.content h1 {
+  position: relative;
+  margin-bottom: 28px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 8.5rem;
+  font-weight: 700;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  background: linear-gradient(175deg, #ffffff 0%, #ffd8df 55%, #ff8fa0 100%);
+  background-clip: text;
+  filter: drop-shadow(0 0 40px rgba(255, 26, 74, 0.35));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 55px;
+}
+
+.eyebrowLine {
+  display: none;
+}
+
+.eyebrowLine:last-child {
+  display: none;
+}
+
+.eyebrowText {
+  color: rgba(255,255,255,0.45);
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.68rem;
+  letter-spacing: 0.4rem;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.enterButton {
+  position: relative;
+  margin-top: 0;
+  padding: 16px 64px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 26, 74, 0.5);
+  border-radius: 0;
+  color: rgba(255,255,255,0.85);
+  background: transparent;
+  cursor: pointer;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.4rem;
+  opacity: 0;
+  pointer-events: none;
+  text-transform: uppercase;
+  transform: translateY(18px) scale(0.96);
+  transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.ready .enterButton {
+  color: #fff;
+  border-color: rgba(255, 236, 206, 0.78);
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+  box-shadow:
+    0 0 34px rgba(255, 130, 66, 0.68),
+    0 0 90px rgba(255, 26, 74, 0.34);
+}
+
+.ready {
+  --open: 1;
+}
+
+.enterButton:disabled {
+  cursor: default;
+}
+
+.enterButton::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--bright-red);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.enterButton:hover::before {
+  transform: scaleX(1);
+}
+
+.enterButton:hover {
+  color: #fff;
+  border-color: var(--bright-red);
+  letter-spacing: 0.55rem;
+  box-shadow:
+    0 0 40px rgba(255, 26, 74, 0.6),
+    0 0 80px rgba(255, 26, 74, 0.2);
+}
+
+@media (max-width: 768px) {
+  .content h1 {
+    font-size: 4.5rem;
+  }
+
+  .enterButton {
+    padding: 12px 40px;
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .content h1 {
+    font-size: 3.2rem;
+  }
+
+  .subTitle {
+    font-size: 0.6rem;
+    letter-spacing: 0.4rem;
+  }
+}

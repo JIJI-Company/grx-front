@@ -10,6 +10,7 @@ import type {
   LiveStatus,
   YoutubeVideo,
   CalendarEvent,
+  ContentsArchiveItem,
   HistoryAchievement,
   NoticeStreamer,
 } from './types';
@@ -290,6 +291,83 @@ export const mockGetLiveStatus = async (): Promise<LiveStatus[]> => {
 
 export const mockGetYoutubeLatest = async (): Promise<{ items: YoutubeVideo[] }> =>
   ({ items: [] });
+
+// ─── Contents Archive (Notion schema mock) ───────────────────────────────────
+
+export const mockGetContentsArchive = async (): Promise<ContentsArchiveItem[]> => [
+  {
+    id: 'horror-game',
+    title: '티뉴 무지 공포게임',
+    date: '상시 진행',
+    imageUrl: '/img/contents/horror_game.png',
+    members: ['야무지', '꾸티뉴'],
+    tags: ['공포게임', '콘텐츠'],
+    url: '',
+  },
+  {
+    id: 'blood-demon',
+    title: '꾸한성 NEW 혈귀 모집',
+    date: '상시 진행',
+    imageUrl: '/img/contents/blood_demon.png',
+    members: ['꾸티뉴'],
+    tags: ['콘텐츠', '혈귀'],
+    url: '',
+  },
+  {
+    id: 'wall-kill',
+    title: '꾸한성 친해지기 바래 벽킬내기',
+    date: '상시 진행',
+    imageUrl: '/img/contents/wall_kill.png',
+    members: ['모야', '서라0', '다뮤', '바먀'],
+    tags: ['친목', '벽킬내기'],
+    url: '',
+  },
+  {
+    id: 'lark-study',
+    title: '야무지 종달새 학방',
+    date: '상시 진행',
+    imageUrl: '/img/contents/lark_study.png',
+    members: ['야무지'],
+    tags: ['학방', '콘텐츠'],
+    url: '',
+  },
+  {
+    id: 'socializing',
+    title: '꾸한성 친목도모',
+    date: '상시 진행',
+    imageUrl: '/img/contents/socializing.png',
+    members: ['꾸티뉴', '김옥독', '냥쏘', '야무지'],
+    tags: ['친목', '토크'],
+    url: '',
+  },
+  {
+    id: 'beat-kkujan',
+    title: '꾸잔을 이겨라',
+    date: '상시 진행',
+    imageUrl: '/img/contents/beat_kkujan.png',
+    members: ['꾸티뉴', '야무지', '다뮤', '딴딴2당'],
+    tags: ['게임', '대결'],
+    url: '',
+  },
+  {
+    id: 'okdok-love',
+    title: '옥독 사랑 캠페인',
+    date: '상시 진행',
+    imageUrl: '/img/contents/okdok_love.png',
+    members: ['김옥독'],
+    tags: ['캠페인', '친목'],
+    url: '',
+  },
+  {
+    id: 'battleground-leader',
+    title: 'GRX-battleground 리더',
+    date: '상시 진행',
+    imageUrl: '/img/contents/battleground_leader.png',
+    members: ['난워니'],
+    tags: ['배그', '콘텐츠'],
+    url: '',
+  },
+];
 
 // ─── Calendar (Notion schema mock) ───────────────────────────────────────────
 // Schedule CSV has no endDate/tags/memo; convert rows to CalendarEvent format

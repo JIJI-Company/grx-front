@@ -54,7 +54,7 @@ export default function CalendarPage() {
   return (
     <div>
       <CalendarHero />
-      <div className="calendar-shell mt-8 mb-24">
+      <main className="calendar-container">
         <CalendarControls
           current={current}
           viewMode={viewMode}
@@ -66,7 +66,7 @@ export default function CalendarPage() {
           selectedMember={memberFilter}
           onSelect={setMemberFilter}
         />
-        <div className="glass-panel no-scrollbar overflow-x-auto rounded-2xl border-white/10">
+        <div className="cal-panel no-scrollbar overflow-x-auto">
           <div className="min-w-[44rem]">
             {isLoading && (
               <div className="px-6 py-20 text-center text-ink-400">
@@ -96,7 +96,7 @@ export default function CalendarPage() {
             )}
           </div>
         </div>
-      </div>
+      </main>
 
       {dayModalState && (
         <DayModal

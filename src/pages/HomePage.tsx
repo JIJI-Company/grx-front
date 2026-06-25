@@ -1,10 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useCalendar } from '../hooks/useCalendar';
-import { useNews, useNotice } from '../hooks/useContent';
+import { useContentsArchive, useNews, useNotice } from '../hooks/useContent';
 import { useLiveStatus } from '../hooks/useLive';
 import CurrentMissionSection from '../components/home/CurrentMissionSection';
+import ContentsPreview from '../components/home/ContentsPreview';
 import HomeHero from '../components/home/HomeHero';
 import IntroGate from '../components/home/IntroGate';
 import MemberSlider from '../components/home/MemberSlider';
@@ -14,11 +15,11 @@ import WeeklyCalendar from '../components/home/WeeklyCalendar';
 gsap.registerPlugin(ScrollTrigger);
 
 export default function HomePage() {
-  const entered = useRef(sessionStorage.getItem('ggu-entered') === '1');
   const { data: liveData = [] } = useLiveStatus();
   const { data: newsData } = useNews(6);
   const { data: noticeData = [] } = useNotice();
   const { data: calendarData = [] } = useCalendar();
+  const { data: contentsData = [], isLoading: contentsLoading } = useContentsArchive();
 
   useEffect(() => {
     const context = gsap.context(() => {
@@ -44,30 +45,13 @@ export default function HomePage() {
     return () => context.revert();
   }, []);
 
-  const handleEnter = () => {
-    const gate = document.getElementById('intro-gate');
-    if (gate) gate.classList.add('open');
-    sessionStorage.setItem('ggu-entered', '1');
-
-    setTimeout(() => {
-      if (gate) gate.style.display = 'none';
-      entered.current = true;
-    }, 1500);
-  };
-
-  useEffect(() => {
-    if (entered.current) {
-      const gate = document.getElementById('intro-gate');
-      if (gate) gate.style.display = 'none';
-    }
-  }, []);
-
   return (
     <>
-      {!entered.current && <IntroGate onEnter={handleEnter} />}
+      <IntroGate />
       <HomeHero />
       <CurrentMissionSection liveData={liveData} notices={noticeData} />
       <WeeklyCalendar events={calendarData} />
+      <ContentsPreview items={contentsData} isLoading={contentsLoading} />
       <NewsSection items={newsData?.items ?? []} />
       <MemberSlider />
     </>

@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import {
   apiGetContent,
+  apiGetContentsArchive,
   apiGetSchedule,
   apiGetHistory,
   apiGetNotice,
@@ -52,5 +53,13 @@ export function useYoutubeLatest() {
     queryKey: ['youtube-latest'],
     queryFn: apiGetYoutubeLatest,
     staleTime: 1000 * 60 * 30,
+  });
+}
+
+export function useContentsArchive() {
+  return useQuery({
+    queryKey: ['contents-archive'],
+    queryFn: apiGetContentsArchive,
+    staleTime: 1000 * 60 * 5,
   });
 }
