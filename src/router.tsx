@@ -24,7 +24,7 @@ export const router = createBrowserRouter([
       { path: 'contents', element: <ContentsPage /> },
       { path: 'history', element: <HistoryPage /> },
       //{ path: 'times', element: <TimesPage /> },
-      { path: 'lika', element: <LikaPage /> },
+      //{ path: 'lika', element: <LikaPage /> },
       { path: 'maintenance', element: <MaintenancePage /> },
     ],
   },
