@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Lenis from 'lenis';
+import { setLenis } from '../utils/lenisInstance';
 import SiteBackground from './layout/SiteBackground';
 import SiteHeader from './layout/SiteHeader';
 import SiteFooter from './layout/SiteFooter';
@@ -13,6 +14,7 @@ export default function Layout() {
   useEffect(() => {
     const lenis = new Lenis({ lerp: 0.08, smoothWheel: true });
     lenisRef.current = lenis;
+    setLenis(lenis);
 
     let rafId: number;
     function raf(time: number) {
@@ -24,6 +26,7 @@ export default function Layout() {
     return () => {
       cancelAnimationFrame(rafId);
       lenis.destroy();
+      setLenis(null);
     };
   }, []);
 

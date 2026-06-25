@@ -128,6 +128,7 @@
     background-clip: text;
     color: transparent;
     filter: drop-shadow(0 0 12px --alpha(var(--color-ruby-500) / 40%));
+    padding: 1rem 0;
   }
 
   .nav-link {
@@ -395,11 +396,6 @@
 
 .hero-content-wrap {
   @apply relative z-[10] flex flex-col items-center px-4;
-}
-
-.hero-vertical-text {
-  @apply pointer-events-none absolute top-1/2 left-[3%] z-[5] hidden -translate-y-1/2 font-display text-[0.8rem] tracking-[1rem] whitespace-nowrap text-ruby-500/40 nav:block;
-  transform: translateY(-50%) rotate(-90deg);
 }
 
 .hero-label {

@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
+import { startLenis, stopLenis, scrollLenisTop } from '../../utils/lenisInstance';
 import styles from './IntroGate.module.css';
 
 const INTRO_SESSION_KEY = 'infiniteCastleIntroV6';
@@ -47,6 +48,11 @@ export default function IntroGate() {
     if (!gate) return undefined;
 
     const showMainApp = () => {
+      // Intro ends → main app must start at the very top. Reset Lenis (it owns
+      // window scroll) and the window, then resume smooth scroll.
+      scrollLenisTop();
+      window.scrollTo(0, 0);
+      startLenis();
       document.body.classList.add('show-main');
       setIsActive(false);
     };
@@ -57,6 +63,14 @@ export default function IntroGate() {
     }
 
     document.body.classList.remove('show-main');
+
+    // Freeze the page while the intro overlay is up: Lenis' own wheel handler
+    // would otherwise scroll the page behind the gate (despite the gate's
+    // preventDefault), leaving the main app scrolled and repainting the
+    // filter-heavy fixed gate every frame (flicker). The gate's onWheel still
+    // drives --approach, so the scroll-to-fall effect is unaffected.
+    stopLenis();
+    window.scrollTo(0, 0);
 
     const enterButton = gate.querySelector<HTMLButtonElement>('[data-intro-enter]');
     let dropTimeline: gsap.core.Timeline | undefined;
@@ -87,6 +101,9 @@ export default function IntroGate() {
       enterButton?.removeEventListener('click', onEnter);
       cleanupScroll();
       dropTimeline?.kill();
+      // Don't leave smooth scroll frozen if we unmount mid-intro (e.g. route
+      // change). Idempotent with the startLenis() in showMainApp().
+      startLenis();
     };
   }, []);
 
