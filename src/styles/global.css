@@ -266,15 +266,15 @@
   pointer-events: none;
 }
 
-.members-route {
+.castle-background-route {
   background: transparent;
 }
 
-.members-route .bg-castle {
+.castle-background-route .bg-castle {
   z-index: -1;
 }
 
-.members-route .bg-vignette {
+.castle-background-route .bg-vignette {
   display: none;
 }
 

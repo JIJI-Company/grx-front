@@ -41,9 +41,6 @@ export default function MemberCard({
             {member.profileAsset?.publicUrl && (
               <img src={member.profileAsset.publicUrl} alt={member.stageName} loading="lazy" decoding="async" />
             )}
-            <div className={`rank-overlay ${isGold ? 'rank-overlay-gold' : ''}`}>
-              {rankLabel}
-            </div>
           </div>
           <div className="info">
             <h3 style={{ color }}>{member.stageName}</h3>

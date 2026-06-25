@@ -13,6 +13,37 @@
 
 ---
 
+## v2.3.1 - 2026-06-25
+
+### 목표
+
+- Members 페이지의 무한성 배경을 Live, History, Contents, Notice, Calendar 페이지에도 동일하게 적용한다.
+
+### 변경 사항
+
+- 배경 활성화 책임을 Members 페이지의 개별 effect에서 공통 Layout의 라우트 판별로 이동했다.
+- 대상 라우트에서 무한성 배경을 본문 위로 노출하고 vignette를 숨기는 기존 Members 배경 상태를 공유한다.
+- Contents 페이지의 불투명 최상위 배경을 투명하게 변경해 공통 무한성 배경이 보이도록 했다.
+
+### 변경 파일
+
+- `src/components/Layout.tsx`
+- `src/pages/MembersPage.tsx`
+- `src/styles/global.css`
+- `src/components/contents/ContentsArchiveWall.module.css`
+
+### Verification
+
+- `npm run build`: PASS
+- 로컬 브라우저 확인:
+  - `/members`, `/live`, `/history`, `/contents`, `/notice`, `/calendar`에서 `castle-background-route` 적용
+  - 대상 페이지에서 body와 Contents 최상위 배경이 투명하고 `.bg-castle`이 동일한 레이어로 노출됨
+  - 비대상 `/lika`에서 공통 배경 클래스가 제거되어 기존 동작 유지
+
+### 미검증 항목
+
+- 실제 API 데이터가 모두 로드된 이후의 전체 페이지 스크롤 구간
+
 ## v2.3.0 - 2026-06-25
 
 ### 목표

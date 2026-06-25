@@ -6,6 +6,15 @@ import SiteBackground from './layout/SiteBackground';
 import SiteHeader from './layout/SiteHeader';
 import SiteFooter from './layout/SiteFooter';
 
+const CASTLE_BACKGROUND_ROUTES = new Set([
+  '/members',
+  '/live',
+  '/history',
+  '/contents',
+  '/notice',
+  '/calendar',
+]);
+
 export default function Layout() {
   const lenisRef = useRef<Lenis | null>(null);
   const { pathname } = useLocation();
@@ -33,6 +42,13 @@ export default function Layout() {
   // Scroll to top on route change
   useEffect(() => {
     lenisRef.current?.scrollTo(0, { immediate: true });
+  }, [pathname]);
+
+  useEffect(() => {
+    const usesCastleBackground = CASTLE_BACKGROUND_ROUTES.has(pathname);
+    document.body.classList.toggle('castle-background-route', usesCastleBackground);
+
+    return () => document.body.classList.remove('castle-background-route');
   }, [pathname]);
 
   return (

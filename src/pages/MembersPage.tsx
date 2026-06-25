@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { Member } from '../api/types';
 import { LoadingState } from '../components/common/AsyncState';
 import MemberModal from '../components/members/MemberModal';
@@ -8,11 +8,6 @@ import { useMembers } from '../hooks/useMembers';
 export default function MembersPage() {
   const { data, isLoading } = useMembers();
   const [selected, setSelected] = useState<Member | null>(null);
-
-  useEffect(() => {
-    document.body.classList.add('members-route');
-    return () => document.body.classList.remove('members-route');
-  }, []);
 
   if (isLoading) {
     return (
