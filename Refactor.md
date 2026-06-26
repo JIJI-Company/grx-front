@@ -13,6 +13,35 @@
 
 ---
 
+## v2.3.2 - 2026-06-27
+
+### 목표
+
+- Contents 페이지의 story rail에서 스트리머 항목이 많을 때 마우스 드래그로 가로 이동할 수 있게 한다.
+
+### 변경 사항
+
+- story rail에 pointer drag 기반 `scrollLeft` 제어를 추가했다.
+- 드래그 후 발생하는 click은 한 번 차단해 의도하지 않은 스트리머 선택을 방지했다.
+- 드래그 중 커서와 텍스트 선택 방지 스타일을 추가했다.
+
+### 변경 파일
+
+- `src/components/contents/ContentsArchiveWall.tsx`
+- `src/components/contents/ContentsArchiveWall.module.css`
+
+### Verification
+
+- `npm run build`: PASS
+- `npm run dev:mock -- --host 127.0.0.1 --port 4174`: PASS
+  - `/contents` story rail overflow 확인: `scrollWidth 1349 > clientWidth 760`
+  - 마우스 드래그 후 `scrollLeft 0 → 380`
+  - 드래그 후 선택 상태는 `전체` 유지
+
+### 미검증 항목
+
+- 모바일 터치 스크롤 체감은 수동 확인 필요
+
 ## v2.3.1 - 2026-06-25
 
 ### 목표

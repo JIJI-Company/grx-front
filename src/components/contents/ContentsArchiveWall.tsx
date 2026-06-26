@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { ReactNode, RefObject } from 'react';
+import type { MouseEvent, PointerEvent, ReactNode, RefObject } from 'react';
 import gsap from 'gsap';
 import type { ContentsArchiveItem } from '../../api/types';
 import { useContentsArchive } from '../../hooks/useContent';
@@ -33,6 +33,86 @@ type MemberProfile = {
   name: string;
   avatar: string | null;
 };
+
+type StoryRailDragState = {
+  pointerId: number | null;
+  startX: number;
+  startScrollLeft: number;
+  didDrag: boolean;
+};
+
+function useStoryRailDrag() {
+  const railRef = useRef<HTMLDivElement | null>(null);
+  const dragRef = useRef<StoryRailDragState>({
+    pointerId: null,
+    startX: 0,
+    startScrollLeft: 0,
+    didDrag: false,
+  });
+  const suppressClickRef = useRef(false);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const endDrag = (event: PointerEvent<HTMLDivElement>) => {
+    const pointerId = dragRef.current.pointerId;
+    if (pointerId === null || pointerId !== event.pointerId) return;
+
+    const didDrag = dragRef.current.didDrag;
+    dragRef.current.pointerId = null;
+    dragRef.current.didDrag = false;
+    setIsDragging(false);
+
+    if (event.currentTarget.hasPointerCapture(pointerId)) {
+      event.currentTarget.releasePointerCapture(pointerId);
+    }
+
+    if (didDrag) {
+      suppressClickRef.current = true;
+    }
+  };
+
+  return {
+    railRef,
+    isDragging,
+    onPointerDown: (event: PointerEvent<HTMLDivElement>) => {
+      const rail = railRef.current;
+      if (event.button !== 0 || !rail || rail.scrollWidth <= rail.clientWidth) return;
+
+      dragRef.current = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startScrollLeft: rail.scrollLeft,
+        didDrag: false,
+      };
+      setIsDragging(true);
+      event.currentTarget.setPointerCapture(event.pointerId);
+    },
+    onPointerMove: (event: PointerEvent<HTMLDivElement>) => {
+      const rail = railRef.current;
+      const drag = dragRef.current;
+      if (!rail || drag.pointerId !== event.pointerId) return;
+
+      const deltaX = event.clientX - drag.startX;
+      if (Math.abs(deltaX) > 4) {
+        drag.didDrag = true;
+      }
+
+      if (drag.didDrag) {
+        event.preventDefault();
+      }
+
+      rail.scrollLeft = drag.startScrollLeft - deltaX;
+    },
+    onPointerUp: endDrag,
+    onPointerCancel: endDrag,
+    onClickCapture: (event: MouseEvent<HTMLDivElement>) => {
+      if (!suppressClickRef.current) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      suppressClickRef.current = false;
+    },
+  };
+}
 
 function useContentsIntroAnimations(rootRef: RefObject<HTMLElement | null>) {
   useEffect(() => {
@@ -171,8 +251,19 @@ function StoryRail({
   selectedMember: string;
   onSelectMember: (member: string) => void;
 }) {
+  const drag = useStoryRailDrag();
+  const className = `${styles.storyRail} ${drag.isDragging ? styles.storyRailDragging : ''}`;
+
   return (
-    <div className={styles.storyRail}>
+    <div
+      ref={drag.railRef}
+      className={className}
+      onPointerDown={drag.onPointerDown}
+      onPointerMove={drag.onPointerMove}
+      onPointerUp={drag.onPointerUp}
+      onPointerCancel={drag.onPointerCancel}
+      onClickCapture={drag.onClickCapture}
+    >
       {members.map((member) => (
         <StoryButton
           key={member.name}
@@ -206,7 +297,7 @@ function StoryButton({
     >
       <span className={styles.storyRing}>
         {member.avatar ? (
-          <img src={member.avatar} alt={member.name} />
+          <img src={member.avatar} alt={member.name} draggable={false} />
         ) : (
           <span className={styles.allStory}>{member.name === ALL_MEMBER ? 'ALL' : member.name.slice(0, 1)}</span>
         )}
