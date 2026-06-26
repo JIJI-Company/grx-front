@@ -489,6 +489,157 @@
   font-weight: 800;
 }
 
+.postOverlay {
+  position: fixed;
+  z-index: 1200;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(214, 41, 118, 0.18), transparent 42%),
+    rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(18px);
+}
+
+.postDialog {
+  position: relative;
+  width: min(1060px, 94vw);
+  max-height: min(760px, 88dvh);
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 22px;
+  background: rgba(5, 9, 12, 0.96);
+  box-shadow: 0 30px 110px rgba(0, 0, 0, 0.58);
+}
+
+.postModalClose {
+  position: absolute;
+  z-index: 2;
+  top: 14px;
+  right: 14px;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.46);
+  cursor: pointer;
+  font: inherit;
+  font-size: 1.45rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.postModalClose:hover,
+.postModalClose:focus-visible {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.postModalImage {
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.06), transparent),
+    #000;
+}
+
+.postModalImage img {
+  width: 100%;
+  height: 100%;
+  max-height: min(760px, 88dvh);
+  display: block;
+  object-fit: contain;
+}
+
+.postModalPanel {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(79, 91, 213, 0.14), transparent 38%),
+    rgba(10, 15, 20, 0.96);
+}
+
+.postModalAuthor {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 22px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.postModalAuthor p {
+  margin: 0;
+  color: #fff;
+  font-size: 0.96rem;
+  font-weight: 950;
+}
+
+.postModalAuthor span {
+  display: block;
+  margin-top: 3px;
+  color: rgba(255, 255, 255, 0.54);
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.postModalBody {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  padding: 22px;
+  overscroll-behavior: contain;
+}
+
+.postModalBody h2 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.28rem, 2.2vw, 1.82rem);
+  font-weight: 950;
+  line-height: 1.18;
+  letter-spacing: -0.045em;
+}
+
+.postModalTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.postModalTags span {
+  color: #8ab4ff;
+  font-size: 0.92rem;
+  font-weight: 850;
+}
+
+.postModalLink {
+  min-height: 44px;
+  margin: 0 22px 22px;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(135deg, #fa7e1e, #d62976 52%, #4f5bd5);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 950;
+}
+
+.postModalLink:hover,
+.postModalLink:focus-visible {
+  filter: brightness(1.08);
+}
+
 .emptyGrid,
 .archiveState {
   display: grid;
@@ -538,6 +689,26 @@
     grid-column: 1 / -1;
     justify-self: start;
   }
+
+  .postOverlay {
+    padding: 14px;
+  }
+
+  .postDialog {
+    width: min(520px, 94vw);
+    max-height: 90dvh;
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+  }
+
+  .postModalImage img {
+    max-height: 56dvh;
+  }
+
+  .postModalPanel {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-left: 0;
+  }
 }
 
 @media (max-width: 480px) {
@@ -581,5 +752,14 @@
 
   .gridTileMeta {
     display: none;
+  }
+
+  .postModalAuthor,
+  .postModalBody {
+    padding: 16px;
+  }
+
+  .postModalLink {
+    margin: 0 16px 16px;
   }
 }

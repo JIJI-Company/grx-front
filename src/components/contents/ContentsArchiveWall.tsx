@@ -49,7 +49,8 @@ function useStoryRailDrag() {
     startScrollLeft: 0,
     didDrag: false,
   });
-  const suppressClickRef = useRef(false);
+  const pointerSequenceRef = useRef(0);
+  const suppressClickSequenceRef = useRef<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
   const endDrag = (event: PointerEvent<HTMLDivElement>) => {
@@ -66,7 +67,7 @@ function useStoryRailDrag() {
     }
 
     if (didDrag) {
-      suppressClickRef.current = true;
+      suppressClickSequenceRef.current = pointerSequenceRef.current;
     }
   };
 
@@ -77,14 +78,13 @@ function useStoryRailDrag() {
       const rail = railRef.current;
       if (event.button !== 0 || !rail || rail.scrollWidth <= rail.clientWidth) return;
 
+      pointerSequenceRef.current += 1;
       dragRef.current = {
         pointerId: event.pointerId,
         startX: event.clientX,
         startScrollLeft: rail.scrollLeft,
         didDrag: false,
       };
-      setIsDragging(true);
-      event.currentTarget.setPointerCapture(event.pointerId);
     },
     onPointerMove: (event: PointerEvent<HTMLDivElement>) => {
       const rail = railRef.current;
@@ -92,8 +92,10 @@ function useStoryRailDrag() {
       if (!rail || drag.pointerId !== event.pointerId) return;
 
       const deltaX = event.clientX - drag.startX;
-      if (Math.abs(deltaX) > 4) {
+      if (!drag.didDrag && Math.abs(deltaX) > 4) {
         drag.didDrag = true;
+        setIsDragging(true);
+        event.currentTarget.setPointerCapture(event.pointerId);
       }
 
       if (drag.didDrag) {
@@ -105,11 +107,15 @@ function useStoryRailDrag() {
     onPointerUp: endDrag,
     onPointerCancel: endDrag,
     onClickCapture: (event: MouseEvent<HTMLDivElement>) => {
-      if (!suppressClickRef.current) return;
+      const shouldSuppressClick =
+        suppressClickSequenceRef.current !== null &&
+        suppressClickSequenceRef.current > 0 &&
+        suppressClickSequenceRef.current === pointerSequenceRef.current;
+      if (!shouldSuppressClick) return;
 
       event.preventDefault();
       event.stopPropagation();
-      suppressClickRef.current = false;
+      suppressClickSequenceRef.current = null;
     },
   };
 }
@@ -378,10 +384,13 @@ function MemberGridView({
   posts: ContentsArchiveItem[];
   onBackToAll: () => void;
 }) {
+  const [selectedPost, setSelectedPost] = useState<ContentsArchiveItem | null>(null);
+
   return (
     <div className={styles.memberGridView}>
       <MemberGridHeader profile={profile} postCount={posts.length} onBackToAll={onBackToAll} />
-      {posts.length > 0 ? <MemberGrid posts={posts} /> : <EmptyGrid />}
+      {posts.length > 0 ? <MemberGrid posts={posts} onOpenPost={setSelectedPost} /> : <EmptyGrid />}
+      {selectedPost && <ContentPostModal post={selectedPost} onClose={() => setSelectedPost(null)} />}
     </div>
   );
 }
@@ -419,24 +428,36 @@ function MemberGridHeader({
   );
 }
 
-function MemberGrid({ posts }: { posts: ContentsArchiveItem[] }) {
+function MemberGrid({
+  posts,
+  onOpenPost,
+}: {
+  posts: ContentsArchiveItem[];
+  onOpenPost: (post: ContentsArchiveItem) => void;
+}) {
   return (
     <div className={styles.memberGrid}>
       {posts.map((post) => (
-        <GridTile post={post} key={post.id} />
+        <GridTile post={post} key={post.id} onOpenPost={onOpenPost} />
       ))}
     </div>
   );
 }
 
-function GridTile({ post }: { post: ContentsArchiveItem }) {
+function GridTile({
+  post,
+  onOpenPost,
+}: {
+  post: ContentsArchiveItem;
+  onOpenPost: (post: ContentsArchiveItem) => void;
+}) {
   return (
     <button
       className={styles.gridTile}
       type="button"
       data-member-grid
-      onClick={() => openPost(post)}
-      disabled={!post.url}
+      onClick={() => onOpenPost(post)}
+      aria-label={`${post.title} 게시물 보기`}
     >
       <img src={post.imageUrl || FALLBACK_IMAGE} alt={post.title} />
       <span className={styles.gridTileMeta}>
@@ -444,6 +465,78 @@ function GridTile({ post }: { post: ContentsArchiveItem }) {
         <small>{formatDisplayDate(post.date)}</small>
       </span>
     </button>
+  );
+}
+
+function ContentPostModal({
+  post,
+  onClose,
+}: {
+  post: ContentsArchiveItem;
+  onClose: () => void;
+}) {
+  const hasLink = Boolean(post.url);
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [onClose]);
+
+  return (
+    <div className={styles.postOverlay} role="presentation" onClick={onClose}>
+      <article
+        className={styles.postDialog}
+        role="dialog"
+        aria-modal="true"
+        aria-label={`${post.title} 게시물`}
+        data-lenis-prevent
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button className={styles.postModalClose} type="button" aria-label="게시물 닫기" onClick={onClose}>
+          ×
+        </button>
+        <div className={styles.postModalImage}>
+          <img src={post.imageUrl || FALLBACK_IMAGE} alt={post.title} />
+        </div>
+        <aside className={styles.postModalPanel}>
+          <div className={styles.postModalAuthor}>
+            <div className={styles.smallAvatar}>GC</div>
+            <div>
+              <p>ggu_castle.contents</p>
+              <span>{postMembers(post)} · {formatDisplayDate(post.date)}</span>
+            </div>
+          </div>
+          <div className={styles.postModalBody}>
+            <h2>{post.title}</h2>
+            {post.tags.length > 0 && (
+              <div className={styles.postModalTags}>
+                {post.tags.map((tag) => (
+                  <span key={tag}>#{tag.replace(/^#/, '')}</span>
+                ))}
+              </div>
+            )}
+          </div>
+          {hasLink && (
+            <button className={styles.postModalLink} type="button" onClick={() => openPost(post)}>
+              원본 게시물 열기
+            </button>
+          )}
+        </aside>
+      </article>
+    </div>
   );
 }
 

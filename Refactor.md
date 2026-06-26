@@ -13,6 +13,63 @@
 
 ---
 
+## v2.3.4 - 2026-06-27
+
+### 목표
+
+- Contents memberGrid 이미지를 클릭하면 인스타 게시물처럼 오버레이 팝업으로 크게 볼 수 있게 한다.
+
+### 변경 사항
+
+- memberGrid 타일 클릭 동작을 외부 링크 열기에서 내부 게시물 오버레이 열기로 변경했다.
+- 오버레이에 이미지, 제목, 날짜, 참여 멤버, 태그, 원본 게시물 열기 버튼을 표시한다.
+- ESC, 닫기 버튼, 배경 클릭으로 팝업을 닫고, 팝업 표시 중 body 스크롤을 잠근다.
+- Lenis 환경에서 팝업 내부 스크롤이 안정적으로 동작하도록 `data-lenis-prevent`를 적용했다.
+
+### 변경 파일
+
+- `src/components/contents/ContentsArchiveWall.tsx`
+- `src/components/contents/ContentsArchiveWall.module.css`
+
+### Verification
+
+- `npm run build`: PASS
+- Chrome + `npm run dev:mock -- --host 127.0.0.1 --port 4174`: PASS
+  - `/contents`에서 `야무지` 선택 후 memberGrid 첫 타일 클릭
+  - `role="dialog"` 오버레이 생성, 제목과 이미지 표시 확인
+  - ESC 입력 시 오버레이 제거 및 body overflow 복원 확인
+
+### 미검증 항목
+
+- 운영 도메인 직접 Chrome 조작은 보안 정책상 차단되어 로컬 mock에서 검증했다.
+
+## v2.3.3 - 2026-06-27
+
+### 목표
+
+- Contents story rail에서 일반 스트리머 클릭과 드래그 후 첫 클릭 필터링이 모두 동작하도록 수정한다.
+
+### 변경 사항
+
+- story rail의 pointer capture를 pointerdown 즉시 적용하지 않고, 실제 드래그 임계값을 넘긴 뒤에만 적용하도록 변경했다.
+- 드래그로 생성될 수 있는 click 차단은 같은 pointer 시퀀스에서만 동작하도록 제한했다.
+- 초기 상태나 HMR 상태 보존 케이스에서 모든 클릭이 차단되지 않도록 suppress 조건에 유효 시퀀스 검사를 추가했다.
+
+### 변경 파일
+
+- `src/components/contents/ContentsArchiveWall.tsx`
+
+### Verification
+
+- Chrome + `npm run dev:mock -- --host 127.0.0.1 --port 4174`: PASS
+  - 일반 클릭: `야무지` 선택, `@야무지`, `4 posts` 확인
+  - 드래그: story rail `scrollLeft 0 → 380` 확인
+  - 드래그 후 첫 클릭: `다뮤` 선택, `@다뮤`, `2 posts` 확인
+
+### 미검증 항목
+
+- 모바일 터치 체감은 수동 확인 필요
+
 ## v2.3.2 - 2026-06-27
 
 ### 목표
