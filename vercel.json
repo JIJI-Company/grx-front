@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://grx-back-production-d31b.up.railway.app/api/$1"
+    }
+  ]
+}
