@@ -41,7 +41,7 @@ export default function ContentsPreview({ items, isLoading = false }: ContentsPr
           {latest.map((item) => (
             <Link key={item.id} to="/contents" className="contents-preview-card">
               <div className="contents-preview-thumb">
-                <img src={item.imageUrl || '/img/ggu_title.jpg'} alt={item.title} loading="lazy" />
+                <img src={item.imageUrl || '/img/gg_title.png'} alt={item.title} loading="lazy" />
               </div>
               <div className="contents-preview-copy">
                 <span>{formatDate(item.date)}</span>

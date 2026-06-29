@@ -55,7 +55,7 @@ export function EventModal({ event, onClose }: EventModalProps) {
                   src={lookup.getAvatar(member, getMemberAvatar(member))}
                   alt={member}
                   onError={(error) => {
-                    error.currentTarget.src = '/img/ggu_title.jpg';
+                    error.currentTarget.src = '/img/gg_title.png';
                   }}
                 />
               ))}
@@ -183,7 +183,7 @@ export function DayModal({
                   src={lookup.getAvatar(primaryMember, getMemberAvatar(primaryMember))}
                   alt={primaryMember}
                   onError={(error) => {
-                    error.currentTarget.src = '/img/ggu_title.jpg';
+                    error.currentTarget.src = '/img/gg_title.png';
                   }}
                 />
                 <div className="day-schedule-content">

@@ -7,7 +7,7 @@ import { useMembers } from '../../hooks/useMembers';
 import styles from './ContentsArchiveWall.module.css';
 
 const ALL_MEMBER = '전체';
-const FALLBACK_IMAGE = '/img/ggu_title.jpg';
+const FALLBACK_IMAGE = '/img/gg_title.png';
 
 const BASE_MEMBERS = [
   { name: ALL_MEMBER, avatar: null },
