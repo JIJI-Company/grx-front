@@ -20,8 +20,15 @@ export default function Layout() {
   const lenisRef = useRef<Lenis | null>(null);
   const { pathname } = useLocation();
 
-  // Smooth scroll (Lenis)
+  // Smooth scroll (Lenis) — /members는 GSAP ScrollSmoother가 스크롤을 소유하므로 Lenis 비활성화
   useEffect(() => {
+    if (pathname === '/members') {
+      lenisRef.current?.destroy();
+      lenisRef.current = null;
+      setLenis(null);
+      return undefined;
+    }
+
     const lenis = new Lenis({ lerp: 0.08, smoothWheel: true });
     lenisRef.current = lenis;
     setLenis(lenis);
@@ -38,10 +45,14 @@ export default function Layout() {
       lenis.destroy();
       setLenis(null);
     };
-  }, []);
+  }, [pathname]);
 
   // Scroll to top on route change
   useEffect(() => {
+    if (pathname === '/members') {
+      window.scrollTo(0, 0);
+      return;
+    }
     lenisRef.current?.scrollTo(0, { immediate: true });
   }, [pathname]);
 

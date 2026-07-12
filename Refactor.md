@@ -13,6 +13,42 @@
 
 ---
 
+## v2.4.0 - 2026-07-13
+
+### 목표
+
+- grx_merged에서 완성한 members 페이지(무한성 캐슬 씬)를 이식해 기존 플립 카드 그리드 페이지를 교체한다.
+
+### 변경 사항
+
+- **members 페이지 전면 교체**: `MembersPage`가 `MemberCastleScene`(GSAP ScrollSmoother 기반 시네마틱 수직 씬)을 렌더링. 마스터 대형 포토 + 상현/하현/NEW 티어 씬·카드 그리드, 순위 필 뱃지, 카드 호버 글로우, 스크롤 스태거 리빌, 티어별 불씨 파티클(상현 웜톤/하현 쿨톤/NEW 골드톤), 클릭 시 중앙 모달(이미지 좌 + 정보 우, 슬라이드 스태거 진입, 백드롭/×/ESC 닫기) 포함.
+- **NEW 티어 지원**: 기존 페이지가 렌더링하던 NEW 멤버(7명)가 사라지지 않도록 `MEMBER_TIER_META`에 NEW 티어(골드 `#f5c451`)를 추가한 버전으로 이식(grx_merged에도 동일 반영).
+- **Lenis ↔ ScrollSmoother 충돌 방지**: `Layout.tsx`의 Lenis 초기화를 `/members`에서 건너뛰고(파괴), 라우트 전환 스크롤 초기화도 `/members`는 `window.scrollTo`로 분기. 그 외 라우트는 기존 Lenis 유지. GA4·`castle-background-route` 토글 등 이 레포 고유 로직은 보존.
+- **CSS 이식(선별)**: `global.css`에 `.members-route` 3규칙 + 캐슬 씬 블록(602줄, 기존 `.members-page-wrap` 기본 규칙 대체) + 모달 진입 keyframes 2종 + 768px `.members-page-wrap` 패딩을 삽입. 이 레포 고유의 캘린더/인트로/타이틀 diff는 건드리지 않음. 구 플립 카드 CSS(`.members-grid`·`.member-card-wrap` 등)는 grx_merged와 동일하게 잔존(별도 정리 과제).
+- **삭제**: `MemberCard.tsx`, `MemberRankSection.tsx`(구 페이지 전용, 참조 0). `MemberModal.tsx`·`memberPresentation.ts`는 grx_merged 최신본으로 교체(ESC 닫기, `splitHashTags`/`getMemberSummary`/`MEMBER_TIER_META` 공용화).
+
+### 변경 파일
+
+- `src/pages/MembersPage.tsx` (교체)
+- `src/components/members/MemberCastleScene.tsx` (신규)
+- `src/components/members/MemberModal.tsx` (교체)
+- `src/components/members/memberPresentation.ts` (교체)
+- `src/components/members/MemberCard.tsx` (삭제)
+- `src/components/members/MemberRankSection.tsx` (삭제)
+- `src/components/Layout.tsx`
+- `src/styles/global.css`
+
+### Verification
+
+- `npm run build` PASS.
+- dev 서버(5174) 확인: 마스터 + 상현 3·하현 5·NEW 7 = 16명 카드 전원 렌더링, 티어 타이틀 상현/하현/NEW, body에 `members-route`·`castle-background-route` 공존, ScrollSmoother 래퍼 마운트, 모달 오픈(꾸티뉴)/ESC 닫기 정상.
+
+### 미검증 항목
+
+- 실기기 스크롤 모션(리빌·패럴랙스)과 모바일 반응형은 수동 확인 권장.
+
+---
+
 ## v2.3.4 - 2026-06-27
 
 ### 목표

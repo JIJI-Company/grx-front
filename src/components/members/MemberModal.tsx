@@ -1,26 +1,27 @@
+import { useEffect } from 'react';
 import type { CSSProperties } from 'react';
 import type { Member } from '../../api/types';
 import { getMemberColor } from '../../utils/memberColor';
-import { Fragment } from 'react';
-import { getMemberRankLabel, getTmiLines } from './memberPresentation';
+import { getMemberRankLabel, getMemberSummary, splitHashTags } from './memberPresentation';
 
 interface MemberModalProps {
   member: Member;
   onClose: () => void;
 }
 
-function splitHashTags(value: string | null | undefined): string[] {
-  return (value ?? '')
-    .split(/\s+/)
-    .map((tag) => tag.trim())
-    .filter(Boolean);
-}
-
 export default function MemberModal({ member, onClose }: MemberModalProps) {
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [onClose]);
+
   const soopAccount = member.platformAccounts.find(
     (account) => account.platform.code === 'SOOP',
   );
-  const summary = member.description?.split('\n')[0] ?? '';
+  const summary = getMemberSummary(member);
   const hashTags = splitHashTags(member.hashTag);
   const color = getMemberColor(member);
   const rankLabel = getMemberRankLabel(member);
@@ -105,14 +106,7 @@ export default function MemberModal({ member, onClose }: MemberModalProps) {
                 }}
               >
                 <span style={{ color }}>TMI / 특이사항</span>
-                <p>
-                  {getTmiLines(member.tmi).map((line, index) => (
-                    <Fragment key={index}>
-                      {index > 0 && <br />}
-                      {line}
-                    </Fragment>
-                  ))}
-                </p>
+                <p>{member.tmi}</p>
               </div>
             )}
 
