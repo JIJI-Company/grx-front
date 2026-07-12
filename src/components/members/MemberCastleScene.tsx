@@ -73,7 +73,7 @@ function TierScene({
     >
       <img
         data-speed="auto"
-        src="/img/infinite-castle-abyss-v2.png"
+        src="/img/infinite-castle-abyss-v2.webp"
         alt=""
         loading="lazy"
         decoding="async"
@@ -174,7 +174,7 @@ export default function MemberCastleScene({
               <div className="image_cont member-mood-hero">
                 <img
                   data-speed="auto"
-                  src="/img/infinite-castle-abyss-v2.png"
+                  src="/img/infinite-castle-abyss-v2.webp"
                   alt=""
                   loading="eager"
                   decoding="async"

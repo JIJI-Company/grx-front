@@ -24,7 +24,9 @@ export default function YoutubeFeed() {
   return (
     <div className="youtube-box">
       <div className="yt-thumb-container" onClick={() => window.open(video.link, '_blank')}>
-        {video.thumbnail && <img src={video.thumbnail} className="yt-thumb" alt={video.title} />}
+        {video.thumbnail && (
+          <img src={video.thumbnail} className="yt-thumb" alt={video.title} loading="lazy" decoding="async" />
+        )}
         <div className="yt-play-icon">▶</div>
       </div>
       <div className="yt-info">

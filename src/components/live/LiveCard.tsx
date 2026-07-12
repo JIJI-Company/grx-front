@@ -40,6 +40,8 @@ export default function LiveCard({ stream }: LiveCardProps) {
           <img
             src={imageSource}
             alt={stream.memberName ?? 'member'}
+            loading="lazy"
+            decoding="async"
             onError={(e) => {
               // Live snapshot can 404 right after a stream ends — fall back to profile.
               const img = e.currentTarget;

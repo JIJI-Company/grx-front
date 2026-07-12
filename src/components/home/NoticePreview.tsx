@@ -42,7 +42,7 @@ export default function NoticePreview({ streamers }: NoticePreviewProps) {
               onKeyDown={(event) => event.key === 'Enter' && open()}
             >
               {notice.avatar && (
-                <img src={notice.avatar} alt={notice.streamerName} className="sc-avatar" />
+                <img src={notice.avatar} alt={notice.streamerName} className="sc-avatar" loading="lazy" decoding="async" />
               )}
               <div className="sc-info">
                 <div className="sc-name truncate">{notice.title}</div>

@@ -263,7 +263,7 @@ function WeeklyEventCard({
         src={lookup.getAvatar(primaryMember, getMemberAvatar(primaryMember))}
         alt={primaryMember}
         onError={(error) => {
-          error.currentTarget.src = '/img/gg_title.png';
+          error.currentTarget.src = '/img/gg_title.webp';
         }}
       />
       <div className="day-schedule-content">

@@ -7,7 +7,7 @@ import { useMembers } from '../../hooks/useMembers';
 import styles from './ContentsArchiveWall.module.css';
 
 const ALL_MEMBER = '전체';
-const FALLBACK_IMAGE = '/img/gg_title.png';
+const FALLBACK_IMAGE = '/img/gg_title.webp';
 
 const BASE_MEMBERS = [
   { name: ALL_MEMBER, avatar: null },
@@ -303,7 +303,7 @@ function StoryButton({
     >
       <span className={styles.storyRing}>
         {member.avatar ? (
-          <img src={member.avatar} alt={member.name} draggable={false} />
+          <img src={member.avatar} alt={member.name} draggable={false} loading="lazy" decoding="async" />
         ) : (
           <span className={styles.allStory}>{member.name === ALL_MEMBER ? 'ALL' : member.name.slice(0, 1)}</span>
         )}
@@ -336,7 +336,7 @@ function FeedPost({ post }: { post: ContentsArchiveItem }) {
         onClick={() => openPost(post)}
         aria-label={hasLink ? `${post.title} 열기` : post.title}
       >
-        <img src={post.imageUrl || FALLBACK_IMAGE} alt={post.title} />
+        <img src={post.imageUrl || FALLBACK_IMAGE} alt={post.title} loading="lazy" decoding="async" />
       </button>
       <PostBody post={post} />
     </article>
@@ -408,7 +408,7 @@ function MemberGridHeader({
     <div className={styles.memberGridHeader} data-member-grid>
       <div className={styles.memberGridAvatar}>
         {profile.avatar ? (
-          <img src={profile.avatar} alt={profile.name} />
+          <img src={profile.avatar} alt={profile.name} loading="lazy" decoding="async" />
         ) : (
           <span>{profile.name === ALL_MEMBER ? 'ALL' : profile.name.slice(0, 1)}</span>
         )}
@@ -459,7 +459,7 @@ function GridTile({
       onClick={() => onOpenPost(post)}
       aria-label={`${post.title} 게시물 보기`}
     >
-      <img src={post.imageUrl || FALLBACK_IMAGE} alt={post.title} />
+      <img src={post.imageUrl || FALLBACK_IMAGE} alt={post.title} loading="lazy" decoding="async" />
       <span className={styles.gridTileMeta}>
         <b>{post.title}</b>
         <small>{formatDisplayDate(post.date)}</small>

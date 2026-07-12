@@ -13,6 +13,23 @@
 
 ---
 
+## v2.4.1 - 2026-07-13
+
+### 목표
+
+- 목록성 이미지 lazy loading으로 첫 진입 요청 수·전송량 절감(트래픽 절감 1단계). hero·모달 대표 이미지 제외. (grx_merged v2.9.3과 동일 적용)
+
+### 변경 사항
+
+- `loading="lazy" decoding="async"` 추가: `ContentsArchiveWall`(스토리 아바타·피드·그리드 아바타·그리드 타일 — 게시물 라이트박스 이미지는 제외), `YoutubeFeed`, `NoticePreview`, `LiveStatusPanel`, `LiveCard`.
+- `MemberModal` 대표 이미지 `eager` 전환.
+
+### Verification
+
+- `npm run build` PASS. dev(5174) /contents 실측: img 24개 전원 lazy, 첫 진입 fetch 21/24(뷰포트 인접분만).
+
+---
+
 ## v2.4.0 - 2026-07-13
 
 ### 목표

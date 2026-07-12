@@ -80,7 +80,7 @@ export default function LiveStatusPanel({ data }: LiveStatusPanelProps) {
                 >
                   <div className="multi-avatar-shell">
                     {stream.profileImageUrl ? (
-                      <img src={stream.profileImageUrl} alt={stream.memberName ?? ''} />
+                      <img src={stream.profileImageUrl} alt={stream.memberName ?? ''} loading="lazy" decoding="async" />
                     ) : (
                       <div className="multi-avatar-fallback">
                         {(stream.memberName ?? 'C').charAt(0)}
