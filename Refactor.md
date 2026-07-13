@@ -13,6 +13,22 @@
 
 ---
 
+## v2.4.2 - 2026-07-13
+
+### 목표
+
+- members 페이지 푸터 정리 — 사용자 결정으로 members는 푸터 없는 페이지로 확정. (grx_merged v2.9.4와 동일)
+
+### 변경 사항
+
+- `Layout`이 `/members`에서 `SiteFooter` 렌더링 생략(캐슬 씬의 fixed 래퍼 뒤에 깔려 보이지 않던 죽은 DOM 제거). `MemberCastleScene`은 푸터를 렌더링하지 않음. 타 라우트는 기존대로.
+
+### Verification
+
+- `npm run build` PASS. dev(5174): /members `footer` 0개·씬 정상, /live 푸터 정상.
+
+---
+
 ## v2.4.1 - 2026-07-13
 
 ### 목표

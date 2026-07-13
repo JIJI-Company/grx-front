@@ -75,7 +75,8 @@ export default function Layout() {
       <main id="main-app" className="min-h-screen pt-nav">
         <Outlet />
       </main>
-      <SiteFooter />
+      {/* /members는 ScrollSmoother 고정 래퍼 밖이라 푸터가 보이지 않아, 푸터 없는 페이지로 확정 */}
+      {pathname !== '/members' && <SiteFooter />}
     </>
   );
 }
