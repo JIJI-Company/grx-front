@@ -1299,6 +1299,16 @@
   background-size: 260px 300px, 380px 420px, 300px 340px, 200px 240px, 340px 380px;
 }
 
+.member-card-grid.member-upper-rank-five-row {
+  max-width: 420px;
+  margin-top: calc(-33.3vh + 42px);
+  margin-bottom: 54px;
+}
+
+.member-card-grid.member-upper-pot-dock {
+  margin-bottom: 33.3vh;
+}
+
 .member-card-grid-new .member-pot-frame {
   justify-self: center;
   overflow: visible;

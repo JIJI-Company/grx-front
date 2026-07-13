@@ -89,17 +89,19 @@ function MemberImageGrid({
   onSelect,
   label,
   tone,
+  className = '',
 }: {
   members: Member[];
   activeId: string | undefined;
   onSelect: (member: Member) => void;
   label: string;
   tone: MemberTierTone;
+  className?: string;
 }) {
   if (members.length === 0) return null;
 
   return (
-    <section className={`container member-card-grid member-card-grid-${tone}`} aria-label={label}>
+    <section className={`container member-card-grid member-card-grid-${tone} ${className}`} aria-label={label}>
       {members.map((member) => (
         <MemberImageFrame
           key={member.memberId}
@@ -132,7 +134,12 @@ export default function MemberCastleScene({
   const [modalMemberId, setModalMemberId] = useState<string | undefined>(undefined);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const modalMember = allMembers.find((member) => member.memberId === modalMemberId);
-  const tierMembers: Record<MemberTierTone, Member[]> = { upper, lower, new: newMembers };
+  const upperRankFiveMembers = upper.filter((member) => member.displayOrder === 5);
+  const tierMembers: Record<MemberTierTone, Member[]> = {
+    upper: upper.filter((member) => member.displayOrder !== 5),
+    lower,
+    new: [],
+  };
 
   useEffect(() => {
     if (!wrapperRef.current) return undefined;
@@ -219,6 +226,26 @@ export default function MemberCastleScene({
                     label={`${label} 이미지 목록`}
                     tone={tone}
                   />
+                  {tone === 'upper' && upperRankFiveMembers.length > 0 && (
+                    <>
+                      <MemberImageGrid
+                        members={upperRankFiveMembers}
+                        activeId={modalMemberId}
+                        onSelect={(member) => setModalMemberId(member.memberId)}
+                        label="상현 5 이미지 목록"
+                        tone="upper"
+                        className="member-upper-rank-five-row"
+                      />
+                      <MemberImageGrid
+                        members={newMembers}
+                        activeId={modalMemberId}
+                        onSelect={(member) => setModalMemberId(member.memberId)}
+                        label="상현 5 아래 항아리 목록"
+                        tone="new"
+                        className="member-upper-pot-dock"
+                      />
+                    </>
+                  )}
                 </Fragment>
               ) : null,
             )}
