@@ -106,10 +106,17 @@ function MemberImageGrid({
           member={member}
           active={activeId === member.memberId}
           onClick={() => onSelect(member)}
+          className={getMemberFrameClass(member, tone)}
         />
       ))}
     </section>
   );
+}
+
+function getMemberFrameClass(member: Member, tone: MemberTierTone): string {
+  if (tone !== 'new') return '';
+  const order = Math.min(Math.max(member.displayOrder, 1), 6);
+  return `member-pot-frame member-pot-frame-${order}`;
 }
 
 export default function MemberCastleScene({
