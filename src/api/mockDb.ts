@@ -13,6 +13,7 @@ import type {
   ContentsArchiveItem,
   HistoryAchievement,
   NoticeStreamer,
+  ChallengeBalloonTotal,
 } from './types';
 
 // ─── CSV parser ───────────────────────────────────────────────────────────────
@@ -450,3 +451,21 @@ export const mockGetCalendar = async (): Promise<CalendarEvent[]> => {
 
   return [...samples, ...fromCsv];
 };
+
+// ─── SOOP 도전미션 별풍선 합계 (mock) ─────────────────────────────────────────
+// mockGetNotice가 NoticeStreamer.soopId 자리에 멤버 이름을 넣으므로, 여기서도 이름을 키로 받는다.
+// 값은 별풍선 축(마일스톤 1만~100만)에 맞춘 진행 중 모금 합계.
+const MOCK_BALLOON_TOTALS: Record<string, number> = {
+  꾸티뉴: 480000, 야무지: 260000, 엔쥬: 140000, 리카: 92000, 냥쏘: 47000,
+  다뮤: 21000, 임민트: 8000, 김옥독: 33000, 난워니: 55000,
+};
+
+export const mockGetChallengeBalloonTotals = async (
+  soopIds: string[],
+): Promise<ChallengeBalloonTotal[]> =>
+  soopIds.map((soopId) => ({
+    soopId,
+    balloonTotal: MOCK_BALLOON_TOTALS[soopId] ?? 0,
+    missionTitle: `${soopId} 도전미션`,
+    updatedAt: new Date().toISOString(),
+  }));

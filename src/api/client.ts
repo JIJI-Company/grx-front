@@ -9,6 +9,7 @@ import type {
   ContentsArchiveItem,
   HistoryAchievement,
   NoticeStreamer,
+  ChallengeBalloonTotal,
 } from './types';
 import * as mock from './mockDb';
 
@@ -68,6 +69,21 @@ export const apiGetHistory = (): Promise<HistoryAchievement[]> =>
 
 export const apiGetNotice = (): Promise<NoticeStreamer[]> =>
   USE_MOCK ? mock.mockGetNotice() : get('/notice');
+
+// ─── SOOP 도전미션 별풍선 합계 ──────────────────────────────────────────────────
+// 멤버별 '진행 중 도전미션에 모인 별풍선' 합계. 백엔드가 주기적으로 수집해 저장한 값을 읽는다.
+// 응답은 LIVE 필터 없이 전체 SOOP 계정을 담으므로 요청한 soopId만 남겨 반환 계약을 유지한다.
+// 소비자는 출처를 모른다(추상화).
+
+export const apiGetChallengeBalloonTotals = async (
+  soopIds: string[],
+): Promise<ChallengeBalloonTotal[]> => {
+  if (USE_MOCK) return mock.mockGetChallengeBalloonTotals(soopIds);
+  if (soopIds.length === 0) return [];
+  const all = await get<ChallengeBalloonTotal[]>('/challenge/balloons');
+  const wanted = new Set(soopIds);
+  return all.filter((t) => wanted.has(t.soopId));
+};
 
 // ─── Live ─────────────────────────────────────────────────────────────────────
 

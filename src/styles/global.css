@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;700&family=Noto+Sans+KR:wght@300;400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;700&family=Noto+Sans+KR:wght@300;400;700;900&family=Noto+Serif+KR:wght@500;700;900&display=swap');
 @import 'tailwindcss';
 @import './tokens.css';
 
@@ -276,6 +276,17 @@
 
 .castle-background-route .bg-vignette {
   display: none;
+}
+
+body.samgukji-route {
+  background:
+    linear-gradient(180deg, rgb(4 2 2 / 0.08), rgb(4 2 2 / 0.28)),
+    url('/img/samgukji/page-bg.webp') center top / cover fixed no-repeat,
+    var(--color-castle-950);
+}
+
+.samgukji-route .bg-castle {
+  background: transparent;
 }
 
 .blood-particles {
@@ -4043,5 +4054,827 @@
 
   .live-card.is-live {
     box-shadow: 0 0 16px rgb(225 29 72 / 0.4);
+  }
+}
+
+/* ── 삼국지(三國志) 공약 — 모던 다크 프리미엄 (수묵·금·주홍 절제 액센트) ───────── */
+.sgj-root {
+  --sgj-gold: #d9b871;
+  --sgj-vermilion: #d13b4a;
+  --sgj-hairline: rgb(255 255 255 / 0.09);
+  --sgj-hairline-strong: rgb(255 255 255 / 0.16);
+  --sgj-glass: rgb(18 14 12 / 0.52);
+  --sgj-glass-soft: rgb(24 19 16 / 0.4);
+}
+
+/* 붓글씨 세리프는 히어로 타이틀에만 포인트로. */
+.sgj-brush {
+  font-family: 'Noto Serif KR', serif;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+/* ── 히어로 ─────────────────────────────────────────────────────────────────── */
+.sgj-hero {
+  padding-bottom: 30px;
+}
+
+.sgj-hero-eyebrow {
+  display: inline-block;
+  color: var(--sgj-gold);
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+}
+
+.sgj-hero-title {
+  margin-top: 14px;
+  font-size: clamp(3rem, 10vw, 5.5rem);
+  line-height: 0.92;
+  background: linear-gradient(180deg, #fff 0%, #f4e6c6 60%, var(--sgj-gold) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 6px 30px rgb(209 59 74 / 0.25));
+}
+
+.sgj-hero-sub {
+  margin-top: 14px;
+  color: var(--color-ink-400);
+  font-size: 0.92rem;
+  letter-spacing: 0.14em;
+}
+
+/* ── 탭 (세그먼트 컨트롤) ───────────────────────────────────────────────────── */
+.sgj-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  width: fit-content;
+  margin: 26px auto 44px;
+  padding: 5px;
+  border: 1px solid var(--sgj-hairline);
+  border-radius: 999px;
+  background: var(--sgj-glass);
+  backdrop-filter: blur(16px) saturate(140%);
+}
+
+.sgj-tab {
+  min-height: 42px;
+  padding: 9px 26px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-ink-400);
+  font-family: var(--font-display);
+  font-size: 0.86rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  transition: color 0.3s var(--ease-castle), background 0.3s var(--ease-castle);
+}
+
+.sgj-tab.is-active {
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.1), rgb(255 255 255 / 0.03));
+  color: #fff;
+  box-shadow: inset 0 0 0 1px var(--sgj-hairline-strong),
+    0 6px 18px rgb(0 0 0 / 0.35);
+}
+
+@media (hover: hover) {
+  .sgj-tab:not(.is-active):hover {
+    color: #fff;
+  }
+}
+
+/* ── 공통 패널 요소 ─────────────────────────────────────────────────────────── */
+.sgj-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 22px;
+  font-family: var(--font-display);
+  font-size: clamp(1.05rem, 2.6vw, 1.4rem);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.sgj-panel-title::before {
+  content: '';
+  width: 3px;
+  height: 1.05em;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--sgj-gold), var(--sgj-vermilion));
+}
+
+.sgj-empty {
+  padding: 48px 16px;
+  border: 1px solid var(--sgj-hairline);
+  border-radius: 14px;
+  background: var(--sgj-glass-soft);
+  color: var(--color-ink-400);
+  text-align: center;
+  font-size: 0.92rem;
+}
+
+/* 인장(印章) — 얇은 아웃라인 칩(색은 인라인 accent). */
+.sgj-seal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  font-family: 'Noto Serif KR', serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  opacity: 0.92;
+}
+
+/* ── 현황 ───────────────────────────────────────────────────────────────────── */
+.sgj-status {
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+}
+
+.sgj-counter-single {
+  display: flex;
+  justify-content: center;
+}
+
+.sgj-counter {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: min(440px, 100%);
+  padding: 38px 28px;
+  overflow: hidden;
+  border: 1px solid var(--sgj-hairline);
+  border-radius: 18px;
+  background:
+    radial-gradient(120% 90% at 50% -20%, rgb(209 59 74 / 0.12), transparent 60%),
+    var(--sgj-glass);
+  backdrop-filter: blur(18px) saturate(140%);
+  text-align: center;
+  box-shadow: 0 20px 50px rgb(0 0 0 / 0.35);
+}
+
+.sgj-counter::before {
+  content: '';
+  position: absolute;
+  inset-inline: 20%;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--sgj-gold), transparent);
+  opacity: 0.55;
+}
+
+.sgj-counter-label {
+  color: var(--color-ink-400);
+  font-family: var(--font-display);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.sgj-counter-value {
+  font-family: 'Noto Serif KR', serif;
+  font-size: clamp(2.2rem, 6vw, 3.2rem);
+  font-weight: 900;
+  line-height: 1;
+  color: var(--sgj-gold);
+  text-shadow: 0 0 30px rgb(217 184 113 / 0.28);
+}
+
+.sgj-counter-pending .sgj-counter-value {
+  color: var(--color-ink-300);
+  text-shadow: none;
+}
+
+.sgj-counter-note {
+  color: var(--color-ink-500);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+/* ── 현황: 공약 달리기(진군) 트랙 ──────────────────────────────────────────── */
+.sgj-march-hint {
+  margin: -14px 0 30px;
+  color: var(--color-ink-500);
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+}
+
+.sgj-march {
+  width: min(1600px, calc(100vw - 24px));
+  margin-inline: 50%;
+  transform: translateX(-50%);
+}
+
+.sgj-track {
+  position: relative;
+  height: 680px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border: 1px solid var(--sgj-hairline);
+  border-radius: 18px;
+  background: var(--sgj-glass-soft);
+  box-shadow: 0 20px 50px rgb(0 0 0 / 0.22);
+  scrollbar-color: rgb(217 184 113 / 0.35) transparent;
+  scrollbar-width: thin;
+}
+
+.sgj-track-canvas {
+  position: relative;
+  width: max(100%, 1560px);
+  height: 100%;
+  background:
+    linear-gradient(180deg, rgb(5 3 2 / 0.38), rgb(5 3 2 / 0.58)),
+    radial-gradient(80% 120% at 50% 120%, rgb(209 59 74 / 0.1), transparent 60%),
+    url('/img/samgukji/march-track-bg.webp') center / 100% 100% no-repeat,
+    var(--sgj-glass-soft);
+  box-shadow:
+    inset 0 0 80px rgb(4 2 1 / 0.72);
+  backdrop-filter: blur(14px) saturate(130%);
+}
+
+/* 배경을 stretch로 깔아 이미지 %가 곧 캔버스 %가 되므로 좌표계 inset=0.
+   마일스톤/마커의 left·top(%)이 배경 봉화탑 위치와 1:1 일치한다. */
+.sgj-track-inner {
+  position: absolute;
+  inset: 0;
+}
+
+.sgj-milestone {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.sgj-milestone-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--sgj-gold);
+  box-shadow: 0 0 10px rgb(217 184 113 / 0.5);
+  transform: translate(-50%, -50%);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.sgj-milestone-label {
+  position: absolute;
+  top: calc(50% + 10px);
+  color: var(--color-ink-400);
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  transition: color 0.2s, text-shadow 0.2s;
+}
+
+.sgj-milestone:is(:hover, :focus-visible, .is-active) .sgj-milestone-dot {
+  box-shadow: 0 0 16px rgb(217 184 113 / 0.8);
+  transform: translate(-50%, -50%) scale(1.45);
+}
+
+.sgj-milestone:is(:hover, :focus-visible, .is-active) .sgj-milestone-label {
+  color: #fff;
+  text-shadow: 0 0 12px rgb(217 184 113 / 0.8);
+}
+
+/* ── 진군 밴드: 마일스톤 칸 단위 세로 스택 / +N 뱃지 / 펼침 팝오버 ─────────── */
+/* 밴드는 칸 폭(104px)으로 고정·중앙정렬되어 옆 마일스톤을 침범하지 않는다. */
+.sgj-band {
+  position: absolute;
+  bottom: 22%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 10px;
+  width: 104px;
+}
+
+.sgj-marcher {
+  --sgj-icon-size: 44px;
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 96px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transition: transform 0.2s var(--ease-castle);
+}
+
+.sgj-marcher img,
+.sgj-marcher-fallback {
+  width: var(--sgj-icon-size);
+  height: var(--sgj-icon-size);
+  border: 2px solid var(--sgj-member, var(--sgj-vermilion));
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--color-castle-900);
+  box-shadow: 0 6px 16px rgb(0 0 0 / 0.5),
+    0 0 0 4px color-mix(in srgb, var(--sgj-member, #d13b4a) 12%, transparent);
+  transition: width 0.18s, height 0.18s, box-shadow 0.2s;
+}
+
+.sgj-band.is-active .sgj-marcher img,
+.sgj-band.is-active .sgj-marcher-fallback {
+  border-color: color-mix(in srgb, var(--sgj-member, #d13b4a) 85%, #fff);
+  box-shadow: 0 8px 22px rgb(0 0 0 / 0.55),
+    0 0 0 5px color-mix(in srgb, var(--sgj-member, #d13b4a) 30%, transparent);
+}
+
+.sgj-marcher-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-family: 'Noto Serif KR', serif;
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+.sgj-marcher-name {
+  max-width: 100px;
+  overflow: hidden;
+  color: rgb(255 255 255 / 0.86);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 2px 8px rgb(0 0 0 / 0.9);
+}
+
+.sgj-marcher-count {
+  position: absolute;
+  top: calc(100% + 7px);
+  left: 50%;
+  padding: 6px 9px;
+  border: 1px solid color-mix(in srgb, var(--sgj-member, #d13b4a) 55%, transparent);
+  border-radius: 7px;
+  background: rgb(8 5 4 / 0.94);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -4px);
+  transition: opacity 0.2s, transform 0.2s;
+  white-space: nowrap;
+  box-shadow: 0 8px 20px rgb(0 0 0 / 0.48);
+}
+
+@media (hover: hover) {
+  .sgj-marcher:hover {
+    transform: translateY(-4px);
+    z-index: 60;
+  }
+
+  .sgj-marcher:hover img,
+  .sgj-marcher:hover .sgj-marcher-fallback {
+    box-shadow: 0 10px 24px rgb(0 0 0 / 0.6),
+      0 0 0 5px color-mix(in srgb, var(--sgj-member, #d13b4a) 22%, transparent);
+  }
+
+  .sgj-marcher:hover .sgj-marcher-count {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.sgj-marcher:focus-visible {
+  z-index: 60;
+}
+
+.sgj-marcher:focus-visible .sgj-marcher-count {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* +N 뱃지 (인원 초과로 접힌 밴드) */
+.sgj-band-badge {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.sgj-band-badge-avatars {
+  display: flex;
+}
+
+.sgj-band-badge-avatars img,
+.sgj-band-badge-fallback {
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--sgj-gold);
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--color-castle-900);
+  box-shadow: 0 6px 16px rgb(0 0 0 / 0.5);
+}
+
+.sgj-band-badge-avatars > * + * {
+  margin-left: -14px;
+}
+
+.sgj-band-badge-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-family: 'Noto Serif KR', serif;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.sgj-band-badge-count {
+  padding: 2px 10px;
+  border: 1px solid color-mix(in srgb, var(--sgj-gold) 60%, transparent);
+  border-radius: 999px;
+  background: rgb(8 5 4 / 0.94);
+  color: var(--sgj-gold);
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  box-shadow: 0 8px 20px rgb(0 0 0 / 0.48);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.sgj-band-badge:is(:hover, :focus-visible, .is-expanded) .sgj-band-badge-count {
+  transform: translateY(-2px);
+  box-shadow: 0 0 16px rgb(217 184 113 / 0.6);
+}
+
+/* 밴드 펼침 팝오버 (오버레이 — 트랙 밖으로 안 넘치게 첫/끝 칸은 좌/우 정렬) */
+.sgj-band-popover {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: max-content;
+  max-width: 336px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 16px;
+  border: 1px solid var(--sgj-hairline-strong);
+  border-radius: 16px;
+  background: rgb(14 11 9 / 0.94);
+  backdrop-filter: blur(20px) saturate(140%);
+  box-shadow: 0 24px 60px rgb(0 0 0 / 0.6);
+}
+
+.sgj-band-popover-center {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.sgj-band-popover-start {
+  left: 0;
+}
+
+.sgj-band-popover-end {
+  right: 0;
+}
+
+.sgj-band-popover-title {
+  color: var(--sgj-gold);
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.sgj-band-popover-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 96px);
+  gap: 14px 6px;
+  justify-items: center;
+}
+
+/* ── 멤버별 공약: 사진 카드 그리드 ─────────────────────────────────────────── */
+.sgj-scroll-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(178px, 1fr));
+  gap: 16px;
+}
+
+.sgj-photo-card {
+  position: relative;
+  display: block;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border: 1px solid var(--sgj-hairline);
+  border-radius: 16px;
+  background: var(--color-castle-900);
+  transition: transform 0.35s var(--ease-castle), box-shadow 0.35s var(--ease-castle),
+    border-color 0.35s;
+}
+
+.sgj-photo-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s var(--ease-castle);
+}
+
+.sgj-photo-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 42%, rgb(5 3 2 / 0.55) 74%, rgb(5 3 2 / 0.9));
+  pointer-events: none;
+}
+
+.sgj-photo-fallback {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  color: var(--sgj-gold);
+  font-family: 'Noto Serif KR', serif;
+  font-size: 3rem;
+  font-weight: 900;
+}
+
+.sgj-photo-name {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 15px;
+  z-index: 1;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-shadow: 0 2px 12px rgb(0 0 0 / 0.9);
+}
+
+@media (hover: hover) {
+  .sgj-photo-card:hover {
+    transform: translateY(-6px);
+    border-color: color-mix(in srgb, var(--sgj-member, #d13b4a) 55%, var(--sgj-hairline));
+    box-shadow: 0 22px 46px rgb(0 0 0 / 0.55),
+      0 0 32px color-mix(in srgb, var(--sgj-member, #d13b4a) 22%, transparent);
+  }
+
+  .sgj-photo-card:hover img {
+    transform: scale(1.06);
+  }
+}
+
+/* ── 공약첩 모달 (다크 글래스) ─────────────────────────────────────────────── */
+.sgj-modal {
+  position: relative;
+  width: min(560px, 100%);
+  max-height: 86vh;
+  overflow-y: auto;
+  padding: 30px;
+  border: 1px solid var(--sgj-hairline-strong);
+  border-radius: 20px;
+  background:
+    radial-gradient(120% 60% at 50% 0%, color-mix(in srgb, var(--sgj-member, #d13b4a) 14%, transparent), transparent 60%),
+    rgb(14 11 9 / 0.86);
+  backdrop-filter: blur(26px) saturate(150%);
+  color: var(--color-ink-200);
+  box-shadow: 0 40px 90px rgb(0 0 0 / 0.7);
+}
+
+.sgj-modal::before {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 2px;
+  border-radius: 20px 20px 0 0;
+  background: linear-gradient(90deg, transparent, var(--sgj-member, var(--sgj-vermilion)), transparent);
+}
+
+.sgj-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  border: 0;
+  background: transparent;
+  color: var(--color-ink-400);
+  font-size: 1.7rem;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.sgj-modal-close:hover {
+  color: #fff;
+}
+
+.sgj-modal-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 20px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid var(--sgj-hairline);
+}
+
+.sgj-modal-avatar {
+  width: 62px;
+  height: 62px;
+  border: 2px solid var(--sgj-member, var(--sgj-vermilion));
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--color-castle-900);
+}
+
+.sgj-modal-eyebrow {
+  color: var(--sgj-gold);
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.sgj-modal-head h2 {
+  margin-top: 6px;
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.sgj-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sgj-modal-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sgj-section-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sgj-section-head h3 {
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.9);
+}
+
+.sgj-modal-empty {
+  padding: 12px 14px;
+  border: 1px solid var(--sgj-hairline);
+  border-radius: 10px;
+  background: rgb(255 255 255 / 0.02);
+  color: var(--color-ink-500);
+  font-size: 0.84rem;
+}
+
+.sgj-pledge-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sgj-pledge-row {
+  padding: 14px 16px;
+  border: 1px solid var(--sgj-hairline);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 0.03);
+  transition: border-color 0.25s, background 0.25s;
+}
+
+@media (hover: hover) {
+  .sgj-pledge-row:hover {
+    border-color: var(--sgj-hairline-strong);
+    background: rgb(255 255 255 / 0.05);
+  }
+}
+
+.sgj-pledge-row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.sgj-pledge-row-top strong {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.sgj-pledge-row p {
+  margin-top: 7px;
+  color: var(--color-ink-300);
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
+.sgj-pledge-date {
+  display: inline-block;
+  margin-top: 9px;
+  color: var(--sgj-gold);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.sgj-badge {
+  flex-shrink: 0;
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.sgj-badge-achieved {
+  border: 1px solid color-mix(in srgb, var(--sgj-vermilion) 60%, transparent);
+  background: color-mix(in srgb, var(--sgj-vermilion) 18%, transparent);
+  color: #ffb9c0;
+}
+
+.sgj-badge-active {
+  border: 1px solid color-mix(in srgb, var(--sgj-gold) 55%, transparent);
+  background: color-mix(in srgb, var(--sgj-gold) 15%, transparent);
+  color: var(--sgj-gold);
+}
+
+.sgj-badge-idle {
+  border: 1px solid var(--sgj-hairline-strong);
+  background: rgb(255 255 255 / 0.03);
+  color: var(--color-ink-400);
+}
+
+.sgj-modal-cta {
+  display: block;
+  margin-top: 26px;
+  padding: 13px;
+  border: 1px solid color-mix(in srgb, var(--sgj-member, #d13b4a) 55%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--sgj-member, #d13b4a) 16%, transparent);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-align: center;
+  text-transform: uppercase;
+  transition: background 0.25s, transform 0.25s;
+}
+
+@media (hover: hover) {
+  .sgj-modal-cta:hover {
+    background: color-mix(in srgb, var(--sgj-member, #d13b4a) 28%, transparent);
+    transform: translateY(-2px);
   }
 }

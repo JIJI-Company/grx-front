@@ -9,6 +9,7 @@ import ContentsPage from './pages/ContentsPage';
 import HistoryPage from './pages/HistoryPage';
 import TimesPage from './pages/TimesPage';
 import LikaPage from './pages/LikaPage';
+import SamgukjiPage from './pages/SamgukjiPage';
 import MaintenancePage from './pages/MaintenancePage';
 
 export const router = createBrowserRouter([
@@ -23,6 +24,7 @@ export const router = createBrowserRouter([
       { path: 'calendar', element: <CalendarPage /> },
       { path: 'contents', element: <ContentsPage /> },
       { path: 'history', element: <HistoryPage /> },
+      { path: 'samgukji', element: <SamgukjiPage /> },
       //{ path: 'times', element: <TimesPage /> },
       //{ path: 'lika', element: <LikaPage /> },
       { path: 'maintenance', element: <MaintenancePage /> },

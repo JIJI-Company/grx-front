@@ -162,3 +162,10 @@ export interface ContentsArchiveItem {
   tags: string[];
   url: string;
 }
+
+export interface ChallengeBalloonTotal {
+  soopId: string;
+  balloonTotal: number | null; // 진행 중 도전미션 모금 별풍선 합. 관측된 적 없으면 null (0과 구분)
+  missionTitle: string | null; // 진행 중 도전미션 제목. 없으면 null
+  updatedAt: string | null; // 마지막 관측 시각(ISO). 관측된 적 없으면 null
+}
