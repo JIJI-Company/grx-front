@@ -1057,19 +1057,19 @@ export const PLEDGES: Pledge[] = [
  * 사용자가 실제 게시물 URL(외부 링크 가능)로 교체한다. key는 Member.stageName과 일치.
  */
 export const PLEDGE_POST_URLS: Record<string, string> = {
-  꾸티뉴: '#',
+  꾸티뉴: 'https://www.sooplive.com/station/aksen7833/post/202382999',
   야무지: 'https://www.sooplive.com/station/land4968/post/202380759',
   엔쥬: 'https://www.sooplive.com/station/northpole/post/202380199',
   리카: 'https://www.sooplive.com/station/lika07/post/202369057',
-  난워니: '#',
+  난워니: 'https://www.sooplive.com/station/whiteone325/post/202382155',
   다뮤: 'https://www.sooplive.com/station/not15987/post/202376561',
   딴딴2당: 'https://www.sooplive.com/station/dbsk0708/post/202380587',
   바먀: '#',
-  서라0: '#',
+  서라0: 'https://www.sooplive.com/station/o0opha/post/202381863',
   임민트: 'https://www.sooplive.com/station/mint616/post/202374159',
   김옥독: 'https://www.sooplive.com/station/niniru/post/202367397',
   냥쏘: 'https://www.sooplive.com/station/leesoi34/post/202375345',
-  윤타미: '#',
+  윤타미: 'https://www.sooplive.com/station/dbsthdus111/post/202381811',
   모야: 'https://www.sooplive.com/station/neul0908/post/202371523',
-  란다: '#',
+  란다: 'https://www.sooplive.com/station/top6373/post/202381413',
 };
