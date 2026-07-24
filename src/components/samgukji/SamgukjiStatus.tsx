@@ -6,6 +6,8 @@ import { useNotice } from '../../hooks/useContent';
 import { useChallengeBalloonTotals } from '../../hooks/useChallengeMissions';
 import {
   CUMULATIVE_STAT,
+  GLOBAL_PLEDGES,
+  GLOBAL_REWARDS,
   MARCH_ICON_SRC,
   MARCH_PATH_POINTS,
   MILESTONES,
@@ -18,12 +20,15 @@ import {
   buildNoticeAvatarMap,
   buildNoticeSoopMap,
   collectSoopIds,
+  formatPledgeTarget,
   getMilestonePositionPercent,
   getNextMilestone,
+  getPledgeStatusMeta,
   indexBalloonBySoop,
   isStatPending,
   MARCH_BAND_THRESHOLD,
   resolveMarcherIcon,
+  resolvePledgeStatus,
   sumBalloonTotals,
 } from './samgukjiPresentation';
 import type { MarchBand, MarchEntry } from './samgukjiPresentation';
@@ -75,6 +80,39 @@ export default function SamgukjiStatus({ members, onSelectMember }: SamgukjiStat
     <div className="sgj-status">
       <section className="sgj-counter-single" aria-label="누적 API 현황">
         <CounterCard stat={{ ...CUMULATIVE_STAT, value: total }} />
+      </section>
+
+      <section className="sgj-global-pledges" aria-labelledby="global-pledges-title">
+        <h2 id="global-pledges-title" className="sgj-panel-title">
+          전체 누적 공약
+        </h2>
+        <ul className="sgj-pledge-list">
+          {GLOBAL_PLEDGES.map((pledge) => {
+            const status = getPledgeStatusMeta(resolvePledgeStatus(pledge.targetCount, total));
+            return (
+              <li key={pledge.id} className="sgj-pledge-row">
+                <div className="sgj-pledge-target">
+                  <strong>{formatPledgeTarget(pledge.targetCount)}</strong>
+                </div>
+                <div className="sgj-pledge-content">
+                  <div className="sgj-pledge-row-top">
+                    <strong>{pledge.title}</strong>
+                    <span className={`sgj-badge sgj-badge-${status.tone}`}>
+                      {status.label}
+                    </span>
+                  </div>
+                  {pledge.detail && <p>{pledge.detail}</p>}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+        {GLOBAL_REWARDS.map((item) => (
+          <div key={item.id} className="sgj-global-reward">
+            <span>{item.audience}</span>
+            <strong>{item.reward}</strong>
+          </div>
+        ))}
       </section>
 
       <section className="sgj-march" aria-label="공약 달리기 현황">

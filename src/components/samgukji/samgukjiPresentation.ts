@@ -3,7 +3,7 @@
 // OOP 4대 특징의 grx 관용구 실현:
 //  - 추상화: 소비자는 Pledge/CampaignStat 등 interface 계약에만 의존.
 //  - 캡슐화: 분기·정규화 로직을 이 모듈에 격리하고 순수 함수만 export.
-//  - 다형성: PledgeKind/Status에 대한 Record 디스패치 테이블로 변형별 출력.
+//  - 다형성: PledgeStatus에 대한 Record 디스패치 테이블로 변형별 출력.
 //  - 상속: PledgeBase를 extends한 Pledge를 그대로 소비.
 
 import type {
@@ -16,7 +16,7 @@ import type {
   CampaignStat,
   MilestoneMarker,
   Pledge,
-  PledgeKind,
+  ResolvedPledge,
   PledgeStatus,
 } from './samgukjiData';
 import { MARCH_PATH_POINTS, SAMGUKJI_EXCLUDED } from './samgukjiData';
@@ -154,27 +154,6 @@ export function resolveMarcherIcon(
   return entry.member.profileAsset?.publicUrl ?? null;
 }
 
-// ─── 다형성: 공약 종류 메타 디스패치 테이블 ──────────────────────────────────────
-
-export interface PledgeKindMeta {
-  label: string;
-  /** 인장(印章)에 새길 한 글자. */
-  seal: string;
-  accent: string;
-}
-
-const PLEDGE_KIND_META: Record<PledgeKind, PledgeKindMeta> = {
-  personal: { label: '개인 공약', seal: '個', accent: '#b32024' },
-  cumulative: { label: '누적 공약', seal: '累', accent: '#c9a24b' },
-  special: { label: '특별·특이', seal: '特', accent: '#6b4bb3' },
-};
-
-export function getPledgeKindMeta(kind: PledgeKind): PledgeKindMeta {
-  return PLEDGE_KIND_META[kind];
-}
-
-export const PLEDGE_KIND_ORDER: PledgeKind[] = ['personal', 'cumulative', 'special'];
-
 // ─── 다형성: 공약 상태 메타 ──────────────────────────────────────────────────────
 
 export interface PledgeStatusMeta {
@@ -192,6 +171,23 @@ export function getPledgeStatusMeta(status: PledgeStatus): PledgeStatusMeta {
   return PLEDGE_STATUS_META[status];
 }
 
+/** 공약 카드에서 목표 수치를 빠르게 읽을 수 있도록 만 단위로 축약한다. */
+export function formatPledgeTarget(targetCount: number | null): string {
+  if (targetCount === null) return '미설정';
+  if (targetCount >= 10000 && targetCount % 10000 === 0) {
+    return `${targetCount / 10000}만`;
+  }
+  return targetCount.toLocaleString('ko-KR');
+}
+
+export function resolvePledgeStatus(
+  targetCount: number | null,
+  currentCount: number | null,
+): PledgeStatus {
+  if (targetCount === null || currentCount === null) return 'pending';
+  return currentCount >= targetCount ? 'achieved' : 'in-progress';
+}
+
 // ─── 공약 집계·분류 ──────────────────────────────────────────────────────────────
 
 export function groupPledgesByMember(pledges: Pledge[]): Map<string, Pledge[]> {
@@ -201,15 +197,25 @@ export function groupPledgesByMember(pledges: Pledge[]): Map<string, Pledge[]> {
     list.push(pledge);
     map.set(pledge.memberName, list);
   }
+  for (const list of map.values()) {
+    list.sort((a, b) => (a.targetCount ?? Infinity) - (b.targetCount ?? Infinity));
+  }
   return map;
 }
 
-export type PledgesByKind = Record<PledgeKind, Pledge[]>;
-
-export function partitionByKind(pledges: Pledge[]): PledgesByKind {
-  const out: PledgesByKind = { personal: [], cumulative: [], special: [] };
-  for (const pledge of pledges) out[pledge.kind].push(pledge);
-  return out;
+/** 저장된 별풍선 스냅샷과 목표 갯수를 비교해 화면용 달성 상태를 계산한다. */
+export function resolvePledges(
+  pledges: Pledge[],
+  snapshot: ChallengeBalloonTotal | undefined,
+): ResolvedPledge[] {
+  return pledges.map((pledge) => {
+    const status = resolvePledgeStatus(pledge.targetCount, snapshot?.balloonTotal ?? null);
+    return {
+      ...pledge,
+      status,
+      achievedAt: status === 'achieved' ? snapshot?.updatedAt?.slice(0, 10) ?? null : null,
+    };
+  });
 }
 
 // ─── 누적 수치 포맷 ──────────────────────────────────────────────────────────────

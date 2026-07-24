@@ -32,7 +32,11 @@ export default function SiteHeader() {
         </Link>
         <nav aria-label="주요 메뉴" className="hidden items-center gap-2 nav:flex lg:gap-4">
           {navigation.map(({ to, label }) => (
-            <NavLink key={to} to={to} className="nav-link">
+            <NavLink
+              key={to}
+              to={to}
+              className={`nav-link${to === '/samgukji' ? ' nav-link-samgukji' : ''}`}
+            >
               {label}
             </NavLink>
           ))}
@@ -58,7 +62,11 @@ export default function SiteHeader() {
       >
         <nav aria-label="모바일 메뉴" className="page-shell grid grid-cols-2 gap-2 py-3">
           {navigation.map(({ to, label }) => (
-            <NavLink key={to} to={to} className="mobile-nav-link">
+            <NavLink
+              key={to}
+              to={to}
+              className={`mobile-nav-link${to === '/samgukji' ? ' mobile-nav-link-samgukji' : ''}`}
+            >
               {label}
             </NavLink>
           ))}

@@ -168,11 +168,72 @@
     }
   }
 
+  /* 삼국지만 격을 달리한다 — 금빛 명조체. .nav-link 위에 덧입히는 모디파이어.
+     그라데이션 텍스트라 색이 transparent이므로, .nav-link의 hover/active가 거는
+     text-white·text-shadow를 도로 무효화해야 금색이 유지된다. */
+  .nav-link-samgukji {
+    @apply px-3.5 text-[1.12rem] font-black tracking-[0.22em] normal-case;
+    font-family: 'Noto Serif KR', serif;
+    background: linear-gradient(
+      180deg,
+      var(--color-ink-50) 0%,
+      #f7edd4 45%,
+      var(--color-gold-400) 100%
+    );
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 10px --alpha(var(--color-gold-400) / 45%))
+      drop-shadow(0 1px 1px rgb(0 0 0 / 0.6));
+
+    /* 왼쪽 금빛 세로 획 — 나머지 메뉴와 격을 갈라준다(::after는 밑줄이 쓴다). */
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 6% auto 6% 0;
+      width: 1px;
+      background: linear-gradient(
+        180deg,
+        transparent,
+        --alpha(var(--color-gold-400) / 70%),
+        transparent
+      );
+    }
+
+    &::after {
+      background: var(--color-gold-400);
+      box-shadow: 0 0 10px var(--color-gold-400);
+    }
+
+    @variant can-hover {
+      &:hover {
+        color: transparent;
+        filter: drop-shadow(0 0 14px --alpha(var(--color-gold-400) / 65%));
+      }
+    }
+
+    @variant nav-active {
+      color: transparent;
+      text-shadow: none;
+      filter: drop-shadow(0 0 16px --alpha(var(--color-gold-400) / 75%));
+    }
+  }
+
   .mobile-nav-link {
     @apply focus-ring rounded-md border border-white/8 bg-white/3 px-3 py-3 text-center font-display text-xs tracking-[0.16em] text-ink-300 uppercase transition;
 
     @variant nav-active {
       @apply border-ruby-600/50 bg-ruby-600/12 text-white;
+    }
+  }
+
+  /* 모바일 메뉴에서도 동일한 격. */
+  .mobile-nav-link-samgukji {
+    @apply border-gold-400/40 bg-gold-400/8 text-gold-400 normal-case;
+    font-family: 'Noto Serif KR', serif;
+    letter-spacing: 0.12em;
+
+    @variant nav-active {
+      @apply border-gold-400/70 bg-gold-400/16 text-gold-400;
     }
   }
 
@@ -287,6 +348,24 @@ body.samgukji-route {
 
 .samgukji-route .bg-castle {
   background: transparent;
+}
+
+/* 삼국지(이벤트) 페이지에서만 상단 헤더의 '막대'를 지워 배경에 띄운다.
+   완전 투명 대신 위→아래로 옅어지는 어두운 그라데이션을 남기는 이유는,
+   배경 아트 위에서도 메뉴 글자 가독성을 유지하기 위함이다(경계선은 안 보인다).
+   box-shadow는 SiteHeader의 인라인 style이라 !important로만 덮인다.
+   이벤트 종료 시 이 블록만 지우면 원래 헤더로 돌아온다. */
+.samgukji-route header.fixed {
+  border-bottom-color: transparent;
+  background: linear-gradient(180deg, rgb(4 2 2 / 0.6) 0%, rgb(4 2 2 / 0) 100%);
+  backdrop-filter: none;
+  box-shadow: none !important;
+}
+
+/* 모바일 메뉴 컨테이너의 윗선도 지운다. 헤더가 불투명할 땐 묻히던 선이라
+   투명해지고 나면 허공에 뜬 실선으로 보인다. */
+.samgukji-route header.fixed > #mobile-navigation {
+  border-top-color: transparent;
 }
 
 .blood-particles {
@@ -4090,7 +4169,13 @@ body.samgukji-route {
 }
 
 .sgj-hero-title {
-  margin-top: 14px;
+  /* line-height가 1보다 작아 글리프가 줄 상자를 위아래로 넘치는데,
+     background-clip:text의 칠 영역은 패딩 상자까지라 넘친 획이 색을 받지 못해
+     잘린 것처럼 보였다. 상하 패딩으로 칠 영역만 넓히고, 같은 양의 음수 마진으로
+     차지하는 높이는 원래대로 되돌린다(주변 간격 변화 없음). */
+  margin-top: calc(14px - 0.24em);
+  margin-bottom: -0.24em;
+  padding-block: 0.24em;
   font-size: clamp(3rem, 10vw, 5.5rem);
   line-height: 0.92;
   background: linear-gradient(180deg, #fff 0%, #f4e6c6 60%, var(--sgj-gold) 100%);
@@ -4178,6 +4263,30 @@ body.samgukji-route {
   color: var(--color-ink-400);
   text-align: center;
   font-size: 0.92rem;
+}
+
+.sgj-global-reward {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 12px;
+  padding: 13px 16px;
+  border: 1px dashed color-mix(in srgb, var(--sgj-gold) 40%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--sgj-gold) 6%, transparent);
+}
+
+.sgj-global-reward span {
+  color: var(--color-ink-400);
+  font-size: 0.78rem;
+}
+
+.sgj-global-reward strong {
+  color: var(--sgj-gold);
+  font-size: 0.88rem;
+  text-align: right;
 }
 
 /* 인장(印章) — 얇은 아웃라인 칩(색은 인라인 accent). */
@@ -4668,7 +4777,7 @@ body.samgukji-route {
 /* ── 공약첩 모달 (다크 글래스) ─────────────────────────────────────────────── */
 .sgj-modal {
   position: relative;
-  width: min(560px, 100%);
+  width: min(680px, 100%);
   max-height: 86vh;
   overflow-y: auto;
   padding: 30px;
@@ -4742,6 +4851,16 @@ body.samgukji-route {
   color: #fff;
 }
 
+.sgj-modal-count {
+  margin-left: auto;
+  padding-right: 28px;
+  color: var(--color-ink-400);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
 .sgj-modal-body {
   display: flex;
   flex-direction: column;
@@ -4781,11 +4900,15 @@ body.samgukji-route {
 .sgj-pledge-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .sgj-pledge-row {
-  padding: 14px 16px;
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: stretch;
+  gap: 16px;
+  padding: 13px 16px;
   border: 1px solid var(--sgj-hairline);
   border-radius: 12px;
   background: rgb(255 255 255 / 0.03);
@@ -4799,6 +4922,26 @@ body.samgukji-route {
   }
 }
 
+.sgj-pledge-target {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  border-right: 1px solid var(--sgj-hairline);
+}
+
+.sgj-pledge-target strong {
+  color: var(--sgj-gold);
+  font-family: var(--font-display);
+  font-size: 1.08rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.sgj-pledge-content {
+  min-width: 0;
+  align-self: center;
+}
+
 .sgj-pledge-row-top {
   display: flex;
   align-items: center;
@@ -4807,21 +4950,24 @@ body.samgukji-route {
 }
 
 .sgj-pledge-row-top strong {
+  min-width: 0;
   font-size: 0.95rem;
   font-weight: 700;
+  line-height: 1.45;
   color: #fff;
 }
 
-.sgj-pledge-row p {
-  margin-top: 7px;
-  color: var(--color-ink-300);
-  font-size: 0.84rem;
-  line-height: 1.55;
+.sgj-pledge-content p {
+  margin-top: 4px;
+  color: var(--color-ink-400);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  white-space: pre-line;
 }
 
 .sgj-pledge-date {
   display: inline-block;
-  margin-top: 9px;
+  margin-top: 5px;
   color: var(--sgj-gold);
   font-size: 0.7rem;
   font-weight: 700;
@@ -4854,6 +5000,39 @@ body.samgukji-route {
   border: 1px solid var(--sgj-hairline-strong);
   background: rgb(255 255 255 / 0.03);
   color: var(--color-ink-400);
+}
+
+@media (max-width: 520px) {
+  .sgj-modal {
+    padding: 24px 18px;
+  }
+
+  .sgj-modal-head {
+    gap: 12px;
+  }
+
+  .sgj-modal-count {
+    display: none;
+  }
+
+  .sgj-pledge-row {
+    grid-template-columns: 54px minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .sgj-pledge-target strong {
+    font-size: 0.95rem;
+  }
+
+  .sgj-pledge-row-top {
+    align-items: flex-start;
+  }
+
+  .sgj-badge {
+    padding: 3px 8px;
+    font-size: 0.62rem;
+  }
 }
 
 .sgj-modal-cta {

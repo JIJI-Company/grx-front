@@ -2,20 +2,13 @@ import { useEffect } from 'react';
 import type { CSSProperties } from 'react';
 import type { Member } from '../../api/types';
 import { getMemberColor } from '../../utils/memberColor';
-import type { Pledge } from './samgukjiData';
-import {
-  getPledgeKindMeta,
-  getPledgeStatusMeta,
-  partitionByKind,
-} from './samgukjiPresentation';
-
-// 모달에는 누적 공약만 노출한다(개인/특별 섹션 숨김).
-const VISIBLE_KINDS = ['cumulative'] as const;
+import type { ResolvedPledge } from './samgukjiData';
+import { formatPledgeTarget, getPledgeStatusMeta } from './samgukjiPresentation';
 
 interface MemberPledgeModalProps {
   memberName: string;
   member: Member | undefined;
-  pledges: Pledge[];
+  pledges: ResolvedPledge[];
   channelUrl: string | null;
   onClose: () => void;
 }
@@ -36,7 +29,6 @@ export default function MemberPledgeModal({
   }, [onClose]);
 
   const color = member ? getMemberColor(member) : '#b32024';
-  const byKind = partitionByKind(pledges);
 
   return (
     <div
@@ -69,49 +61,46 @@ export default function MemberPledgeModal({
             <span className="sgj-modal-eyebrow">장수 공약첩</span>
             <h2 id="samgukji-modal-title">{memberName}</h2>
           </div>
+          <span className="sgj-modal-count">목표 {pledges.length}개</span>
         </header>
 
         <div className="sgj-modal-body">
-          {VISIBLE_KINDS.map((kind) => {
-            const list = byKind[kind];
-            const meta = getPledgeKindMeta(kind);
-            return (
-              <section key={kind} className="sgj-modal-section">
-                <div className="sgj-section-head">
-                  <span
-                    className="sgj-seal"
-                    style={{ borderColor: meta.accent, color: meta.accent }}
-                  >
-                    {meta.seal}
-                  </span>
-                  <h3>{meta.label}</h3>
-                </div>
-                {list.length === 0 ? (
-                  <p className="sgj-modal-empty">아직 새겨진 공약이 없습니다.</p>
-                ) : (
-                  <ul className="sgj-pledge-list">
-                    {list.map((pledge) => {
-                      const status = getPledgeStatusMeta(pledge.status);
-                      return (
-                        <li key={pledge.id} className="sgj-pledge-row">
-                          <div className="sgj-pledge-row-top">
-                            <strong>{pledge.title}</strong>
-                            <span className={`sgj-badge sgj-badge-${status.tone}`}>
-                              {status.label}
-                            </span>
-                          </div>
-                          {pledge.detail && <p>{pledge.detail}</p>}
-                          {pledge.achievedAt && (
-                            <span className="sgj-pledge-date">달성 {pledge.achievedAt}</span>
-                          )}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
-              </section>
-            );
-          })}
+          <section className="sgj-modal-section">
+            <div className="sgj-section-head">
+              <span className="sgj-seal" style={{ borderColor: '#c9a24b', color: '#c9a24b' }}>
+                累
+              </span>
+              <h3>누적 공약</h3>
+            </div>
+            {pledges.length === 0 ? (
+              <p className="sgj-modal-empty">아직 새겨진 공약이 없습니다.</p>
+            ) : (
+              <ul className="sgj-pledge-list">
+                {pledges.map((pledge) => {
+                  const status = getPledgeStatusMeta(pledge.status);
+                  return (
+                    <li key={pledge.id} className="sgj-pledge-row">
+                      <div className="sgj-pledge-target">
+                        <strong>{formatPledgeTarget(pledge.targetCount)}</strong>
+                      </div>
+                      <div className="sgj-pledge-content">
+                        <div className="sgj-pledge-row-top">
+                          <strong>{pledge.title}</strong>
+                          <span className={`sgj-badge sgj-badge-${status.tone}`}>
+                            {status.label}
+                          </span>
+                        </div>
+                        {pledge.detail && <p>{pledge.detail}</p>}
+                        {pledge.achievedAt && (
+                          <span className="sgj-pledge-date">달성 {pledge.achievedAt}</span>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </section>
         </div>
 
         {channelUrl && (

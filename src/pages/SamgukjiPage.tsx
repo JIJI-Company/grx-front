@@ -5,11 +5,15 @@ import SamgukjiPledges from '../components/samgukji/SamgukjiPledges';
 import MemberPledgeModal from '../components/samgukji/MemberPledgeModal';
 import { PLEDGES } from '../components/samgukji/samgukjiData';
 import {
+  buildNoticeSoopMap,
   flattenMembers,
   groupPledgesByMember,
   indexMembersByName,
+  resolvePledges,
   selectSamgukjiMembers,
 } from '../components/samgukji/samgukjiPresentation';
+import { useChallengeBalloonTotals } from '../hooks/useChallengeMissions';
+import { useNotice } from '../hooks/useContent';
 import { useMembers } from '../hooks/useMembers';
 
 type SamgukjiTab = 'status' | 'pledges';
@@ -21,6 +25,7 @@ const TABS: Array<{ id: SamgukjiTab; label: string }> = [
 
 export default function SamgukjiPage() {
   const { data, isLoading } = useMembers();
+  const { data: streamers } = useNotice();
   const [tab, setTab] = useState<SamgukjiTab>('status');
   const [selectedName, setSelectedName] = useState<string | null>(null);
 
@@ -32,9 +37,19 @@ export default function SamgukjiPage() {
   const members = useMemo(() => selectSamgukjiMembers(flattenMembers(data)), [data]);
   const membersByName = useMemo(() => indexMembersByName(members), [members]);
   const pledgesByMember = useMemo(() => groupPledgesByMember(PLEDGES), []);
+  const nameToSoop = useMemo(() => buildNoticeSoopMap(streamers), [streamers]);
 
   const selectedMember = selectedName ? membersByName.get(selectedName) : undefined;
   const selectedPledges = selectedName ? pledgesByMember.get(selectedName) ?? [] : [];
+  const selectedSoopId = selectedName ? nameToSoop.get(selectedName) : undefined;
+  const { data: selectedTotals } = useChallengeBalloonTotals(
+    selectedSoopId ? [selectedSoopId] : [],
+  );
+  const selectedSnapshot = selectedTotals?.find((total) => total.soopId === selectedSoopId);
+  const resolvedSelectedPledges = useMemo(
+    () => resolvePledges(selectedPledges, selectedSnapshot),
+    [selectedPledges, selectedSnapshot],
+  );
   const selectedChannel =
     selectedMember?.platformAccounts.find((a) => a.platform.code === 'SOOP')?.channelUrl ?? null;
 
@@ -43,7 +58,7 @@ export default function SamgukjiPage() {
       <header className="sgj-hero text-center">
         <span className="sgj-hero-eyebrow">三國志 · 공약 대전</span>
         <h1 className="sgj-hero-title sgj-brush">삼국지</h1>
-        <p className="sgj-hero-sub">지-캐슬 장수들의 공약 진군을 기록하다</p>
+        <p className="sgj-hero-sub">꾸한성 장수들의 공약 진군을 기록하다</p>
       </header>
 
       <nav className="sgj-tabs" aria-label="삼국지 화면 전환">
@@ -72,7 +87,7 @@ export default function SamgukjiPage() {
         <MemberPledgeModal
           memberName={selectedName}
           member={selectedMember}
-          pledges={selectedPledges}
+          pledges={resolvedSelectedPledges}
           channelUrl={selectedChannel}
           onClose={() => setSelectedName(null)}
         />
