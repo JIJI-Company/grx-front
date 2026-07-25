@@ -1064,7 +1064,7 @@ export const PLEDGE_POST_URLS: Record<string, string> = {
   난워니: 'https://www.sooplive.com/station/whiteone325/post/202382155',
   다뮤: 'https://www.sooplive.com/station/not15987/post/202376561',
   딴딴2당: 'https://www.sooplive.com/station/dbsk0708/post/202380587',
-  바먀: '#',
+  바먀: 'https://www.sooplive.com/station/wooyah21/post/202383145',
   서라0: 'https://www.sooplive.com/station/o0opha/post/202381863',
   임민트: 'https://www.sooplive.com/station/mint616/post/202374159',
   김옥독: 'https://www.sooplive.com/station/niniru/post/202367397',

@@ -357,7 +357,10 @@ body.samgukji-route {
    이벤트 종료 시 이 블록만 지우면 원래 헤더로 돌아온다. */
 .samgukji-route header.fixed {
   border-bottom-color: transparent;
-  background: linear-gradient(180deg, rgb(4 2 2 / 0.6) 0%, rgb(4 2 2 / 0) 100%);
+  /* 완전 투명. 어두운 스크림 그라데이션을 얹어봤더니, 헤더 높이(82px) 안에서
+     알파가 0까지 떨어지며 8비트 밴딩이 생겨 하단에 1px 실선처럼 보였다.
+     이 페이지 상단은 배경 아트가 충분히 어두워 스크림 없이도 글자가 읽힌다. */
+  background: transparent;
   backdrop-filter: none;
   box-shadow: none !important;
 }
