@@ -36,8 +36,7 @@ export function useHistory() {
   return useQuery({
     queryKey: ['history'],
     queryFn: () => apiGetHistory(),
-    staleTime: 0,
-    refetchOnMount: 'always',
+    staleTime: 1000 * 60 * 5,
   });
 }
 
@@ -61,7 +60,6 @@ export function useContentsArchive() {
   return useQuery({
     queryKey: ['contents-archive'],
     queryFn: apiGetContentsArchive,
-    staleTime: 0,
-    refetchOnMount: 'always',
+    staleTime: 1000 * 60 * 3,
   });
 }

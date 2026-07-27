@@ -18,7 +18,7 @@ import {
   buildMarchBands,
   buildMarchEntries,
   buildNoticeAvatarMap,
-  buildNoticeSoopMap,
+  buildMemberSoopMap,
   collectSoopIds,
   formatPledgeTarget,
   getMilestonePositionPercent,
@@ -42,7 +42,7 @@ export default function SamgukjiStatus({ members, onSelectMember }: SamgukjiStat
   const [previewGroup, setPreviewGroup] = useState<number | null>(null);
   const [pinnedGroup, setPinnedGroup] = useState<number | null>(null);
   const { data: streamers } = useNotice();
-  const nameToSoop = buildNoticeSoopMap(streamers);
+  const nameToSoop = buildMemberSoopMap(members);
   const soopIds = collectSoopIds(members, nameToSoop);
   const { data: balloonTotals, isLoading } = useChallengeBalloonTotals(soopIds);
 

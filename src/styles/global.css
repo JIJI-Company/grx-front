@@ -371,12 +371,20 @@ body.samgukji-route {
   border-top-color: transparent;
 }
 
+body.hide-site-header header.fixed {
+  transform: translateY(-100%);
+  transition: transform 0.35s ease;
+  pointer-events: none;
+}
+
+body.hide-site-header #main-app {
+  padding-top: 0;
+}
+
 .blood-particles {
   position: fixed;
-  inset: -50%;
+  inset: 0;
   z-index: -3;
-  width: 200%;
-  height: 200%;
   pointer-events: none;
   background-image:
     radial-gradient(rgb(255 26 74 / 0.3) 1px, transparent 1px),
@@ -385,6 +393,12 @@ body.samgukji-route {
   opacity: 0.6;
   transform: rotateZ(15deg) rotateX(45deg);
   animation: spatial-drift 40s linear infinite;
+  will-change: transform;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blood-particles { animation: none; }
 }
 
 .intro-gate {
@@ -4047,7 +4061,7 @@ body.samgukji-route {
 
 @keyframes spatial-drift {
   to {
-    transform: rotateZ(15deg) rotateX(45deg) translateY(-800px);
+    transform: rotateZ(15deg) rotateX(45deg) translateY(-200px);
   }
 }
 
@@ -5060,3 +5074,291 @@ body.samgukji-route {
     transform: translateY(-2px);
   }
 }
+
+/* ── 실시간 순위 리더보드 ─────────────────────────────────────────────────── */
+
+.sgj-lb-scale {
+  width: 100%;
+  max-width: 680px;
+  margin-inline: auto;
+  overflow: hidden;
+}
+
+.sgj-lb {
+  width: 680px;
+}
+
+.sgj-lb-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.sgj-lb-updated {
+  color: var(--color-ink-500);
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+}
+
+.sgj-lb-hint {
+  margin: -14px 0 28px;
+  color: var(--color-ink-500);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+}
+
+/* ── 포디움 (1 · 2 · 3등) ──────────────────────────────────────────────── */
+
+.sgj-lb-podium {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.sgj-lb-podium-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 22px 10px 18px;
+  border: 1px solid var(--sgj-hairline);
+  border-radius: 16px;
+  background: var(--sgj-glass);
+  backdrop-filter: blur(14px) saturate(130%);
+  cursor: pointer;
+  transition: border-color 0.25s, transform 0.25s;
+}
+
+.sgj-lb-podium-card:hover {
+  border-color: var(--sgj-hairline-strong);
+  transform: translateY(-3px);
+}
+
+.sgj-lb-medal-1 {
+  border-color: color-mix(in srgb, var(--sgj-gold) 50%, transparent);
+  background:
+    radial-gradient(100% 120% at 50% -15%, color-mix(in srgb, var(--sgj-gold) 18%, transparent), transparent 65%),
+    var(--sgj-glass);
+}
+
+.sgj-lb-medal-2 {
+  border-color: rgb(192 192 192 / 0.3);
+  background:
+    radial-gradient(100% 120% at 50% -15%, rgb(192 192 192 / 0.1), transparent 65%),
+    var(--sgj-glass);
+}
+
+.sgj-lb-medal-3 {
+  border-color: rgb(205 127 50 / 0.3);
+  background:
+    radial-gradient(100% 120% at 50% -15%, rgb(205 127 50 / 0.1), transparent 65%),
+    var(--sgj-glass);
+}
+
+.sgj-lb-rank {
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  font-family: 'Noto Serif KR', serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--sgj-gold);
+  opacity: 0.7;
+}
+
+.sgj-lb-medal-1 .sgj-lb-rank { color: var(--sgj-gold); opacity: 1; }
+.sgj-lb-medal-2 .sgj-lb-rank { color: #c0c0c0; opacity: 1; }
+.sgj-lb-medal-3 .sgj-lb-rank { color: #cd7f32; opacity: 1; }
+
+.sgj-lb-podium-avatar {
+  width: 56px;
+  height: 56px;
+}
+
+.sgj-lb-podium-avatar img,
+.sgj-lb-podium-avatar .sgj-lb-avatar-fallback {
+  width: 100%;
+  height: 100%;
+  border: 2px solid var(--sgj-member, var(--sgj-vermilion));
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--color-castle-900);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.45),
+    0 0 0 3px color-mix(in srgb, var(--sgj-member, #d13b4a) 12%, transparent);
+}
+
+.sgj-lb-avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-ink-200);
+}
+
+.sgj-lb-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-ink-100);
+  letter-spacing: -0.01em;
+}
+
+.sgj-lb-count {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--sgj-gold);
+  line-height: 1;
+}
+
+/* ── 4등 이하 리스트 ────────────────────────────────────────────────────── */
+
+.sgj-lb-list {
+  columns: 2;
+  column-gap: 10px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sgj-lb-list > li {
+  break-inside: avoid;
+  margin-bottom: 6px;
+}
+
+.sgj-lb-row {
+  display: grid;
+  grid-template-columns: 36px 36px minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--sgj-hairline);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 0.02);
+  cursor: pointer;
+  transition: border-color 0.25s, background 0.25s;
+}
+
+@media (hover: hover) {
+  .sgj-lb-row:hover {
+    border-color: var(--sgj-hairline-strong);
+    background: rgb(255 255 255 / 0.05);
+  }
+}
+
+.sgj-lb-row-rank {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--color-ink-300);
+  text-align: center;
+}
+
+.sgj-lb-row-avatar {
+  width: 36px;
+  height: 36px;
+}
+
+.sgj-lb-row-avatar img,
+.sgj-lb-row-avatar .sgj-lb-avatar-fallback {
+  width: 100%;
+  height: 100%;
+  border: 2px solid var(--sgj-member, var(--sgj-vermilion));
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--color-castle-900);
+}
+
+.sgj-lb-row-name {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--color-ink-100);
+}
+
+.sgj-lb-row-count {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--sgj-gold);
+  text-align: right;
+}
+
+/* ── FLIP 순위변동 착지 글로우 ──────────────────────────────────────────── */
+
+.sgj-lb-landed {
+  animation: sgj-lb-land-glow 1.2s ease-out;
+}
+
+@keyframes sgj-lb-land-glow {
+  0%   { box-shadow: 0 0 24px 4px rgb(217 184 113 / 0.6); }
+  100% { box-shadow: none; }
+}
+
+/* ── 차이·접전 표시 ─────────────────────────────────────────────────────── */
+
+.sgj-lb-gap {
+  font-size: 0.68rem;
+  color: rgb(180 180 190);
+  letter-spacing: -0.01em;
+}
+
+.sgj-lb-gap-compact {
+  font-size: 0.62rem;
+}
+
+.sgj-lb-close {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #ff4444;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgb(255 40 40 / 0.15);
+  border: 1px solid rgb(255 60 60 / 0.35);
+  white-space: nowrap;
+  text-shadow: 0 0 8px rgb(255 60 30 / 0.7);
+  box-shadow: 0 0 10px rgb(255 50 30 / 0.25), inset 0 0 8px rgb(255 80 30 / 0.1);
+  animation: sgj-lb-fire 1.2s ease-in-out infinite alternate;
+}
+
+.sgj-lb-close-compact {
+  font-size: 0.62rem;
+  padding: 1px 6px;
+}
+
+.sgj-lb-close-gap {
+  opacity: 0.8;
+  margin-left: 3px;
+  font-weight: 600;
+}
+
+@keyframes sgj-lb-fire {
+  0%   { text-shadow: 0 0 6px rgb(255 60 30 / 0.6);  box-shadow: 0 0 8px rgb(255 50 30 / 0.2), inset 0 0 6px rgb(255 80 30 / 0.08); }
+  50%  { text-shadow: 0 0 14px rgb(255 30 10 / 0.9), 0 0 28px rgb(255 100 20 / 0.4);  box-shadow: 0 0 18px rgb(255 40 20 / 0.35), inset 0 0 12px rgb(255 60 20 / 0.15); }
+  100% { text-shadow: 0 0 10px rgb(255 50 20 / 0.7), 0 0 20px rgb(255 80 30 / 0.3);  box-shadow: 0 0 12px rgb(255 50 30 / 0.28), inset 0 0 8px rgb(255 70 25 / 0.1); }
+}
+
+/* ── 폴링 진행 바 ────────────────────────────────────────────────────────── */
+
+.sgj-lb-poll {
+  margin-top: 24px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--sgj-hairline);
+  overflow: hidden;
+}
+
+.sgj-lb-poll-bar {
+  height: 100%;
+  background: var(--sgj-gold);
+  opacity: 0.45;
+  transition: width 1s linear;
+}
+
+/* ── 모바일 ──────────────────────────────────────────────────────────────── */
+
+/* 모바일에서는 zoom으로 비율 유지 축소되므로 리플로우 불필요 */

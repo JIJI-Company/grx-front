@@ -84,6 +84,7 @@ export default function IntroGate() {
     document.documentElement.style.overscrollBehavior = 'none';
 
     const enterButton = gate.querySelector<HTMLButtonElement>('[data-intro-enter]');
+    const skipButton = gate.querySelector<HTMLButtonElement>('[data-intro-skip]');
     let dropTimeline: gsap.core.Timeline | undefined;
     const cleanupScroll = setupIntroScroll(gate, enterButton);
 
@@ -106,15 +107,21 @@ export default function IntroGate() {
       });
     };
 
+    const onSkip = () => {
+      cleanupScroll();
+      sessionStorage.setItem(INTRO_SESSION_KEY, 'true');
+      showMainApp();
+    };
+
     enterButton?.addEventListener('click', onEnter);
+    skipButton?.addEventListener('click', onSkip);
 
     return () => {
       enterButton?.removeEventListener('click', onEnter);
+      skipButton?.removeEventListener('click', onSkip);
       cleanupScroll();
       dropTimeline?.kill();
       unlockScroll();
-      // Don't leave smooth scroll frozen if we unmount mid-intro (e.g. route
-      // change). Idempotent with the startLenis() in showMainApp().
       startLenis();
     };
   }, []);
@@ -136,6 +143,9 @@ export default function IntroGate() {
           ENTER THE INFINITE
         </button>
       </div>
+      <button className={styles.skipButton} data-intro-skip type="button">
+        SKIP
+      </button>
     </div>
   );
 }

@@ -2,10 +2,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { LoadingState } from '../components/common/AsyncState';
 import SamgukjiStatus from '../components/samgukji/SamgukjiStatus';
 import SamgukjiPledges from '../components/samgukji/SamgukjiPledges';
+import SamgukjiLeaderboard from '../components/samgukji/SamgukjiLeaderboard';
 import MemberPledgeModal from '../components/samgukji/MemberPledgeModal';
 import { PLEDGES } from '../components/samgukji/samgukjiData';
 import {
-  buildNoticeSoopMap,
+  buildMemberSoopMap,
   flattenMembers,
   groupPledgesByMember,
   indexMembersByName,
@@ -13,19 +14,18 @@ import {
   selectSamgukjiMembers,
 } from '../components/samgukji/samgukjiPresentation';
 import { useChallengeBalloonTotals } from '../hooks/useChallengeMissions';
-import { useNotice } from '../hooks/useContent';
 import { useMembers } from '../hooks/useMembers';
 
-type SamgukjiTab = 'status' | 'pledges';
+type SamgukjiTab = 'status' | 'pledges' | 'leaderboard';
 
 const TABS: Array<{ id: SamgukjiTab; label: string }> = [
   { id: 'status', label: '현황' },
   { id: 'pledges', label: '장수별 공약' },
+  { id: 'leaderboard', label: '실시간 순위' },
 ];
 
 export default function SamgukjiPage() {
   const { data, isLoading } = useMembers();
-  const { data: streamers } = useNotice();
   const [tab, setTab] = useState<SamgukjiTab>('status');
   const [selectedName, setSelectedName] = useState<string | null>(null);
 
@@ -34,10 +34,15 @@ export default function SamgukjiPage() {
     return () => document.body.classList.remove('samgukji-route');
   }, []);
 
+  useEffect(() => {
+    document.body.classList.toggle('hide-site-header', tab === 'leaderboard');
+    return () => document.body.classList.remove('hide-site-header');
+  }, [tab]);
+
   const members = useMemo(() => selectSamgukjiMembers(flattenMembers(data)), [data]);
   const membersByName = useMemo(() => indexMembersByName(members), [members]);
   const pledgesByMember = useMemo(() => groupPledgesByMember(PLEDGES), []);
-  const nameToSoop = useMemo(() => buildNoticeSoopMap(streamers), [streamers]);
+  const nameToSoop = useMemo(() => buildMemberSoopMap(members), [members]);
 
   const selectedMember = selectedName ? membersByName.get(selectedName) : undefined;
   const selectedPledges = selectedName ? pledgesByMember.get(selectedName) ?? [] : [];
@@ -79,8 +84,10 @@ export default function SamgukjiPage() {
         <LoadingState message="장수 명부를 불러오는 중..." />
       ) : tab === 'status' ? (
         <SamgukjiStatus members={members} onSelectMember={setSelectedName} />
-      ) : (
+      ) : tab === 'pledges' ? (
         <SamgukjiPledges members={members} />
+      ) : (
+        <SamgukjiLeaderboard members={members} onSelectMember={setSelectedName} />
       )}
 
       {selectedName && (

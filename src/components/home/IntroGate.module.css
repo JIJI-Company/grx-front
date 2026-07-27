@@ -523,6 +523,30 @@
   }
 }
 
+.skipButton {
+  position: fixed;
+  top: 24px;
+  right: 28px;
+  z-index: 100;
+  padding: 6px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.2rem;
+  text-transform: uppercase;
+  backdrop-filter: blur(4px);
+  transition: color 0.25s, border-color 0.25s;
+}
+
+.skipButton:hover {
+  color: rgba(255, 255, 255, 0.85);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
 @media (max-width: 480px) {
   .content h1 {
     font-size: 3.2rem;

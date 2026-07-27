@@ -45,18 +45,21 @@ export function selectSamgukjiMembers(members: Member[]): Member[] {
   );
 }
 
-// ─── 별풍선 합계 색인 (soopId → 이름) ────────────────────────────────────────────
+// ─── 별풍선 합계 색인 (멤버 이름 → soopId) ────────────────────────────────────────
 
-/** notice 스트리머의 soopId를 멤버 이름으로 색인(빈 값 제외). */
-export function buildNoticeSoopMap(streamers: NoticeStreamer[] | undefined): Map<string, string> {
+/** 멤버의 SOOP 플랫폼 계정을 멤버 이름으로 색인(빈 값 제외). */
+export function buildMemberSoopMap(members: Member[]): Map<string, string> {
   const map = new Map<string, string>();
-  for (const s of streamers ?? []) {
-    if (s.soopId && s.soopId.trim()) map.set(s.name, s.soopId);
+  for (const member of members) {
+    const soopAccount = member.platformAccounts.find(
+      (account) => account.platform.code === 'SOOP' && account.externalUserId.trim(),
+    );
+    if (soopAccount) map.set(member.stageName, soopAccount.externalUserId.trim());
   }
   return map;
 }
 
-/** 로스터에서 조회 대상 soopId 목록을 만든다(중복 제거, notice에 없는 멤버는 제외). */
+/** 로스터에서 조회 대상 soopId 목록을 만든다(중복 제거, SOOP 계정 없는 멤버는 제외). */
 export function collectSoopIds(members: Member[], nameToSoop: Map<string, string>): string[] {
   const ids = new Set<string>();
   for (const m of members) {
@@ -73,7 +76,7 @@ export function indexBalloonBySoop(
   return new Map((totals ?? []).map((t) => [t.soopId, t.balloonTotal]));
 }
 
-/** 멤버 이름 → 별풍선 합계(number|null). notice soopId가 없으면 null(조회 불가). */
+/** 멤버 이름 → 별풍선 합계(number|null). SOOP 계정이 없으면 null(조회 불가). */
 export function buildBalloonByName(
   members: Member[],
   nameToSoop: Map<string, string>,
@@ -292,7 +295,7 @@ export function getMarchGroupIndex(
 // ─── 밴드(마일스톤 칸) 그룹핑 ─────────────────────────────────────────────────
 
 /** 밴드 접기 임계치 — 한 칸 인원이 이 수를 초과하면 +N 뱃지로 접는다. 조정 가능. */
-export const MARCH_BAND_THRESHOLD = 3;
+export const MARCH_BAND_THRESHOLD = 2;
 
 /**
  * 표시용 밴드 인덱스 — getMarchGroupIndex의 null(미집계)을 출발(0) 밴드로 보정한다.
