@@ -11,7 +11,7 @@ import {
   indexBalloonBySoop,
 } from './samgukjiPresentation';
 
-const POLL_INTERVAL = 60_000;
+const POLL_INTERVAL = 5 * 60_000;
 const CLOSE_BATTLE_THRESHOLD = 1_000;
 const DESIGN_WIDTH = 680;
 const FLIP_DURATION = '0.8s';
@@ -160,7 +160,7 @@ export default function SamgukjiLeaderboard({
         </div>
 
         <p className="sgj-lb-hint">
-          {POLL_INTERVAL / 1000}초마다 자동 갱신 · 장수를 눌러 공약첩 열기
+          5분마다 자동 갱신 · 장수를 눌러 공약첩 열기
         </p>
 
         <div className="sgj-lb-podium">
