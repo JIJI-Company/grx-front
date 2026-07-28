@@ -11,7 +11,7 @@ import {
   indexBalloonBySoop,
 } from './samgukjiPresentation';
 
-const POLL_INTERVAL = 60_000;
+const POLL_INTERVAL = 30_000;
 const CLOSE_BATTLE_THRESHOLD = 1_000;
 const DESIGN_WIDTH = 680;
 const FLIP_DURATION = '0.8s';
