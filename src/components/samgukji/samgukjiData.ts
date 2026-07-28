@@ -227,14 +227,14 @@ export const PLEDGES: Pledge[] = [
   {
     id: 'p-nanawoni-150k',
     memberName: '난워니',
-    title: '난키니 풀트방',
+    title: '난키니 풀트방송',
     detail: null,
     targetCount: 150000,
   },
   {
     id: 'p-nanawoni-200k',
     memberName: '난워니',
-    title: '촉수배그 & 영도 ON',
+    title: '촉슈배그 & 영도 ON',
     detail: null,
     targetCount: 200000,
   },
@@ -248,7 +248,7 @@ export const PLEDGES: Pledge[] = [
   {
     id: 'p-nanawoni-500k',
     memberName: '난워니',
-    title: '난머니 & 난버지 초청방',
+    title: '난머니 & 난버지 초청방송',
     detail: null,
     targetCount: 500000,
   },

@@ -160,7 +160,6 @@ export default function SamgukjiLeaderboard({
         </div>
 
         <p className="sgj-lb-hint">
-          1분마다 자동 갱신 · 장수를 눌러 공약첩 열기
         </p>
 
         <div className="sgj-lb-podium">
