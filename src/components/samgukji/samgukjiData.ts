@@ -95,6 +95,12 @@ export const GLOBAL_PLEDGES: GlobalPledge[] = [
     detail: '전체 후원 1·2·3등 이름 넣기',
     targetCount: 2000000,
   },
+  {
+    id: 'global-3m',
+    title: '꾸한성 텔레파시 비빔밥',
+    detail: null,
+    targetCount: 3000000,
+  },
 ];
 
 export const GLOBAL_REWARDS: GlobalReward[] = [
