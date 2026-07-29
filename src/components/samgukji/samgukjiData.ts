@@ -101,6 +101,12 @@ export const GLOBAL_PLEDGES: GlobalPledge[] = [
     detail: null,
     targetCount: 3000000,
   },
+  {
+    id: 'global-4m',
+    title: '꾸로 굿즈 제작',
+    detail: null,
+    targetCount: 4000000,
+  },
 ];
 
 export const GLOBAL_REWARDS: GlobalReward[] = [
