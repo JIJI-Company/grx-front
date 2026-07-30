@@ -6,6 +6,7 @@ import SamgukjiLeaderboard from '../components/samgukji/SamgukjiLeaderboard';
 import MemberPledgeModal from '../components/samgukji/MemberPledgeModal';
 import { PLEDGES } from '../components/samgukji/samgukjiData';
 import {
+  applyBalloonCarryovers,
   buildMemberSoopMap,
   flattenMembers,
   groupPledgesByMember,
@@ -50,7 +51,9 @@ export default function SamgukjiPage() {
   const { data: selectedTotals } = useChallengeBalloonTotals(
     selectedSoopId ? [selectedSoopId] : [],
   );
-  const selectedSnapshot = selectedTotals?.find((total) => total.soopId === selectedSoopId);
+  const selectedSnapshot = applyBalloonCarryovers(selectedTotals)?.find(
+    (total) => total.soopId === selectedSoopId,
+  );
   const resolvedSelectedPledges = useMemo(
     () => resolvePledges(selectedPledges, selectedSnapshot),
     [selectedPledges, selectedSnapshot],

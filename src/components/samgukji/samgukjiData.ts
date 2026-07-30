@@ -82,6 +82,15 @@ export const CUMULATIVE_STAT: CampaignStat = {
   suffix: '',
 };
 
+/**
+ * SOOP 도전미션 교체 전 누적액.
+ * 현재 진행 중인 미션 금액에 계정별 이월액을 한 번 더해 삼국지 누적 수치로 사용한다.
+ */
+export const BALLOON_CARRYOVER_BY_SOOP_ID: Readonly<Record<string, number>> = {
+  neul0908: 150288,
+  niniru: 201570,
+};
+
 export const GLOBAL_PLEDGES: GlobalPledge[] = [
   {
     id: 'global-1m',

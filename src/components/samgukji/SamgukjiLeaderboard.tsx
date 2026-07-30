@@ -4,6 +4,7 @@ import { getMemberColor } from '../../utils/memberColor';
 import { useChallengeBalloonTotals } from '../../hooks/useChallengeMissions';
 import { useNotice } from '../../hooks/useContent';
 import {
+  applyBalloonCarryovers,
   buildBalloonByName,
   buildNoticeAvatarMap,
   buildMemberSoopMap,
@@ -55,12 +56,13 @@ export default function SamgukjiLeaderboard({
     soopIds,
     POLL_INTERVAL,
   );
+  const adjustedBalloonTotals = applyBalloonCarryovers(balloonTotals);
 
   const avatarMap = buildNoticeAvatarMap(streamers);
   const balloonByName = buildBalloonByName(
     members,
     nameToSoop,
-    indexBalloonBySoop(balloonTotals),
+    indexBalloonBySoop(adjustedBalloonTotals),
   );
 
   const cardRefs = useRef<Map<string, HTMLElement>>(new Map());

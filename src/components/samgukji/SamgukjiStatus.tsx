@@ -14,6 +14,7 @@ import {
 } from './samgukjiData';
 import type { CampaignStat } from './samgukjiData';
 import {
+  applyBalloonCarryovers,
   buildBalloonByName,
   buildMarchBands,
   buildMarchEntries,
@@ -45,9 +46,14 @@ export default function SamgukjiStatus({ members, onSelectMember }: SamgukjiStat
   const nameToSoop = buildMemberSoopMap(members);
   const soopIds = collectSoopIds(members, nameToSoop);
   const { data: balloonTotals, isLoading } = useChallengeBalloonTotals(soopIds);
+  const adjustedBalloonTotals = applyBalloonCarryovers(balloonTotals);
 
   const avatarMap = buildNoticeAvatarMap(streamers);
-  const balloonByName = buildBalloonByName(members, nameToSoop, indexBalloonBySoop(balloonTotals));
+  const balloonByName = buildBalloonByName(
+    members,
+    nameToSoop,
+    indexBalloonBySoop(adjustedBalloonTotals),
+  );
   const entries = buildMarchEntries(members, balloonByName, MARCH_ICON_SRC);
   const bands = buildMarchBands(entries, MILESTONES, MARCH_BAND_THRESHOLD);
   const total = isLoading ? null : sumBalloonTotals(balloonByName);

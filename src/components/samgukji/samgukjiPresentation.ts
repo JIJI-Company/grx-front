@@ -19,7 +19,11 @@ import type {
   ResolvedPledge,
   PledgeStatus,
 } from './samgukjiData';
-import { MARCH_PATH_POINTS, SAMGUKJI_EXCLUDED } from './samgukjiData';
+import {
+  BALLOON_CARRYOVER_BY_SOOP_ID,
+  MARCH_PATH_POINTS,
+  SAMGUKJI_EXCLUDED,
+} from './samgukjiData';
 
 // ─── 멤버 로스터 평탄화 (그룹 → 단일 리스트) ─────────────────────────────────────
 
@@ -46,6 +50,19 @@ export function selectSamgukjiMembers(members: Member[]): Member[] {
 }
 
 // ─── 별풍선 합계 색인 (멤버 이름 → soopId) ────────────────────────────────────────
+
+/** 현재 SOOP 스냅샷에 계정별 이전 미션 누적액을 정확히 한 번 더한다. */
+export function applyBalloonCarryovers(
+  totals: ChallengeBalloonTotal[] | undefined,
+): ChallengeBalloonTotal[] | undefined {
+  return totals?.map((total) => ({
+    ...total,
+    balloonTotal:
+      total.balloonTotal === null
+        ? null
+        : total.balloonTotal + (BALLOON_CARRYOVER_BY_SOOP_ID[total.soopId] ?? 0),
+  }));
+}
 
 /** 멤버의 SOOP 플랫폼 계정을 멤버 이름으로 색인(빈 값 제외). */
 export function buildMemberSoopMap(members: Member[]): Map<string, string> {
