@@ -163,6 +163,33 @@ export interface ContentsArchiveItem {
   url: string;
 }
 
+// ─── Fan Art ─────────────────────────────────────────────────────────────────
+
+export interface FanArtMemberRef {
+  memberId: string;
+  stageName: string;
+  personalColor: string | null;
+  slug: string;
+}
+
+export interface FanArtItem {
+  id: string;
+  title: string;
+  authorName: string;
+  imageUrl: string;
+  thumbUrl: string;
+  width: number;
+  height: number;
+  fileSize: number;
+  createdAt: string;
+  members: FanArtMemberRef[];
+}
+
+export interface FanArtListResponse {
+  items: FanArtItem[];
+  nextCursor: string | null;
+}
+
 export interface ChallengeBalloonTotal {
   soopId: string;
   balloonTotal: number | null; // 진행 중 도전미션 모금 별풍선 합. 관측된 적 없으면 null (0과 구분)

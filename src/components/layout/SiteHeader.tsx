@@ -1,24 +1,66 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 
-const navigation = [
+const primaryNavigation = [
   { to: '/samgukji', label: '삼국지' },
   { to: '/live', label: 'LIVE' },
   { to: '/members', label: 'MEMBERS' },
-  { to: '/history', label: 'HISTORY' },
-  //{ to: '/times', label: 'TIMES' },
-  { to: '/contents', label: 'CONTENTS' },
-  { to: '/notice', label: 'NOTICE' },
+  { to: '/fanart', label: 'FANART' },
   { to: '/calendar', label: 'CALENDAR' },
+];
+
+const moreNavigation = [
+  { to: '/contents', label: 'CONTENTS' },
+  { to: '/history', label: 'HISTORY' },
+  { to: '/notice', label: 'NOTICE' },
+];
+
+const mobileNavigation = [
+  { to: '/samgukji', label: '삼국지' },
+  { to: '/live', label: 'LIVE' },
+  { to: '/members', label: 'MEMBERS' },
+  { to: '/contents', label: 'CONTENTS' },
+  { to: '/fanart', label: 'FANART' },
+  { to: '/calendar', label: 'CALENDAR' },
+  { to: '/history', label: 'HISTORY' },
+  { to: '/notice', label: 'NOTICE' },
 ];
 
 export default function SiteHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
+  const moreButtonRef = useRef<HTMLButtonElement>(null);
   const { pathname } = useLocation();
+  const isMoreActive = moreNavigation.some(({ to }) => pathname === to);
 
   useEffect(() => {
     setIsMenuOpen(false);
+    setIsMoreOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!isMoreOpen) return undefined;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!moreMenuRef.current?.contains(event.target as Node)) {
+        setIsMoreOpen(false);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsMoreOpen(false);
+        moreButtonRef.current?.focus();
+      }
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isMoreOpen]);
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-ruby-600/20 bg-castle-950/50 backdrop-blur-xl" style={{ boxShadow: '0 4px 30px rgba(0,0,0,0.5)' }}>
@@ -31,7 +73,7 @@ export default function SiteHeader() {
           G-CASTLE
         </Link>
         <nav aria-label="주요 메뉴" className="hidden items-center gap-2 nav:flex lg:gap-4">
-          {navigation.map(({ to, label }) => (
+          {primaryNavigation.map(({ to, label }) => (
             <NavLink
               key={to}
               to={to}
@@ -40,6 +82,40 @@ export default function SiteHeader() {
               {label}
             </NavLink>
           ))}
+          <div ref={moreMenuRef} className="relative">
+            <button
+              ref={moreButtonRef}
+              type="button"
+              className={`nav-link inline-flex items-center gap-1 border-0 bg-transparent${isMoreActive ? ' is-active' : ''}`}
+              aria-controls="desktop-more-navigation"
+              aria-expanded={isMoreOpen}
+              aria-haspopup="true"
+              onClick={() => setIsMoreOpen((open) => !open)}
+            >
+              MORE
+              <span aria-hidden="true" className={`text-[0.55rem] transition-transform ${isMoreOpen ? 'rotate-180' : ''}`}>
+                ▼
+              </span>
+            </button>
+            {isMoreOpen && (
+              <nav
+                id="desktop-more-navigation"
+                aria-label="추가 메뉴"
+                className="absolute top-[calc(100%+1rem)] right-0 w-44 rounded-md border border-ruby-600/20 bg-castle-950/95 p-2 shadow-[0_12px_32px_rgba(0,0,0,0.55)] backdrop-blur-xl"
+              >
+                {moreNavigation.map(({ to, label }) => (
+                  <NavLink
+                    key={to}
+                    to={to}
+                    className="nav-dropdown-link"
+                    onClick={() => setIsMoreOpen(false)}
+                  >
+                    {label}
+                  </NavLink>
+                ))}
+              </nav>
+            )}
+          </div>
         </nav>
         <button
           type="button"
@@ -61,7 +137,7 @@ export default function SiteHeader() {
         }`}
       >
         <nav aria-label="모바일 메뉴" className="page-shell grid grid-cols-2 gap-2 py-3">
-          {navigation.map(({ to, label }) => (
+          {mobileNavigation.map(({ to, label }) => (
             <NavLink
               key={to}
               to={to}

@@ -10,6 +10,8 @@ import type {
   HistoryAchievement,
   NoticeStreamer,
   ChallengeBalloonTotal,
+  FanArtListResponse,
+  FanArtItem,
 } from './types';
 import * as mock from './mockDb';
 
@@ -111,6 +113,58 @@ export const apiGetContentsArchive = async (): Promise<ContentsArchiveItem[]> =>
 };
 
 // ─── YouTube ──────────────────────────────────────────────────────────────────
+
+// ─── Fan Art ─────────────────────────────────────────────────────────────────
+
+export const apiGetFanArt = (params?: {
+  cursor?: string;
+  limit?: number;
+  memberId?: string;
+}): Promise<FanArtListResponse> =>
+  get('/fanart', params as Record<string, string | number>);
+
+export const apiGetFanArtPending = async (adminKey: string): Promise<FanArtItem[]> => {
+  const res = await fetch(`${BASE}/fanart/admin/pending`, {
+    headers: { 'x-admin-key': adminKey },
+  });
+  if (!res.ok) throw new Error(`${res.status}`);
+  return res.json();
+};
+
+export const apiApproveFanArt = async (id: string, adminKey: string): Promise<void> => {
+  const res = await fetch(`${BASE}/fanart/admin/${id}/approve`, {
+    method: 'PATCH',
+    headers: { 'x-admin-key': adminKey },
+  });
+  if (!res.ok) throw new Error(`${res.status}`);
+};
+
+export const apiRejectFanArt = async (id: string, adminKey: string): Promise<void> => {
+  const res = await fetch(`${BASE}/fanart/admin/${id}/reject`, {
+    method: 'PATCH',
+    headers: { 'x-admin-key': adminKey },
+  });
+  if (!res.ok) throw new Error(`${res.status}`);
+};
+
+export const apiUploadFanArt = async (data: {
+  file: File;
+  title: string;
+  authorName: string;
+  memberNames: string[];
+}): Promise<FanArtItem> => {
+  const form = new FormData();
+  form.append('file', data.file);
+  form.append('title', data.title);
+  form.append('authorName', data.authorName);
+  form.append('memberNames', data.memberNames.join(','));
+  const res = await fetch(`${BASE}/fanart`, { method: 'POST', body: form });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || `Upload failed: ${res.status}`);
+  }
+  return res.json();
+};
 
 /** Channel: UChU1YQle9vX1xRipUcBcR5g → uploads playlist: UUhU1YQle9vX1xRipUcBcR5g */
 export const GGU_YOUTUBE_CHANNEL_ID = 'UChU1YQle9vX1xRipUcBcR5g';

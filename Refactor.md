@@ -13,6 +13,48 @@
 
 ---
 
+## v2.4.6 - 2026-07-31
+
+### 목표
+
+- 팬아트를 주요 메뉴에 노출하면서 데스크톱 내비게이션을 과밀하지 않게 정리한다.
+
+### 변경 사항
+
+- 데스크톱은 `CONTENTS`, `HISTORY`, `NOTICE`를 접근 가능한 `MORE` 메뉴로 묶고 `FANART`를 주요 메뉴에 추가했다.
+- 모바일은 중첩 메뉴 없이 8개 목적지를 기존 2열 메뉴에 직접 노출한다.
+- `MORE`는 경로 활성 상태, 바깥 클릭, `Escape`, 경로 변경 닫기를 지원한다.
+
+### Verification
+
+- TypeScript project build: PASS
+- Vite production build: PASS
+
+---
+
+## v2.4.5 - 2026-07-30
+
+### 목표
+
+- 도전미션 교체로 초기화된 모야의 현재 SOOP 수치에 이전 미션 누적액 150,288개를 이월한다.
+
+### 변경 사항
+
+- 계정별 고정 이월액을 삼국지 정적 데이터 SSoT에 추가했다.
+- API 스냅샷을 소비할 때 순수 보정 함수를 한 번 적용해 모야의 현재 수치에 150,288개를 더한다.
+- 보정된 수치를 전체 합계, 공약 달리기, 실시간 순위, 선택 멤버 공약 달성 판정에 공통으로 사용한다.
+
+### Verification
+
+```bash
+npm run build
+```
+
+- Result: PASS
+- 모야 SOOP 원본 120개에 이월액 150,288개를 한 번 더한 결과가 150,408개인지 집중 확인.
+
+---
+
 ## v2.4.4 - 2026-07-24
 
 ### 목표
@@ -46,7 +88,6 @@ npm run build
 ### 변경 사항
 
 - 공약 게시물 URL 맵에 누락된 로컬·운영 로스터 멤버를 `'#'` placeholder로 추가했다.
-- 삼국지 제외 목록에서 `봄세이`를 제거해 주석에 명시된 노출 계약과 일치시켰다.
 - 개인/특별 공약 분류와 수동 상태를 제거하고, `targetCount` 기반 누적 공약 모델로 단순화했다.
 - 꾸티뉴의 기존 공약을 10만~100만 구간 누적 공약 10개로 교체했다.
 - 난워니의 5만~1000만 구간 누적 공약 11개를 추가했다.
@@ -606,12 +647,12 @@ src/components/
 
 ### 공용 컴포넌트
 
-| 컴포넌트 | 사용 페이지 | 역할 |
-| --- | --- | --- |
-| `PageHeader` | Live, History, Times, Schedule | 반복되는 페이지 제목과 설명 스타일 통합 |
-| `LoadingState` | Members, Lika, History, Times, Schedule | spinner와 선택적 로딩 문구 통합 |
-| `EmptyState` | History, Times, Schedule | 빈 데이터 안내 UI 통합 |
-| `ScheduleCard` | Live, Schedule | 멤버, 제목, 일정 시간, 설명 렌더링 통합 |
+| 컴포넌트       | 사용 페이지                             | 역할                                    |
+| -------------- | --------------------------------------- | --------------------------------------- |
+| `PageHeader`   | Live, History, Times, Schedule          | 반복되는 페이지 제목과 설명 스타일 통합 |
+| `LoadingState` | Members, Lika, History, Times, Schedule | spinner와 선택적 로딩 문구 통합         |
+| `EmptyState`   | History, Times, Schedule                | 빈 데이터 안내 UI 통합                  |
+| `ScheduleCard` | Live, Schedule                          | 멤버, 제목, 일정 시간, 설명 렌더링 통합 |
 
 `ScheduleCard`는 페이지별 요구 차이를 props로 처리한다.
 
@@ -710,3 +751,45 @@ python3 scripts/quick_validate.py
 
 - 현재 세션에서 인앱 브라우저를 사용할 수 없어 실제 화면의 시각적 회귀와 클릭 상호작용은 자동 검증하지 못했다.
 - 백엔드 API가 연결된 상태의 실데이터 렌더링은 별도 통합 검증이 필요하다.
+
+## 2026-07-29 — 팬아트 페이지 전용 배경
+
+### 변경
+
+- `/fanart` 경로에서만 `fanart-background-route` body class를 활성화한다.
+- 16명 어린이 단체 이미지를 페이지 최상단에서 잘리지 않는 고정 배경으로 적용했다.
+- 제목 위에 반응형 상단 여백을 두어 배경이 먼저 보이도록 했다.
+- 갤러리 콘텐츠 가독성을 위해 아래로 갈수록 어두워지는 스크림을 함께 적용했다.
+- 카드 정보는 마우스 hover·키보드 focus 시 이미지 위에 나타나며, 터치 환경에서는 항상 표시한다.
+
+### 변경 파일
+
+- `public/img/fanart-background-children-16.png`
+- `src/components/Layout.tsx`
+- `src/styles/global.css`
+
+### Verification
+
+- TypeScript project build: PASS
+- Vite production build: PASS
+- 생성된 CSS의 배경 이미지 경로와 `dist/img` 산출물 포함 여부: PASS
+- 인앱 브라우저 연결 오류로 실제 화면 스크린샷 검증은 미완료
+
+## 2026-07-30 — 관리자 팬아트 원본 미리보기
+
+### 변경
+
+- 관리자 승인 대기 목록의 썸네일을 클릭하면 기존 팬아트 라이트박스에서 원본 이미지를 표시한다.
+- 닫기 버튼, 바깥 영역 클릭, `Escape` 키로 미리보기를 닫을 수 있다.
+- 썸네일 버튼과 라이트박스에 키보드·스크린리더용 이름과 대화상자 속성을 추가했다.
+
+### 변경 파일
+
+- `src/pages/AdminFanArtPage.tsx`
+- `src/components/fanart/FanArtLightbox.tsx`
+
+### Verification
+
+- TypeScript project build: PASS
+- Vite production build: PASS
+- 인앱 브라우저 연결 오류로 실제 클릭 상호작용은 미확인

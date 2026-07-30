@@ -64,8 +64,12 @@ export default function Layout() {
   useEffect(() => {
     const usesCastleBackground = CASTLE_BACKGROUND_ROUTES.has(pathname);
     document.body.classList.toggle('castle-background-route', usesCastleBackground);
+    document.body.classList.toggle('fanart-background-route', pathname === '/fanart');
 
-    return () => document.body.classList.remove('castle-background-route');
+    return () => {
+      document.body.classList.remove('castle-background-route');
+      document.body.classList.remove('fanart-background-route');
+    };
   }, [pathname]);
 
   return (
