@@ -381,7 +381,7 @@ body.fanart-background-route {
       rgb(4 3 7 / 0.68) 48%,
       rgb(4 3 7 / 0.92) 100%
     ),
-    url('/img/fanart-background-children-16.png') center top / contain fixed no-repeat,
+    url('/img/fanart-background-children-16.png') center top / cover fixed no-repeat,
     var(--color-castle-950);
 }
 
