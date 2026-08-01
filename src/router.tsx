@@ -9,7 +9,6 @@ import ContentsPage from './pages/ContentsPage';
 import HistoryPage from './pages/HistoryPage';
 import TimesPage from './pages/TimesPage';
 import LikaPage from './pages/LikaPage';
-import SamgukjiPage from './pages/SamgukjiPage';
 import MaintenancePage from './pages/MaintenancePage';
 import FanArtPage from './pages/FanArtPage';
 import AdminFanArtPage from './pages/AdminFanArtPage';
@@ -26,7 +25,6 @@ export const router = createBrowserRouter([
       { path: 'calendar', element: <CalendarPage /> },
       { path: 'contents', element: <ContentsPage /> },
       { path: 'history', element: <HistoryPage /> },
-      { path: 'samgukji', element: <SamgukjiPage /> },
       { path: 'fanart', element: <FanArtPage /> },
       { path: 'admin/fanart', element: <AdminFanArtPage /> },
       //{ path: 'times', element: <TimesPage /> },

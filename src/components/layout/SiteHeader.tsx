@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 
 const primaryNavigation = [
-  { to: '/samgukji', label: '삼국지' },
   { to: '/live', label: 'LIVE' },
   { to: '/members', label: 'MEMBERS' },
   { to: '/fanart', label: 'FANART' },
@@ -16,7 +15,6 @@ const moreNavigation = [
 ];
 
 const mobileNavigation = [
-  { to: '/samgukji', label: '삼국지' },
   { to: '/live', label: 'LIVE' },
   { to: '/members', label: 'MEMBERS' },
   { to: '/contents', label: 'CONTENTS' },
@@ -77,7 +75,7 @@ export default function SiteHeader() {
             <NavLink
               key={to}
               to={to}
-              className={`nav-link${to === '/samgukji' ? ' nav-link-samgukji' : ''}`}
+              className="nav-link"
             >
               {label}
             </NavLink>
@@ -141,7 +139,7 @@ export default function SiteHeader() {
             <NavLink
               key={to}
               to={to}
-              className={`mobile-nav-link${to === '/samgukji' ? ' mobile-nav-link-samgukji' : ''}`}
+              className="mobile-nav-link"
             >
               {label}
             </NavLink>
