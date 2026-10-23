@@ -9,26 +9,6 @@ import styles from './ContentsArchiveWall.module.css';
 const ALL_MEMBER = '전체';
 const FALLBACK_IMAGE = '/img/gg_title.webp';
 
-const BASE_MEMBERS = [
-  { name: ALL_MEMBER, avatar: null },
-  { name: '꾸티뉴', avatar: '/img/ggutinho.png' },
-  { name: '엔쥬', avatar: '/img/enju.png' },
-  { name: '난워니', avatar: '/img/nanana.png' },
-  { name: '야무지', avatar: '/img/yamuzi.png' },
-  { name: '리카', avatar: '/img/lika.png' },
-  { name: '다뮤', avatar: '/img/damu.jpeg' },
-  { name: '딴딴2당', avatar: '/img/ttanttan.jpeg' },
-  { name: '바먀', avatar: '/img/baamya.png' },
-  { name: '김옥독', avatar: '/img/okdok.png' },
-  { name: '냥쏘', avatar: '/img/nangsso.png' },
-  { name: '윤타미', avatar: '/img/tami.png' },
-  { name: '임민트', avatar: '/img/mint.png' },
-  { name: '란다', avatar: '/img/randa.jpg' },
-  { name: '서라0', avatar: '/img/서라0.jpg' },
-  { name: '모야', avatar: '/img/moya.png' },
-  { name: '소심해', avatar: '/img/sosim.jpeg' },
-];
-
 type MemberProfile = {
   name: string;
   avatar: string | null;
@@ -179,15 +159,6 @@ function useContentsViewTransition(rootRef: RefObject<HTMLElement | null>, selec
 
     return () => ctx.revert();
   }, [rootRef, selectedMember]);
-}
-
-function buildMembers(items: ContentsArchiveItem[]): MemberProfile[] {
-  const known = new Set(BASE_MEMBERS.map((member) => member.name));
-  const extras = Array.from(new Set(items.flatMap((item) => item.members)))
-    .filter((name) => name && !known.has(name))
-    .map((name) => ({ name, avatar: null }));
-
-  return [...BASE_MEMBERS, ...extras];
 }
 
 function getSelectedProfile(members: MemberProfile[], selectedMember: string) {
@@ -578,7 +549,6 @@ export default function ContentsArchiveWall() {
 
   const members = useMemo(() => {
     const list: MemberProfile[] = [{ name: ALL_MEMBER, avatar: null }];
-    const seen = new Set<string>();
 
     if (membersData) {
       const all = [
@@ -588,35 +558,24 @@ export default function ContentsArchiveWall() {
         ...(membersData.new ?? []),
         ...(membersData.other ?? []),
       ];
-      all.forEach((m) => {
+      all.filter((m) => m.isActive).forEach((m) => {
         list.push({
           name: m.stageName,
           avatar: m.profileAsset?.publicUrl ?? null,
         });
-        seen.add(m.stageName);
-      });
-    } else {
-      BASE_MEMBERS.forEach((m) => {
-        if (m.name !== ALL_MEMBER) {
-          list.push(m);
-          seen.add(m.name);
-        }
       });
     }
 
-    const extras = Array.from(new Set(items.flatMap((item) => item.members)))
-      .filter((name) => name && !seen.has(name))
-      .map((name) => ({ name, avatar: null }));
-
-    return [...list, ...extras];
-  }, [membersData, items]);
-  const selectedProfile = useMemo(() => getSelectedProfile(members, selectedMember), [members, selectedMember]);
-  const selectedPosts = useMemo(() => getPostsByMember(items, selectedMember), [items, selectedMember]);
+    return list;
+  }, [membersData]);
+  const visibleMember = members.some((member) => member.name === selectedMember) ? selectedMember : ALL_MEMBER;
+  const selectedProfile = useMemo(() => getSelectedProfile(members, visibleMember), [members, visibleMember]);
+  const selectedPosts = useMemo(() => getPostsByMember(items, visibleMember), [items, visibleMember]);
   const creatorCount = Math.max(members.length - 1, 0);
-  const isAllView = selectedMember === ALL_MEMBER;
+  const isAllView = visibleMember === ALL_MEMBER;
 
   useContentsIntroAnimations(rootRef);
-  useContentsViewTransition(rootRef, selectedMember);
+  useContentsViewTransition(rootRef, visibleMember);
 
   return (
     <main ref={rootRef} className={styles.page}>
@@ -624,7 +583,7 @@ export default function ContentsArchiveWall() {
 
       <section className={styles.shell}>
         <ProfileHeader postCount={items.length} creatorCount={creatorCount} />
-        <StoryRail members={members} selectedMember={selectedMember} onSelectMember={setSelectedMember} />
+        <StoryRail members={members} selectedMember={visibleMember} onSelectMember={setSelectedMember} />
         {isLoading ? (
           <ArchiveState>콘텐츠를 불러오는 중입니다.</ArchiveState>
         ) : isError ? (
