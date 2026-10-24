@@ -108,18 +108,19 @@ function MemberImageGrid({
           member={member}
           active={activeId === member.memberId}
           onClick={() => onSelect(member)}
-          className={getMemberFrameClass(member, tone)}
+          className=""
         />
       ))}
     </section>
   );
 }
 
-function getMemberFrameClass(member: Member, tone: MemberTierTone): string {
-  if (tone !== 'new') return '';
-  const order = Math.min(Math.max(member.displayOrder, 1), 6);
-  return `member-pot-frame member-pot-frame-${order}`;
-}
+// 신규 멤버의 항아리 프레임은 별도 항아리 구역을 다시 사용할 때 복구한다.
+// function getMemberFrameClass(member: Member, tone: MemberTierTone): string {
+//   if (tone !== 'new') return '';
+//   const order = Math.min(Math.max(member.displayOrder, 1), 6);
+//   return `member-pot-frame member-pot-frame-${order}`;
+// }
 
 export default function MemberCastleScene({
   master,
@@ -134,11 +135,12 @@ export default function MemberCastleScene({
   const [modalMemberId, setModalMemberId] = useState<string | undefined>(undefined);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const modalMember = allMembers.find((member) => member.memberId === modalMemberId);
-  const upperRankFiveMembers = upper.filter((member) => member.displayOrder === 5);
+  // 상현 5 전용 행은 현재 사용하지 않는다. 상현 목록에서 함께 표시한다.
+  // const upperRankFiveMembers = upper.filter((member) => member.displayOrder === 5);
   const tierMembers: Record<MemberTierTone, Member[]> = {
-    upper: upper.filter((member) => member.displayOrder !== 5),
+    upper,
     lower,
-    new: [],
+    new: newMembers,
   };
 
   useEffect(() => {
@@ -226,26 +228,29 @@ export default function MemberCastleScene({
                     label={`${label} 이미지 목록`}
                     tone={tone}
                   />
-                  {tone === 'upper' && upperRankFiveMembers.length > 0 && (
-                    <>
-                      <MemberImageGrid
-                        members={upperRankFiveMembers}
-                        activeId={modalMemberId}
-                        onSelect={(member) => setModalMemberId(member.memberId)}
-                        label="상현 5 이미지 목록"
-                        tone="upper"
-                        className="member-upper-rank-five-row"
-                      />
-                      <MemberImageGrid
-                        members={newMembers}
-                        activeId={modalMemberId}
-                        onSelect={(member) => setModalMemberId(member.memberId)}
-                        label="상현 5 아래 항아리 목록"
-                        tone="new"
-                        className="member-upper-pot-dock"
-                      />
-                    </>
-                  )}
+                  {/*
+                    상현 5 전용 행과 상현 아래 항아리 구역은 현재 사용하지 않는다.
+                    {tone === 'upper' && upperRankFiveMembers.length > 0 && (
+                      <>
+                        <MemberImageGrid
+                          members={upperRankFiveMembers}
+                          activeId={modalMemberId}
+                          onSelect={(member) => setModalMemberId(member.memberId)}
+                          label="상현 5 이미지 목록"
+                          tone="upper"
+                          className="member-upper-rank-five-row"
+                        />
+                        <MemberImageGrid
+                          members={newMembers}
+                          activeId={modalMemberId}
+                          onSelect={(member) => setModalMemberId(member.memberId)}
+                          label="상현 5 아래 항아리 목록"
+                          tone="new"
+                          className="member-upper-pot-dock"
+                        />
+                      </>
+                    )}
+                  */}
                 </Fragment>
               ) : null,
             )}
