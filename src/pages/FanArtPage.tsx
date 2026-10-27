@@ -142,6 +142,7 @@ export default function FanArtPage() {
 
       {showUpload && (
         <FanArtUploadModal
+          members={chipMembers}
           onClose={() => setShowUpload(false)}
           onSubmit={handleUpload}
           uploading={uploading}

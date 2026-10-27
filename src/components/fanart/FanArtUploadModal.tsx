@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { FANART_MEMBERS, type FanArtMember } from './fanartMockData';
+import type { FanArtMember } from './fanartMockData';
 
 interface FanArtUploadModalProps {
+  members: FanArtMember[];
   onClose: () => void;
   onSubmit: (data: { file: File; title: string; authorName: string; memberNames: string[] }) => void;
   uploading?: boolean;
 }
 
-export default function FanArtUploadModal({ onClose, onSubmit, uploading }: FanArtUploadModalProps) {
+export default function FanArtUploadModal({ members, onClose, onSubmit, uploading }: FanArtUploadModalProps) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [title, setTitle] = useState('');
@@ -120,7 +121,7 @@ export default function FanArtUploadModal({ onClose, onSubmit, uploading }: FanA
             {memberNames.length > 0 ? (
               <span className="fanart-picker-tags">
                 {memberNames.map((name) => {
-                  const m = FANART_MEMBERS.find((x) => x.name === name);
+                  const m = members.find((x) => x.name === name);
                   return (
                     <span
                       key={name}
@@ -146,7 +147,7 @@ export default function FanArtUploadModal({ onClose, onSubmit, uploading }: FanA
 
           {showPicker && (
             <div className="fanart-picker-dropdown" onWheel={(e) => e.stopPropagation()}>
-              {FANART_MEMBERS.map((m) => {
+              {members.map((m) => {
                 const checked = memberNames.includes(m.name);
                 return (
                   <button
