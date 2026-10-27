@@ -309,7 +309,7 @@ body.fanart-background-route {
       rgb(4 3 7 / 0.68) 48%,
       rgb(4 3 7 / 0.92) 100%
     ),
-    url('/img/fanart-background-children-16.png') center top / cover fixed no-repeat,
+    url('/img/fanart_title.webp') center top / cover fixed no-repeat,
     var(--color-castle-950);
 }
 
@@ -4109,6 +4109,19 @@ body.hide-site-header #main-app {
   padding: clamp(4rem, 10vw, 8rem) 1rem 4rem;
 }
 
+.fanart-top {
+  /* Fill the first screen so the cards start below the artwork; mirrors main's
+     pt-nav and .fanart-root's padding-top. */
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100svh - var(--nav-h) - clamp(4rem, 10vw, 8rem));
+}
+
+/* Chips sit with the toolbar at the bottom, where the gradient is darkest. */
+.fanart-top .fanart-chip-rail {
+  margin-top: auto;
+}
+
 .fanart-hero {
   text-align: center;
   padding: 3rem 0 2rem;
@@ -4558,10 +4571,12 @@ body.hide-site-header #main-app {
   align-items: center;
   gap: 0.4rem;
   padding: 0.4rem 0.85rem;
-  border: 1px solid rgb(255 255 255 / 0.1);
+  border: 1px solid rgb(255 255 255 / 0.18);
   border-radius: 9999px;
-  background: rgb(255 255 255 / 0.04);
-  color: var(--color-ink-400);
+  /* Opaque enough to stay readable over the bright background artwork. */
+  background: rgb(10 8 14 / 0.72);
+  backdrop-filter: blur(6px);
+  color: var(--color-ink-200);
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
@@ -4570,9 +4585,9 @@ body.hide-site-header #main-app {
 }
 
 .fanart-chip:hover {
-  background: rgb(255 255 255 / 0.08);
-  color: var(--color-ink-200);
-  border-color: rgb(255 255 255 / 0.18);
+  background: rgb(30 26 38 / 0.85);
+  color: var(--color-ink-50);
+  border-color: rgb(255 255 255 / 0.3);
 }
 
 .fanart-chip.is-active {

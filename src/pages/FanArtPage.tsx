@@ -99,6 +99,7 @@ export default function FanArtPage() {
 
   return (
     <div className="page-wrap fanart-root">
+      <div className="fanart-top">
       <header className="fanart-hero">
         <span className="fanart-hero-eyebrow">Fan Art Gallery</span>
         <h1 className="fanart-hero-title">팬아트</h1>
@@ -120,6 +121,7 @@ export default function FanArtPage() {
         >
           <span>+</span> 업로드
         </button>
+      </div>
       </div>
 
       {loading ? (
