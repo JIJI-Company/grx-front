@@ -351,3 +351,59 @@ npm run dev                          # 터미널 2
 | `/times` | TimesPage | useNews |
 | `/lika` | LikaPage | — |
 | `/maintenance` | MaintenancePage | — |
+| `/castle` | CastlePage (lazy) | useCastleStatues · useCastleHalls · useMembers |
+
+---
+
+## 무한성 `/castle`
+
+팬캐릭터 **꾸로**로 무한성 3개 층(지하 1층 하현의 회랑 → 지하 2층 상현의 방 → 지하 3층 심층)을 돌아다니며, 멤버 석상 앞에 등롱을 바쳐 응원하는 3D 실시간 공간. 말 없이 함께 머무는 곳이라 채팅은 없다. 사이트 메뉴에는 아직 링크가 없다.
+
+### 조작
+
+| 입력 | 동작 |
+|------|------|
+| 방향키 / WASD | 이동 (카메라 기준, 벽에 닿으면 미끄러짐) |
+| Shift | 달리기 |
+| Space | 석상 앞에서 등롱 바치기 (석상당 1인 1개, 7일 유지, 다시 누르면 연장) |
+| E | 석상 앞에서 멤버 정보(반투명 창). 움직이면 닫힘 |
+| 모바일 | 왼쪽 아래 조이스틱, 오른쪽 아래 버튼 |
+
+층 이동: 지하 1층 복도 끝 계단 5칸 → 지하 2층, 가운데 통로 해치 5걸음 → 지하 3층, 지하 3층 다리 끝 → 지하 1층.
+
+### 폴더
+
+```
+src/pages/CastlePage.tsx          # lazy 라우트 (three.js·socket.io는 이 청크에만 포함)
+src/castle/                       # 화면과 분리된 데이터 로직
+  protocol.ts                     # WebSocket 계약 (grx-back과 같은 타입)
+  transport.ts                    # 전송 인터페이스 + socket.io / mock 구현 선택
+  socketTransport.ts · mockTransport.ts
+  session.ts · store.ts           # 세션(입장·층 이동·등롱) / React 밖 상태
+  floors.ts                       # 층 정의: 이동 영역·트리거·석상 자리·카메라
+  movement.ts · interpolation.ts  # 이동·벽 미끄러짐 / 다른 사람 100ms 보간
+src/components/castle/            # 화면 (Oni=꾸로, Statue, LanternRing, floors/, ui/)
+public/castle/                    # 3D 모델 (kkuro.glb, lantern.glb)
+```
+
+### 실행
+
+```bash
+# Mock 모드: 백엔드 없이 혼자 돌아다니기·등롱 바치기
+npm run dev:mock        # → /castle
+
+# 실제 서버 연결: grx-back을 :3000에 띄운 뒤 (grx-back README "무한성 실시간" 참고)
+VITE_CASTLE_WS_ORIGIN=http://localhost:3000 npm run dev -- --port 5173 --strictPort
+```
+
+| 환경변수 | 설명 |
+|----------|------|
+| `VITE_CASTLE_WS_ORIGIN` | WebSocket 서버 주소. 없으면 `VITE_API_BASE_URL`의 origin, 그것도 없으면 현재 origin. 개발 시 Vite 프록시는 `/api`만 넘기므로 실서버 연결에는 이 값이 필요 |
+
+### 3D 모델
+
+- `public/castle/kkuro.glb`: 꾸로. 클립 `idle`·`walk`·`run`·`bow`, 뿔 재질(`kk_horn`)은 플레이어가 고른 색으로 바뀐다
+- `public/castle/lantern.glb`: 종이 등롱. 메시 2개(`lt_paper`·`lt_frame`), 종이는 멤버 퍼스널 컬러로 빛난다
+- 석상은 아직 도형이다. 멤버별 석상 모델(`statue_{slug}.glb`)로 교체 예정
+- Blender 원본(`.blend`)은 저장소 밖 `assets/castle/`에 있다. 모델을 고치면 GLB를 다시 내보내 `public/castle/`에 덮어쓴다
+
