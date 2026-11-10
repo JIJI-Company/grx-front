@@ -189,3 +189,8 @@ export interface FanArtListResponse {
   items: FanArtItem[];
   nextCursor: string | null;
 }
+
+// ─── Castle (무한성) ─────────────────────────────────────────────────────────
+// 원본은 grx-back api.md §3 — src/castle/protocol.ts에 그대로 옮겨 두고 여기서는 다시 내보내기만 한다.
+
+export type { CastleHallSummary, CastleStatueFloor, CastleStatue } from '../castle/protocol';

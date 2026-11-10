@@ -13,6 +13,38 @@
 
 ---
 
+## v3.1.0 - 2026-11-10
+
+### 목표
+
+- 무한성 3D 실시간 공간 `/castle` MVP 프론트엔드. PoC를 grx 구조로 이식하고(PoC 폴더는 이식 후 정리), WebSocket 계약은 `grx-back/docs/design/castle-courtyard-20261110/api.md`(승인본)를 따른다.
+
+### 변경 사항
+
+- `/castle` 라우트를 Layout 밖에 lazy route로 추가했다. three.js·socket.io는 `CastlePage` 청크에만 들어간다(메인 청크 +1.3kB). 내비게이션 메뉴 링크는 추가하지 않았다.
+- 데이터 계층 `src/castle/`: api.md §3 계약을 그대로 옮긴 `protocol.ts`, 전송 인터페이스와 구현 2개(socket.io / `VITE_MOCK=true` 로컬 mock), React 밖 store, 세션(입장·층 이동·등롱·10Hz 위치 전송·재연결 복구), 층 정의, 이동, 보간, 밝기, 입력, 게스트 토큰, 사운드 자리.
+- 화면 `src/components/castle/`: PoC 3개 층 장면, 오니·석상·카메라, 블룸·비네트·입자, 입장 화면(닉네임·뿔 색·성), HUD, 등롱 힌트, 층 이동 연출, 각성 알림, 모바일 조이스틱.
+- REST `GET /api/castle/statues`·`/api/castle/halls`를 `client.ts`·`mockDb.ts`·`hooks/useCastle.ts`에 추가했다.
+- 의존성: `three@0.169.0`, `@react-three/fiber@8.17.10`, `@react-three/drei@9.114.0`, `@react-three/postprocessing@2.19.1`, `socket.io-client@4.8.1`, `@types/three@0.169.0`(dev). 버전 고정.
+- 설계 문서: `docs/render/castle-20261110/`.
+
+### 변경 파일
+
+- `package.json`, `package-lock.json`
+- `src/router.tsx`, `src/api/types.ts`, `src/api/client.ts`, `src/api/mockDb.ts`
+- `src/hooks/useCastle.ts`, `src/pages/CastlePage.tsx`
+- `src/castle/*` (13개), `src/components/castle/**` (19개)
+
+### Verification
+
+- `npm run build`: PASS. 메인 청크 490.09kB(이전 488.79kB), `CastlePage` 청크 982.68kB(gzip 268kB). 메인 청크에 WebGLRenderer·engine.io 없음.
+- `VITE_MOCK=true` dev 서버 + headless Chrome(Metal, 60fps) 자동 조작: 금칙어 닉네임 거절 후 입장 화면 복귀·문구 표시, B1 신입 석상 등롱 바치기(0→1)·재바치기 시 "7일 연장"(수 유지), B1→B2→B3→B1 층 이동 모두 PASS.
+
+### 미검증 항목
+
+- 실제 백엔드(socket.io) 연결: 서버가 아직 없어 join·재연결·`session:end`·`connect_error` 경로와 다른 사람 보간 렌더링은 실행해 보지 못했다.
+- 방송 각성 알림(mock 라이브 데이터에 방송 중 멤버가 없었다), 모바일 실기기 조이스틱, 저사양 기기 프레임.
+
 ## v3.0.1 - 2026-10-23
 
 ### 목표

@@ -13,6 +13,8 @@ import type {
   ContentsArchiveItem,
   HistoryAchievement,
   NoticeStreamer,
+  CastleStatueFloor,
+  CastleHallSummary,
 } from './types';
 
 // ─── CSV parser ───────────────────────────────────────────────────────────────
@@ -449,3 +451,40 @@ export const mockGetCalendar = async (): Promise<CalendarEvent[]> => {
 
   return [...samples, ...fromCsv];
 };
+
+// ─── Castle (무한성) ─────────────────────────────────────────────────────────
+
+const CASTLE_FLOORS = [
+  { floor: 'B1', rank: R.lower },
+  { floor: 'B1', rank: R.new },
+  { floor: 'B2', rank: R.upper },
+  { floor: 'B3', rank: R.master },
+] as const;
+
+export const mockGetCastleStatues = async (): Promise<CastleStatueFloor[]> => {
+  const live = await mockGetLiveStatus().catch(() => [] as LiveStatus[]);
+  const liveSlugs = new Set(live.filter(l => l.isLive).map(l => l.memberSlug));
+  return CASTLE_FLOORS.map(({ floor, rank }) => ({
+    floor,
+    rankSlug: rank.slug,
+    rankName: rank.name,
+    statues: ALL_MEMBERS
+      .filter(m => m.rank?.slug === rank.slug)
+      .sort((a, b) => a.displayOrder - b.displayOrder)
+      .map((m, order) => ({
+        memberId: m.memberId,
+        slug: m.slug,
+        stageName: m.stageName,
+        personalColor: m.personalColor ?? null,
+        order,
+        modelUrl: null,
+        isLive: liveSlugs.has(m.slug),
+      })),
+  }));
+};
+
+export const mockGetCastleHalls = async (): Promise<CastleHallSummary[]> => [
+  { slug: 'hall-1', name: '제1성', capacity: 100, total: 19, floors: { B1: 12, B2: 5, B3: 2 }, isFull: false },
+  { slug: 'hall-2', name: '제2성', capacity: 100, total: 4, floors: { B1: 3, B2: 0, B3: 1 }, isFull: false },
+  { slug: 'hall-3', name: '제3성', capacity: 100, total: 100, floors: { B1: 70, B2: 20, B3: 10 }, isFull: true },
+];

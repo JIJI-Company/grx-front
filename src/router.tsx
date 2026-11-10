@@ -32,4 +32,6 @@ export const router = createBrowserRouter([
       { path: 'maintenance', element: <MaintenancePage /> },
     ],
   },
+  // 전체 화면 3D 공간 — 사이트 헤더·Lenis 없이 lazy-load
+  { path: '/castle', lazy: () => import('./pages/CastlePage').then((m) => ({ Component: m.default })) },
 ]);

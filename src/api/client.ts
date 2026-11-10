@@ -11,6 +11,8 @@ import type {
   NoticeStreamer,
   FanArtListResponse,
   FanArtItem,
+  CastleStatueFloor,
+  CastleHallSummary,
 } from './types';
 import * as mock from './mockDb';
 
@@ -156,3 +158,11 @@ export const GGU_UPLOADS_PLAYLIST_ID = GGU_YOUTUBE_CHANNEL_ID.replace(/^UC/, 'UU
 
 export const apiGetYoutubeLatest = (): Promise<{ items: YoutubeVideo[] }> =>
   USE_MOCK ? mock.mockGetYoutubeLatest() : get('/youtube/latest', { playlistId: GGU_UPLOADS_PLAYLIST_ID });
+
+// ─── Castle (무한성) ─────────────────────────────────────────────────────────
+
+export const apiGetCastleStatues = (): Promise<CastleStatueFloor[]> =>
+  USE_MOCK ? mock.mockGetCastleStatues() : get('/castle/statues');
+
+export const apiGetCastleHalls = (): Promise<CastleHallSummary[]> =>
+  USE_MOCK ? mock.mockGetCastleHalls() : get('/castle/halls');
