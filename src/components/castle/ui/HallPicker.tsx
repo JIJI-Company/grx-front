@@ -25,11 +25,14 @@ export default function HallPicker({ halls, isLoading, isError, value, onChange 
             aria-checked={selected}
             disabled={hall.isFull}
             onClick={() => onChange(hall.slug)}
-            className={`focus-ring flex items-baseline justify-between border-b px-1 py-2 text-sm transition disabled:cursor-not-allowed disabled:opacity-40 ${
-              selected ? 'border-gold-400/70 text-gold-400' : 'border-gold-400/15 text-ink-300 hover:text-ink-50'
+            className={`focus-ring flex items-center justify-between border-b px-1 py-2 text-sm transition duration-300 disabled:cursor-not-allowed disabled:opacity-40 ${
+              selected ? 'border-gold-400/70 bg-linear-to-r from-gold-400/5 to-transparent text-gold-400' : 'border-gold-400/15 text-ink-300 hover:border-gold-400/35 hover:text-ink-50'
             }`}
           >
-            <span className="tracking-[0.2em]">{hall.name}</span>
+            <span className="flex items-center gap-2 tracking-[0.2em]">
+              <span aria-hidden className={`size-1 rotate-45 bg-gold-400 transition-opacity duration-300 ${selected ? 'opacity-90' : 'opacity-0'}`} />
+              {hall.name}
+            </span>
             <span className="text-[11px] text-ink-500">{hallPopulationLabel(hall)}</span>
           </button>
         );

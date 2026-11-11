@@ -1,24 +1,36 @@
-// 입장 후 화면: 캔버스 + HUD + 층 이동 연출 + 등롱 바치기. 상태 변경은 세션 메서드로만 한다.
+// 입장 후 화면: 캔버스 + HUD + 층 이동 연출 + 등롱 바치기 + 1인칭/3인칭. 상태 변경은 세션 메서드로만 한다.
+// 층 이동 연출은 시간표(castle/transition.ts)대로만 진행한다. 서버 floor:change ack는 세션이 따로 기다리므로
+// ack가 늦거나 실패해도(세션이 재연결) 화면이 가려진 채 멈추지 않는다.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CastleStatueFloor, Member } from '../../api/types';
 import { findStatue, FLOORS, placeStatues, type PlacedStatue } from '../../castle/floors';
+import { MOUSE_SENSITIVITY } from '../../castle/input';
 import type { FloorId } from '../../castle/protocol';
 import type { CastleSession } from '../../castle/session';
 import { castleSound } from '../../castle/sound';
 import { useCastleStore } from '../../castle/store';
+import { transitionEndMs, TRANSITIONS, type ActiveTransition, type TransitionKind } from '../../castle/transition';
+import { loadView, saveView, type CameraView } from '../../castle/view';
 import { useMembers } from '../../hooks/useMembers';
 import MemberModal from '../members/MemberModal';
 import CastleCanvas from './CastleCanvas';
-import { awakenMessage, connectionLabel, lanternActionLabel, memberInfoLabel, populationLabel, problemLabel } from './castlePresentation';
+import {
+  awakenMessage,
+  connectionLabel,
+  lanternActionLabel,
+  memberInfoLabel,
+  populationLabel,
+  problemLabel,
+  type TransitionOverlay,
+} from './castlePresentation';
 import AwakenToast from './ui/AwakenToast';
 import FloorTransition from './ui/FloorTransition';
 import Hud from './ui/Hud';
 import Joystick from './ui/Joystick';
 import LanternPrompt from './ui/LanternPrompt';
+import LookPad from './ui/LookPad';
 
-const FADE_OUT_MS = 900; // 암전까지
-const FADE_IN_DELAY_MS = 350; // 새 층 로드 후 밝아지기까지
-const BANNER_MS = 2600;
+const BANNER_MS = 3200;
 
 interface CastleGameProps {
   session: CastleSession;
@@ -31,7 +43,13 @@ export default function CastleGame({ session, statues, statuesError }: CastleGam
   useCastleStore(store);
   const [floorId, setFloorId] = useState<FloorId>(session.floor);
   const [near, setNear] = useState<PlacedStatue | null>(null);
-  const [fade, setFade] = useState({ color: '#000000', opaque: false });
+  const [overlay, setOverlay] = useState<TransitionOverlay | null>(null);
+  /** 3D 연출이 매 프레임 읽는 진행 중인 연출 */
+  const fx = useRef<ActiveTransition | null>(null);
+  const [view, setView] = useState<CameraView>(loadView);
+  const [locked, setLocked] = useState(false);
+  const coarse = useMemo(() => window.matchMedia('(pointer: coarse)').matches, []);
+  const spaceRef = useRef<HTMLDivElement>(null);
   const [banner, setBanner] = useState<FloorId | null>(session.floor);
   const nearRef = useRef<PlacedStatue | null>(null);
   const [infoMemberId, setInfoMemberId] = useState<string | null>(null);
@@ -55,25 +73,40 @@ export default function CastleGame({ session, statues, statuesError }: CastleGam
   useEffect(() => () => castleSound.ambience(null), []);
 
   const onTrigger = useCallback(
-    (to: FloorId, color: string) => {
+    (to: FloorId, color: string, kind: TransitionKind) => {
+      const plan = TRANSITIONS[kind];
       session.motion.frozen = true;
       castleSound.cue(to === 'B3' ? 'fall' : 'descend');
-      setBanner(to);
-      setFade({ color, opaque: true });
+      fx.current = { kind, phase: 'out', start: performance.now() };
+      setOverlay({ kind, phase: 'out', color });
       timers.current.push(
         setTimeout(() => {
           void session.changeFloor(to);
+          session.look.reset(); // 새 층에서는 앞(-z)을 보고 시작
           setFloorId(to);
+          setBanner(to);
+          fx.current = { kind, phase: 'in', start: performance.now() };
+          setOverlay({ kind, phase: 'in', color });
           timers.current.push(
+            setTimeout(() => (session.motion.frozen = false), plan.revealDelayMs),
             setTimeout(() => {
-              setFade((f) => ({ ...f, opaque: false }));
-              session.motion.frozen = false;
-            }, FADE_IN_DELAY_MS),
+              fx.current = null;
+              setOverlay(null);
+            }, transitionEndMs(kind)),
           );
-        }, FADE_OUT_MS),
+        }, plan.switchMs),
       );
     },
     [session],
+  );
+
+  // HUD에서 층을 직접 고름: 내려가면 계단 연출, 올라가면 복귀 연출
+  const pickFloor = useCallback(
+    (to: FloorId) => {
+      if (session.motion.frozen || to === floorId) return;
+      onTrigger(to, '#000000', to > floorId ? 'stairs' : 'return');
+    },
+    [session, floorId, onTrigger],
   );
 
   const onNear = useCallback((s: PlacedStatue | null) => {
@@ -106,9 +139,52 @@ export default function CastleGame({ session, statues, statuesError }: CastleGam
     return () => clearInterval(t);
   }, [infoMemberId, session]);
 
+  // ── 1인칭 시점: 데스크톱은 포인터 락 마우스(Esc 해제), 모바일은 LookPad 드래그
+  const lockPointer = useCallback(() => {
+    const canvas = spaceRef.current?.querySelector('canvas');
+    if (!canvas || coarse || document.pointerLockElement === canvas) return;
+    try {
+      // 최신 브라우저는 Promise를 돌려준다. 거절(사용자 조작 없음 등)은 무시하고 다음 클릭에 다시 건다
+      void (canvas.requestPointerLock() as unknown as Promise<void> | undefined)?.catch(() => {});
+    } catch {
+      // 포인터 락을 지원하지 않는 환경
+    }
+  }, [coarse]);
+
+  const toggleView = useCallback(() => {
+    const next: CameraView = view === 'first' ? 'third' : 'first';
+    saveView(next);
+    session.look.reset();
+    setView(next);
+    if (next === 'first' && !infoMemberId) lockPointer();
+  }, [view, session, infoMemberId, lockPointer]);
+
+  // 3인칭이거나 정보 창이 떠 있으면 포인터 락을 푼다
+  useEffect(() => {
+    if ((view === 'third' || infoMemberId) && document.pointerLockElement) document.exitPointerLock();
+  }, [view, infoMemberId]);
+
+  useEffect(() => {
+    const change = () => setLocked(!!document.pointerLockElement);
+    const move = (e: MouseEvent) => {
+      if (document.pointerLockElement) session.look.turn(e.movementX, e.movementY, MOUSE_SENSITIVITY);
+    };
+    document.addEventListener('pointerlockchange', change);
+    document.addEventListener('mousemove', move);
+    return () => {
+      document.removeEventListener('pointerlockchange', change);
+      document.removeEventListener('mousemove', move);
+      if (document.pointerLockElement) document.exitPointerLock();
+    };
+  }, [session]);
+
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.repeat) return;
+      if (e.code === 'KeyV') {
+        toggleView();
+        return;
+      }
       if (e.code === 'KeyE') {
         if (infoMemberId) closeInfo();
         else openInfo();
@@ -118,7 +194,7 @@ export default function CastleGame({ session, statues, statuesError }: CastleGam
     };
     window.addEventListener('keydown', down);
     return () => window.removeEventListener('keydown', down);
-  }, [offer, openInfo, closeInfo, infoMemberId]);
+  }, [offer, openInfo, closeInfo, infoMemberId, toggleView]);
 
   const awaken = store.lastAwaken;
   const awakened = awaken?.isLive ? findStatue(statues, awaken.memberId) : null;
@@ -129,12 +205,21 @@ export default function CastleGame({ session, statues, statuesError }: CastleGam
 
   return (
     <div className="relative h-full">
-      <CastleCanvas session={session} floor={floor} statues={placed} onTrigger={onTrigger} onNear={onNear} />
+      <FloorTransition overlay={overlay} banner={banner ? FLOORS[banner] : null}>
+        <div ref={spaceRef} className="h-full" onClick={() => view === 'first' && !infoMemberId && lockPointer()}>
+          <CastleCanvas session={session} floor={floor} statues={placed} onTrigger={onTrigger} onNear={onNear} view={view} fx={fx} />
+        </div>
+      </FloorTransition>
+      {view === 'first' && <LookPad look={session.look} />}
       <Hud
         floor={floor}
+        onPickFloor={pickFloor}
         population={populationLabel(store.population)}
         connection={connectionLabel(store.status)}
         notice={problemLabel(store.problem) ?? (statuesError ? '석상 정보를 불러오지 못했습니다' : null)}
+        view={view}
+        onToggleView={toggleView}
+        lookHint={view === 'first' && !locked && !coarse && !infoMember}
       />
       {near && !infoMember && (
         <LanternPrompt
@@ -152,7 +237,6 @@ export default function CastleGame({ session, statues, statuesError }: CastleGam
       )}
       <Joystick input={session.input} />
       <AwakenToast message={awakened ? awakenMessage(awakened.name, awakened.floor) : null} seq={awaken?.seq ?? 0} />
-      <FloorTransition fade={fade.color} opaque={fade.opaque} banner={banner ? FLOORS[banner] : null} />
     </div>
   );
 }

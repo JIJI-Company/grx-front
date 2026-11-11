@@ -1,6 +1,6 @@
 // 플레이어 캐릭터 '꾸로' (assets/castle/kkuro.blend → public/castle/kkuro.glb).
 // 속도에 따라 idle·walk·run을 섞고, 등롱을 바치면 bow를 한 번 재생한다. 뿔 색만 플레이어마다 다르다.
-import { Suspense, useEffect, useMemo, useRef } from 'react';
+import { Suspense, useEffect, useMemo, useRef, type Ref } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
@@ -8,10 +8,18 @@ import type { FloorDef } from '../../castle/floors';
 import { INTERP_DELAY_MS, smoothToward, type Sample } from '../../castle/interpolation';
 import { RUN_SPEED, WALK_SPEED } from '../../castle/movement';
 import type { RemotePeer } from '../../castle/store';
+import { glowTexture } from './floors/sceneParts';
 
 const KKURO_URL = '/castle/kkuro.glb';
 const HORN_MATERIAL = 'kk_horn';
 const FADE = 6; // 클립 가중치가 목표로 다가가는 속도 (1/s)
+
+let shadowMat: THREE.MeshBasicMaterial | null = null;
+/** 발밑 둥근 그림자: 가장자리로 흐려지는 검은 원 (그림자 맵 아님). 모두 같은 재질 한 벌 */
+function blobShadowMaterial(): THREE.MeshBasicMaterial {
+  shadowMat ??= new THREE.MeshBasicMaterial({ map: glowTexture(), color: '#000', transparent: true, opacity: 0.75, depthWrite: false });
+  return shadowMat;
+}
 
 interface OniProps {
   hornColor: string;
@@ -20,9 +28,11 @@ interface OniProps {
   /** 값이 바뀔 때마다 bow를 한 번 재생 (등롱 바치기) */
   getBowSeq?: () => number;
   isMe?: boolean;
+  /** 발밑 그림자 (해치 낙하 중 숨기려고 내 캐릭터가 잡는다) */
+  shadowRef?: Ref<THREE.Mesh>;
 }
 
-function Kkuro({ hornColor, getSpeed, getBowSeq }: Omit<OniProps, 'nickname' | 'isMe'>) {
+function Kkuro({ hornColor, getSpeed, getBowSeq }: Omit<OniProps, 'nickname' | 'isMe' | 'shadowRef'>) {
   const { scene, animations } = useGLTF(KKURO_URL);
   // 사람마다 독립된 사본: 노드(뼈)와 뿔 재질만 복제한다
   const model = useMemo(() => {
@@ -84,13 +94,12 @@ function Kkuro({ hornColor, getSpeed, getBowSeq }: Omit<OniProps, 'nickname' | '
   return <primitive object={model} />;
 }
 
-export function Oni({ hornColor, nickname, getSpeed, getBowSeq, isMe = false }: OniProps) {
+export function Oni({ hornColor, nickname, getSpeed, getBowSeq, isMe = false, shadowRef }: OniProps) {
   return (
     <group>
-      {/* blob shadow */}
-      <mesh position={[0, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[0.6, 24]} />
-        <meshBasicMaterial color="#000" transparent opacity={0.5} />
+      {/* 발밑 그림자 (지면 높이에 붙는다: 캐릭터 그룹이 heightAt 위에 있다) */}
+      <mesh ref={shadowRef} position={[0, 0.03, 0]} rotation={[-Math.PI / 2, 0, 0]} material={blobShadowMaterial()} renderOrder={1}>
+        <planeGeometry args={[1.9, 1.9]} />
       </mesh>
       <Suspense fallback={null}>
         <Kkuro hornColor={hornColor} getSpeed={getSpeed} getBowSeq={getBowSeq} />

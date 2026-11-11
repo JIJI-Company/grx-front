@@ -1,7 +1,9 @@
 // React 밖 store. 매 프레임 바뀌는 값(다른 사람 위치)은 버퍼에만 쓰고 리렌더하지 않는다.
 // 리렌더(version 증가)는 입장/퇴장, 등롱 변경, 방송 각성, 연결 상태 변경 때만 일어난다.
+// 등롱 연출 이벤트는 바치기 ack 성공(mine)과 lantern:count로 수가 늘어난 때(other)만 쌓인다. 입장 snapshot은 연출 없음.
 import { useSyncExternalStore } from 'react';
 import { InterpolationBuffer } from './interpolation';
+import { isTierUp, OFFER_FX_MS, type OfferEvent, type OfferKind } from './offering';
 import {
   decodePeer,
   decodeTick,
@@ -42,6 +44,8 @@ export class CastleStore {
   private connection: ConnectionStatus = 'connecting';
   private problemCode: CastleProblem | null = null;
   private awaken: AwakenEvent | null = null;
+  private offers: OfferEvent[] = [];
+  private offerSeq = 0;
   private rejected: CastleErrorCode | null = null;
   /** join/floor:change ack 대기 중 받은 입·퇴장 (api.md §2-1) */
   private pending: { leaves: Set<PeerId>; joins: Map<PeerId, PeerInfo> } | null = null;
@@ -70,9 +74,12 @@ export class CastleStore {
     this.applyPeers(s.self.id, s.peers);
   }
 
-  applyOffer(r: LanternOfferResult): void {
+  /** 내 바치기 ack 성공. 연장(extended)이어도 바친 행동이므로 연출한다. from = 바친 위치(m) */
+  applyOffer(r: LanternOfferResult, from?: { x: number; z: number }): void {
+    const before = this.lanternCount(r.memberId);
     this.mine.set(r.memberId, Date.parse(r.expiresAt));
     this.setCount(r.memberId, r.count, r.asOf);
+    this.pushOffer(r.memberId, 'mine', isTierUp(before, this.lanternCount(r.memberId)), from);
     this.problemCode = null;
     this.bump();
   }
@@ -98,9 +105,14 @@ export class CastleStore {
         this.pending?.joins.delete(msg.payload.id);
         this.peerMap.delete(msg.payload.id);
         return this.bump();
-      case 'lantern:count':
-        if (this.setCount(msg.payload.memberId, msg.payload.count, msg.payload.asOf)) this.bump();
-        return;
+      case 'lantern:count': {
+        const { memberId, count, asOf } = msg.payload;
+        const before = this.lanternCount(memberId);
+        if (!this.setCount(memberId, count, asOf)) return;
+        // 내 ack로 이미 올린 수와 같으면(내 바치기의 방송) 연출하지 않는다. 줄어든 것(만료)도 없음
+        if (count > before) this.pushOffer(memberId, 'other', isTierUp(before, count));
+        return this.bump();
+      }
       case 'statue:awaken': {
         const { memberId, isLive } = msg.payload;
         if (this.live.has(memberId) === isLive) return; // 상태값이라 같은 값 재전송은 무시(멱등)
@@ -169,6 +181,11 @@ export class CastleStore {
     return this.mine.get(memberId) ?? null;
   }
 
+  /** 아직 연출 중일 수 있는 등롱 이벤트 (오래된 것은 쌓을 때 정리) */
+  get offerEvents(): readonly OfferEvent[] {
+    return this.offers;
+  }
+
   isLive(memberId: MemberId): boolean {
     return this.live.has(memberId);
   }
@@ -198,6 +215,10 @@ export class CastleStore {
     if (cur && cur.asOf >= asOf) return false;
     this.lanterns.set(memberId, { count, asOf });
     return true;
+  }
+
+  private pushOffer(memberId: MemberId, kind: OfferKind, tierUp: boolean, from?: { x: number; z: number }, now = performance.now()) {
+    this.offers = [...this.offers.filter((e) => now - e.start < OFFER_FX_MS), { seq: ++this.offerSeq, memberId, kind, tierUp, start: now, from }];
   }
 
   private upsertPeer(p: PeerInfo, now: number) {

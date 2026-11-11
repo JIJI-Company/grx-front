@@ -31,11 +31,23 @@ export default function EntryScreen({ onEnter, rejection, initial }: EntryScreen
 
   return (
     <div className="grid h-full place-items-center bg-[radial-gradient(circle_at_50%_40%,#2a0510,var(--color-castle-950)_70%)] px-6">
-      <form onSubmit={submit} className="grid w-full max-w-[360px] gap-6 text-center">
+      <form
+        onSubmit={submit}
+        className="relative grid w-full max-w-[380px] gap-6 px-8 py-10 text-center transition duration-1000 ease-castle starting:translate-y-3 starting:opacity-0"
+      >
+        {/* 네 모서리 금선 장식 */}
+        {['top-0 left-0 border-t border-l', 'top-0 right-0 border-t border-r', 'bottom-0 left-0 border-b border-l', 'bottom-0 right-0 border-b border-r'].map((c) => (
+          <span key={c} aria-hidden className={`pointer-events-none absolute size-5 border-gold-400/50 ${c}`} />
+        ))}
         <header>
-          <p className="text-xs tracking-[0.4em] text-gold-400/60">GGU-CASTLE</p>
-          <h1 className="mt-1.5 text-[40px] font-black">무한성으로</h1>
-          <p className="text-[13px] text-ink-400">말 없이 함께 머무는 곳</p>
+          <p className="flex items-center justify-center gap-3 text-xs tracking-[0.4em] text-gold-400/60">
+            <span aria-hidden className="h-px w-8 bg-linear-to-l from-gold-400/60 to-transparent" />
+            GGU-CASTLE
+            <span aria-hidden className="h-px w-8 bg-linear-to-r from-gold-400/60 to-transparent" />
+          </p>
+          <h1 className="mt-2 text-[42px] font-black tracking-[0.08em] [text-shadow:0_0_28px_rgb(225_29_72/0.35)]">무한성으로</h1>
+          <p className="mt-1 text-[13px] tracking-[0.1em] text-ink-400">말 없이 함께 머무는 곳</p>
+          <span aria-hidden className="mx-auto mt-4 block size-1.5 rotate-45 bg-gold-400/60" />
         </header>
 
         <label className="grid gap-1">
@@ -48,7 +60,7 @@ export default function EntryScreen({ onEnter, rejection, initial }: EntryScreen
             autoComplete="off"
             aria-invalid={rejection ? true : undefined}
             aria-describedby={rejection ? 'castle-entry-error' : undefined}
-            className="border-0 border-b border-gold-400/40 bg-transparent p-2 text-center text-base text-ink-50 outline-none placeholder:text-ink-500 focus:border-gold-400"
+            className="border-0 border-b border-gold-400/40 bg-transparent p-2 text-center text-base tracking-[0.08em] text-ink-50 outline-none transition-colors placeholder:text-ink-500 focus:border-gold-400"
           />
         </label>
 
@@ -61,8 +73,10 @@ export default function EntryScreen({ onEnter, rejection, initial }: EntryScreen
               aria-checked={c.value === hornColor}
               aria-label={c.label}
               onClick={() => setHornColor(c.value)}
-              className={`focus-ring size-[22px] rounded-full border-2 transition ${c.value === hornColor ? 'border-ink-50' : 'border-transparent'}`}
-              style={{ background: c.value }}
+              className={`focus-ring size-[22px] rounded-full border-2 transition duration-300 ${
+                c.value === hornColor ? 'scale-110 border-ink-50' : 'border-transparent opacity-80 hover:opacity-100'
+              }`}
+              style={{ background: c.value, boxShadow: c.value === hornColor ? `0 0 12px ${c.value}` : undefined }}
             />
           ))}
         </div>
@@ -78,11 +92,11 @@ export default function EntryScreen({ onEnter, rejection, initial }: EntryScreen
         <button
           type="submit"
           disabled={!hallSlug}
-          className="focus-ring border border-gold-400/60 py-3 text-[15px] font-semibold tracking-[0.15em] text-gold-400 transition hover:bg-gold-400/5 disabled:cursor-not-allowed disabled:opacity-40"
+          className="focus-ring group relative border border-gold-400/60 py-3 text-[15px] font-semibold tracking-[0.15em] text-gold-400 transition duration-300 hover:border-gold-400 hover:bg-gold-400/5 hover:tracking-[0.25em] disabled:cursor-not-allowed disabled:opacity-40"
         >
           내려가기
         </button>
-        <p className="text-[11px] text-ink-500">방향키 이동 · Shift 달리기 · Space 등롱 바치기</p>
+        <p className="text-[11px] tracking-[0.05em] text-ink-500">방향키 이동 · Shift 달리기 · Space 등롱 바치기</p>
       </form>
     </div>
   );

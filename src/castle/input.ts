@@ -1,4 +1,5 @@
-// 방향키·WASD·조이스틱 → 이동 의도. 카메라가 -z를 바라보고 회전하지 않으므로 ↑ = -z.
+// 방향키·WASD·조이스틱 → 이동 의도(화면 기준: ↑ = 앞). 월드 방향은 toWorld로 카메라 yaw만큼 돌린다.
+// 3인칭은 카메라가 -z를 바라보고 회전하지 않으므로 yaw 0 → ↑ = -z 그대로.
 export interface MoveAxis {
   /** 크기 0~1. 대각선은 정규화된다 */
   x: number;
@@ -56,5 +57,36 @@ export class MoveInput {
     if (mag < 0.12) return { x: 0, z: 0, run: false };
     const len = Math.hypot(this.stick.x, this.stick.z);
     return { x: (this.stick.x / len) * mag, z: (this.stick.z / len) * mag, run: mag >= JOYSTICK_RUN };
+  }
+}
+
+/** 화면 기준 이동 의도 → 월드 방향. yaw = 카메라 y축 회전(0이면 -z를 본다) */
+export function toWorld(axis: MoveAxis, yaw: number): MoveAxis {
+  if (yaw === 0) return axis;
+  const c = Math.cos(yaw);
+  const s = Math.sin(yaw);
+  return { x: axis.x * c + axis.z * s, z: -axis.x * s + axis.z * c, run: axis.run };
+}
+
+/** 마우스(포인터 락) 픽셀당 회전(rad) */
+export const MOUSE_SENSITIVITY = 0.0022;
+/** 모바일 드래그 픽셀당 회전(rad) */
+export const TOUCH_SENSITIVITY = 0.005;
+const PITCH_LIMIT = 1.2;
+
+/** 1인칭 시점 회전. 화면이 매 프레임 읽는다 */
+export class LookInput {
+  yaw = 0;
+  pitch = 0;
+
+  /** 화면 이동량(px) → 회전. 오른쪽으로 끌면 오른쪽을 본다 */
+  turn(dx: number, dy: number, sensitivity: number): void {
+    this.yaw -= dx * sensitivity;
+    this.pitch = Math.max(-PITCH_LIMIT, Math.min(PITCH_LIMIT, this.pitch - dy * sensitivity));
+  }
+
+  reset(): void {
+    this.yaw = 0;
+    this.pitch = 0;
   }
 }

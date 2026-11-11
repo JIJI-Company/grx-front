@@ -1,9 +1,10 @@
 // 내 캐릭터 이동: 가속·감속(0.12s), 벽 미끄러짐, 진행 방향 회전(0.1s), 층 이동 트리거, 가까운 석상.
-// navmesh가 들어오기 전까지 걸을 수 있는 영역은 floors.ts의 사각형 목록이다.
-import { inRect, isWalkable, type FloorDef, type PlacedStatue } from './floors';
+// navmesh가 들어오기 전까지 걸을 수 있는 영역은 floors.ts의 사각형 목록 - 막힌 곳(기둥·난간·석상)이다.
+import { inRect, isWalkable, type FloorDef, type PlacedStatue, type WalkArea } from './floors';
 import { approach, lerpAngle } from './interpolation';
 import type { MoveAxis } from './input';
 import type { FloorId } from './protocol';
+import type { TransitionKind } from './transition';
 
 export const WALK_SPEED = 4.2;
 export const RUN_SPEED = 7.5;
@@ -31,7 +32,7 @@ export function placeMotion(m: Motion, x: number, z: number): void {
 }
 
 /** 한 프레임 이동. 실제 이동 거리(m)를 돌려준다 */
-export function stepMotion(m: Motion, axis: MoveAxis, floor: FloorDef, dtRaw: number): number {
+export function stepMotion(m: Motion, axis: MoveAxis, area: WalkArea, dtRaw: number): number {
   const dt = Math.min(dtRaw, MAX_DT);
   const max = axis.run ? RUN_SPEED : WALK_SPEED;
   const tx = m.frozen ? 0 : axis.x * max;
@@ -44,13 +45,16 @@ export function stepMotion(m: Motion, axis: MoveAxis, floor: FloorDef, dtRaw: nu
   const oz = m.z;
   const nx = m.x + m.vx * dt;
   const nz = m.z + m.vz * dt;
-  if (isWalkable(floor, nx, nz)) {
+  // 서버가 막힌 곳에 세웠으면(재접속 위치 등) 걷기 영역 안에서는 빠져나올 수 있게 한다
+  const stuck = !isWalkable(area, m.x, m.z);
+  const ok = (x: number, z: number) => isWalkable(area, x, z) || (stuck && area.walk.some((r) => inRect(r, x, z)));
+  if (ok(nx, nz)) {
     m.x = nx;
     m.z = nz;
-  } else if (isWalkable(floor, nx, m.z)) {
+  } else if (ok(nx, m.z)) {
     m.x = nx; // 벽을 따라 미끄러짐
     m.vz = 0;
-  } else if (isWalkable(floor, m.x, nz)) {
+  } else if (ok(m.x, nz)) {
     m.z = nz;
     m.vx = 0;
   } else {
@@ -66,7 +70,7 @@ export function stepMotion(m: Motion, axis: MoveAxis, floor: FloorDef, dtRaw: nu
 export class FloorTriggerTracker {
   private acc = 0;
 
-  update(floor: FloorDef, m: Motion, moved: number): { to: FloorId; fade: string } | null {
+  update(floor: FloorDef, m: Motion, moved: number): { to: FloorId; fade: string; effect: TransitionKind } | null {
     const t = floor.triggers.find((tr) => inRect(tr.rect, m.x, m.z));
     if (!t || m.frozen) {
       this.acc = 0;
@@ -75,7 +79,7 @@ export class FloorTriggerTracker {
     this.acc += moved;
     if (this.acc < t.meters) return null;
     this.acc = 0;
-    return { to: t.to, fade: t.fade };
+    return { to: t.to, fade: t.fade, effect: t.effect };
   }
 }
 

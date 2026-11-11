@@ -9,7 +9,7 @@ import { MAX_LANTERN_MODELS } from '../../castle/brightness';
 
 const LANTERN_URL = '/castle/lantern.glb';
 const FIRST_RING = 7; // 앞줄에 놓는 개수, 나머지는 뒷줄
-const PAPER_GLOW = 1.4;
+export const PAPER_GLOW = 1.4;
 
 /** i번째 등롱 자리: 석상 앞쪽 부채꼴 두 줄. 석상 로컬 좌표(받침대 반폭 0.75) */
 function slot(i: number, n: number): { x: number; z: number; rot: number } {
@@ -22,9 +22,10 @@ function slot(i: number, n: number): { x: number; z: number; rot: number } {
   return { x: Math.sin(a) * radius, z: Math.cos(a) * radius, rot: (i * 1.7) % (Math.PI * 2) };
 }
 
-export default function LanternRing({ count, color }: { count: number; color: string }) {
+/** lantern.glb의 종이·틀 지오메트리 (노드 변환을 구운 사본). 발치 등롱과 바치기 연출이 같이 쓴다 */
+export function useLanternGeometry(): { paper?: THREE.BufferGeometry; frame?: THREE.BufferGeometry } {
   const { scene } = useGLTF(LANTERN_URL);
-  const geo = useMemo(() => {
+  return useMemo(() => {
     const out: { paper?: THREE.BufferGeometry; frame?: THREE.BufferGeometry } = {};
     scene.updateMatrixWorld(true);
     scene.traverse((o) => {
@@ -38,6 +39,10 @@ export default function LanternRing({ count, color }: { count: number; color: st
     });
     return out;
   }, [scene]);
+}
+
+export default function LanternRing({ count, color }: { count: number; color: string }) {
+  const geo = useLanternGeometry();
 
   const paperMat = useMemo(
     () => new THREE.MeshStandardMaterial({ color: '#f3e3c8', roughness: 0.9, emissive: new THREE.Color(color), emissiveIntensity: PAPER_GLOW }),

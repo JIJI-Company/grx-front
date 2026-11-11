@@ -1,6 +1,6 @@
 // 한 번의 입장 = 세션. 전송 계층·store·내 이동 상태를 묶고, 화면은 이 객체의 메서드만 부른다.
 import { FIRST_FLOOR, FLOORS } from './floors';
-import { MoveInput } from './input';
+import { LookInput, MoveInput } from './input';
 import { createMotion, placeMotion, type Motion } from './movement';
 import { decodePoint, encodeAt, encodePos, type CastleError, type FloorId } from './protocol';
 import { CastleStore } from './store';
@@ -21,6 +21,8 @@ const JOIN_FATAL = new Set<CastleError['code']>(['hall_not_found', 'hall_full', 
 export class CastleSession {
   readonly store = new CastleStore();
   readonly input = new MoveInput();
+  /** 1인칭 시점 회전 (서버로 보내지 않는다) */
+  readonly look = new LookInput();
   readonly motion: Motion;
   private floorId: FloorId;
   /** join ack를 받았고 floor:change ack를 기다리는 중이 아님 → pos를 보내도 된다 */
@@ -87,7 +89,7 @@ export class CastleSession {
     this.offerSeq++;
     const res = await this.transport.request('lantern:offer', { memberId });
     if (this.stopped) return;
-    if (res.ok) this.store.applyOffer(res.data);
+    if (res.ok) this.store.applyOffer(res.data, { x: this.motion.x, z: this.motion.z });
     else this.store.setProblem(res.error.code);
   }
 
