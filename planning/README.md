@@ -9,6 +9,7 @@
 | [ggu-castle-fc/figma-design.md](ggu-castle-fc/figma-design.md) | Figma 화면·컴포넌트 목록과 일정 규칙 반영 위치 |
 | [ggu-castle-fc/decision-log.md](ggu-castle-fc/decision-log.md) | 기획 결정 기록 |
 | [design-system/component-taxonomy.md](design-system/component-taxonomy.md) | 사이트 디자인 시스템(토큰·컴포넌트) — `src/styles/tokens.css`·`global.css`에서 추출 |
+| [castle/upgrade-20261111.md](castle/upgrade-20261111.md) | 무한성(`/castle`) 업그레이드 계획과 진행 상태 — 끝난 것·남은 것·미검증 항목·결정 사항 |
 
 Figma: [꾸한성 게임](https://www.figma.com/design/zGfCShCi3wE7YK0ipJd4Fk/%EA%BE%B8%ED%95%9C%EC%84%B1-%EA%B2%8C%EC%9E%84) — `Foundations`·`Components`(디자인 시스템), `GGU CASTLE FC`(게임 화면).
 
