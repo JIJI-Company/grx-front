@@ -363,13 +363,37 @@ npm run dev                          # 터미널 2
 
 | 입력 | 동작 |
 |------|------|
-| 방향키 / WASD | 이동 (카메라 기준, 벽에 닿으면 미끄러짐) |
+| 방향키 / WASD | 이동 (카메라가 보는 방향 기준, 벽·석상·기둥에 닿으면 미끄러짐) |
 | Shift | 달리기 |
 | Space | 석상 앞에서 등롱 바치기 (석상당 1인 1개, 7일 유지, 다시 누르면 연장) |
 | E | 석상 앞에서 멤버 정보(반투명 창). 움직이면 닫힘 |
-| 모바일 | 왼쪽 아래 조이스틱, 오른쪽 아래 버튼 |
+| V | 1인칭 / 3인칭 전환 (선택은 브라우저에 기억) |
+| 마우스 (1인칭) | 화면을 클릭하면 마우스로 둘러본다. Esc로 해제 |
+| 왼쪽 위 B1·B2·B3 | 그 층으로 바로 이동 |
+| 모바일 | 왼쪽 아래 조이스틱, 오른쪽 아래 버튼. 1인칭에서는 화면을 끌어 둘러본다 |
 
-층 이동: 지하 1층 복도 끝 계단 5칸 → 지하 2층, 가운데 통로 해치 5걸음 → 지하 3층, 지하 3층 다리 끝 → 지하 1층.
+### 층과 이동
+
+| 층 | 석상 | 가는 길 |
+|----|------|---------|
+| 지하 1층 하현의 회랑 | 신입 · 하현 | 입장하면 여기서 시작. 복도 끝 계단 5칸 → 지하 2층 |
+| 지하 2층 상현의 방 | 상현 | 가운데 통로의 다다미가 좌우로 열리며 떨어진다 → 지하 3층 |
+| 지하 3층 심층 | master | 긴 다리 끝에 도착해 석상까지 걸어 들어간다. 다리 끝(도착 지점 뒤)으로 가면 → 지하 1층 |
+
+- 번호가 붙는 계급(상현·하현)은 이름표에 "상현 1"처럼 번호가 나오고, **안쪽으로 갈수록 1번**이다.
+- 방송 중인 멤버의 석상은 눈이 빛나고 받침대 아래 붉은 기운이 돌며, 이름표에 "● 방송 중"이 뜬다.
+- 등롱이 쌓일수록 석상이 멤버 색으로 밝아진다. 바치는 순간에는 등롱이 날아가 석상이 반짝인다.
+
+### 지하 3층 입장 연출
+
+- 처음 도착하면 짙은 안개와 어둠 속이다. 다리를 걸을수록 양옆 등이 차례로 켜지며 밝아지고, 단 앞에 닿으면 석상·왕좌·꾸한성 마크가 약 4초에 걸쳐 서서히 나타난다.
+- 1인칭이면 마지막 등이 켜질 때 3인칭으로 바뀐다.
+- 한 번 입장한 동안에는 한 번만 나온다. 새로고침하거나 다시 입장하면 처음부터 다시 나온다.
+
+### 입장과 새로고침
+
+- 입장 화면에서 홀·닉네임·뿔 색을 고른다. 로그인은 없고 브라우저에 익명 토큰 하나를 둔다.
+- 새로고침하면 입장 화면을 건너뛰고 같은 정보로 바로 다시 들어간다(지하 1층에서 시작). 탭을 닫거나 "성을 나서다"로 나가면 다음에는 입장 화면부터다.
 
 ### 폴더
 
@@ -380,10 +404,23 @@ src/castle/                       # 화면과 분리된 데이터 로직
   transport.ts                    # 전송 인터페이스 + socket.io / mock 구현 선택
   socketTransport.ts · mockTransport.ts
   session.ts · store.ts           # 세션(입장·층 이동·등롱) / React 밖 상태
-  floors.ts                       # 층 정의: 이동 영역·트리거·석상 자리·카메라
-  movement.ts · interpolation.ts  # 이동·벽 미끄러짐 / 다른 사람 100ms 보간
-src/components/castle/            # 화면 (Oni=꾸로, Statue, LanternRing, floors/, ui/)
-public/castle/                    # 3D 모델 (kkuro.glb, lantern.glb)
+  entry.ts · guestToken.ts        # 새로고침용 입장 정보(탭) / 익명 토큰
+  floors.ts                       # 층 정의: 이동 영역·막힌 곳·트리거·석상 자리·카메라·색감
+  movement.ts · interpolation.ts  # 이동·충돌·벽 미끄러짐 / 다른 사람 100ms 보간
+  input.ts · view.ts              # 키·조이스틱·시점 회전 / 1·3인칭 선택
+  transition.ts                   # 층 이동 연출 시간표 (계단·다다미 낙하·복귀)
+  reveal.ts                       # 지하 3층 입장 연출 진행 상태
+  offering.ts · brightness.ts     # 등롱 바치는 연출 / 등롱 수 → 밝기 단계
+  quality.ts                      # 저사양 판정 (터치 기기)
+  sound.ts                        # 사운드 자리 (아직 비어 있음)
+src/components/castle/            # 화면
+  CastleGame.tsx · CastleCanvas.tsx   # 화면 전체 조립 / 3D 캔버스·후처리
+  Player.tsx · Oni.tsx · FollowCamera.tsx
+  Statue.tsx · LanternRing.tsx · OfferFx.tsx
+  ColorGrade.tsx · fadeIn.ts      # 층별 색감 / 서서히 나타나기
+  floors/                         # 층별 장면 (SceneB1~B3, B3Exhibit, 공용 부품)
+  ui/                             # 입장 화면, HUD, 조이스틱, 층 이동 덮개 등
+public/castle/                    # kkuro.glb, lantern.glb, mark.webp(꾸한성 마크)
 ```
 
 ### 실행
@@ -405,7 +442,17 @@ VITE_CASTLE_WS_ORIGIN=http://localhost:3000 npm run dev -- --port 5173 --strictP
 - `public/castle/kkuro.glb`: 꾸로. 클립 `idle`·`walk`·`run`·`bow`, 뿔 재질(`kk_horn`)은 플레이어가 고른 색으로 바뀐다
 - `public/castle/lantern.glb`: 종이 등롱. 메시 2개(`lt_paper`·`lt_frame`), 종이는 멤버 퍼스널 컬러로 빛난다
 - 석상은 아직 도형이다. 멤버별 석상 모델(`statue_{slug}.glb`)로 교체 예정
+- `public/castle/mark.webp`: 꾸한성 마크. 지하 3층 석상 뒤에서 천천히 돈다
+- 지하 3층 둘레의 쓰러진 검사 조각과 소품도 도형이다(회색 돌 조각, 얼굴·무늬 없음)
 - Blender 원본(`.blend`)은 저장소 밖 `assets/castle/`에 있다. 모델을 고치면 GLB를 다시 내보내 `public/castle/`에 덮어쓴다
+
+### 아직 없는 것
+
+- 사운드 (석상 클릭 소리 포함) — 소리 종류와 음원 출처 미정
+- 이모트 (손 흔들기·앉기) — 백엔드 설계 먼저
+- 멤버별 석상 실제 모델
+- 배포: 프론트(`floors.ts`)와 grx-back(`castle.constants.ts`)의 층 범위·도착 위치는 같은 값이어야 하므로 **함께 배포**한다
+- 진행 상태와 미검증 항목: [planning/castle/upgrade-20261111.md](planning/castle/upgrade-20261111.md)
 
 ### 확장 계획 (설계 초안, 아직 구현 전)
 
