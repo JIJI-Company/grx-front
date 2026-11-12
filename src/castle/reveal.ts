@@ -25,8 +25,23 @@ export function advanceReveal(r: Reveal, z: number, now: number): void {
 }
 
 /** 가장 깊이 들어온 z (다리 등이 켜지는 기준) */
-export function reachedZ(r: Reveal): number {
+function reachedZ(r: Reveal): number {
   return APPROACH.fromZ - r.reach * (APPROACH.fromZ - APPROACH.toZ);
+}
+
+/** 다리 등 자리(z, m). 도착 쪽부터 단 쪽 순서 */
+export const LAMP_Z: readonly number[] = [24.5, 21.5, 18.5, 15.5, 12.5, 9.5];
+/** 이만큼 앞의 등까지 미리 켜진다(m) */
+const LAMP_AHEAD = 3.5;
+
+/** 이 자리(z)의 등이 켜졌는가 */
+export function lampOn(r: Reveal, lampZ: number): boolean {
+  return reachedZ(r) <= lampZ + LAMP_AHEAD;
+}
+
+/** 마지막(단 쪽) 등까지 다 켜졌는가 */
+export function allLampsOn(r: Reveal): boolean {
+  return lampOn(r, LAMP_Z[LAMP_Z.length - 1]);
 }
 
 /** 드러난 정도 0~1 (천천히 시작해 천천히 끝난다). 드러나기 전은 0 */

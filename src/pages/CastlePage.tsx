@@ -3,13 +3,18 @@ import { useEffect, useState } from 'react';
 import CastleGame from '../components/castle/CastleGame';
 import { joinRejectionLabel } from '../components/castle/castlePresentation';
 import EntryScreen from '../components/castle/ui/EntryScreen';
+import { clearEntry, loadEntry, saveEntry } from '../castle/entry';
 import { CastleSession, type JoinProfile } from '../castle/session';
 import { useCastleStore } from '../castle/store';
 import { useCastleStatues } from '../hooks/useCastle';
 import { trackPageView } from '../utils/analytics';
 
 export default function CastlePage() {
-  const [session, setSession] = useState<CastleSession | null>(null);
+  // 새로고침이면 기억해 둔 입장 정보로 바로 다시 들어간다
+  const [session, setSession] = useState<CastleSession | null>(() => {
+    const saved = loadEntry();
+    return saved ? new CastleSession(saved) : null;
+  });
   const [rejection, setRejection] = useState<{ message: string; profile: JoinProfile } | null>(null);
   const statues = useCastleStatues();
 
@@ -28,12 +33,14 @@ export default function CastlePage() {
   const rejectedCode = store?.joinRejection ?? null;
   useEffect(() => {
     if (!session || !rejectedCode) return;
+    clearEntry();
     setRejection({ message: joinRejectionLabel(rejectedCode), profile: session.profile });
     setSession(null);
   }, [session, rejectedCode]);
 
   const enter = (profile: JoinProfile) => {
     setRejection(null);
+    saveEntry(profile);
     setSession(new CastleSession(profile));
   };
 

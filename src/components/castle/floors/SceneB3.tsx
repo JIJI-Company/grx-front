@@ -7,7 +7,7 @@ import { MeshReflectorMaterial, useTexture } from '@react-three/drei';
 import { FLOORS } from '../../../castle/floors';
 import { approach } from '../../../castle/interpolation';
 import type { Motion } from '../../../castle/movement';
-import { advanceReveal, reachedZ, revealEmerge, type Reveal } from '../../../castle/reveal';
+import { advanceReveal, LAMP_Z, lampOn, revealEmerge, type Reveal } from '../../../castle/reveal';
 import { opaqueMaterials, setFade } from '../fadeIn';
 import { DefeatedSwordsmen, FloatingFragments } from './B3Exhibit';
 import { BoxField, canvasTexture, Embers, glowTexture, scatter } from './sceneParts';
@@ -103,10 +103,7 @@ function Backlight({ reveal }: { reveal: Reveal }) {
 }
 
 // ── 다리 등: 걸어 들어온 만큼 앞쪽부터 차례로 켜진다
-const LAMP_Z = [24.5, 21.5, 18.5, 15.5, 12.5, 9.5];
 const LAMP_X = 1.75; // 다리 가장자리(1.4) 바로 바깥
-/** 이만큼 앞의 등까지 미리 켜진다(m) */
-const LAMP_AHEAD = 3.5;
 const LAMP_COLOR = new THREE.Color('#ffb060');
 const LAMP_TAU = 0.35;
 /** 다 켜졌을 때: 등 밝기 배수(1을 넘겨야 블룸이 잡힌다), 바닥 빛 번짐 불투명도, 광원 세기 */
@@ -126,10 +123,9 @@ function BridgeLamps({ reveal, low }: { reveal: Reveal; low: boolean }) {
   /** 등마다 켜진 정도 0~1. 이미 본 연출이면 처음부터 켜 둔다 */
   const level = useRef(LAMP_Z.map(() => (reveal.revealedAt === null ? 0 : 1)));
   useFrame((_, dt) => {
-    const z = reachedZ(reveal);
     const k = approach(dt, LAMP_TAU);
     LAMP_Z.forEach((lampZ, i) => {
-      const l = (level.current[i] += ((z <= lampZ + LAMP_AHEAD ? 1 : 0) - level.current[i]) * k);
+      const l = (level.current[i] += ((lampOn(reveal, lampZ) ? 1 : 0) - level.current[i]) * k);
       mats[i].paper.color.copy(LAMP_COLOR).multiplyScalar(0.05 + LAMP_ON.glow * l);
       mats[i].pool.opacity = LAMP_ON.pool * l;
       if (lights.current[i]) lights.current[i].intensity = LAMP_ON.light * l;

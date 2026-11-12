@@ -1,7 +1,7 @@
 // 내 캐릭터 이동: 가속·감속(0.12s), 벽 미끄러짐, 진행 방향 회전(0.1s), 층 이동 트리거, 가까운 석상.
 // navmesh가 들어오기 전까지 걸을 수 있는 영역은 floors.ts의 사각형 목록 - 막힌 곳(기둥·난간·석상)이다.
 import { inRect, isWalkable, type FloorDef, type PlacedStatue, type WalkArea } from './floors';
-import { approach, lerpAngle } from './interpolation';
+import { approach, lerpAngle, wrapAngle } from './interpolation';
 import type { MoveAxis } from './input';
 import type { FloorId } from './protocol';
 import type { TransitionKind } from './transition';
@@ -62,7 +62,8 @@ export function stepMotion(m: Motion, axis: MoveAxis, area: WalkArea, dtRaw: num
   }
   const moved = Math.hypot(m.x - ox, m.z - oz);
   m.speed = dt > 0 ? moved / dt : 0;
-  if (m.speed > 0.15) m.rot = lerpAngle(m.rot, Math.atan2(m.vx, m.vz), approach(dt, TURN_TAU));
+  // 같은 쪽으로 계속 돌면 각도가 끝없이 쌓여 서버의 회전 범위(±7rad)를 넘고, 그 뒤 위치 전송이 전부 버려진다 → 매번 접는다
+  if (m.speed > 0.15) m.rot = wrapAngle(lerpAngle(m.rot, Math.atan2(m.vx, m.vz), approach(dt, TURN_TAU)));
   return moved;
 }
 

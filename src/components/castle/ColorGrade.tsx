@@ -35,5 +35,6 @@ export default function ColorGrade({ grade }: { grade: FloorGrade }) {
     effect.uniforms.get('saturation')!.value = grade.saturation;
   }, [effect, grade]);
   useEffect(() => () => effect.dispose(), [effect]);
-  return <primitive object={effect} dispose={null} />;
+  // dispose={null}을 주면 R3F가 effect.dispose를 null로 덮어써서 위 정리가 터진다 (primitive는 어차피 자동 정리 대상이 아니다)
+  return <primitive object={effect} />;
 }

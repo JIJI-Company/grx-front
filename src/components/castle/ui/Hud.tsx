@@ -1,5 +1,6 @@
 // 층 HUD: 박스 없이 텍스트와 얇은 금선만. 왼쪽 위 층 이름 위에서 층을 바로 고른다. 오른쪽 위에 시점 전환·나가기.
 import { Link } from 'react-router-dom';
+import { clearEntry } from '../../../castle/entry';
 import { FLOORS, type FloorDef } from '../../../castle/floors';
 import type { FloorId } from '../../../castle/protocol';
 import type { CameraView } from '../../../castle/view';
@@ -58,7 +59,7 @@ export default function Hud({ floor, onPickFloor, population, connection, notice
           <span className="border border-gold-400/40 px-1 font-sans text-[10px] leading-4 tracking-normal text-gold-400/80 pointer-coarse:hidden">V</span>
           {viewLabel(view)}
         </button>
-        <Link to="/" className="focus-ring border-b border-gold-400/30 pb-0.5 text-[11px] tracking-[0.2em] text-ink-400 transition hover:border-gold-400/70 hover:text-gold-400">
+        <Link to="/" onClick={clearEntry} className="focus-ring border-b border-gold-400/30 pb-0.5 text-[11px] tracking-[0.2em] text-ink-400 transition hover:border-gold-400/70 hover:text-gold-400">
           성을 나서다
         </Link>
       </div>

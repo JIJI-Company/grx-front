@@ -14,11 +14,15 @@ export interface Sample {
   speed: number;
 }
 
+/** 각도를 -π~π로 접는다 */
+export function wrapAngle(a: number): number {
+  while (a > Math.PI) a -= Math.PI * 2;
+  while (a < -Math.PI) a += Math.PI * 2;
+  return a;
+}
+
 export function lerpAngle(a: number, b: number, k: number): number {
-  let d = b - a;
-  while (d > Math.PI) d -= Math.PI * 2;
-  while (d < -Math.PI) d += Math.PI * 2;
-  return a + d * k;
+  return a + wrapAngle(b - a) * k;
 }
 
 /** dt 동안 tau 시간 상수로 목표에 다가가는 보간 계수 (프레임레이트 독립) */

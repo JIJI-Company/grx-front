@@ -10,6 +10,7 @@ import type { CastleSession } from '../../castle/session';
 import { castleSound } from '../../castle/sound';
 import { useCastleStore } from '../../castle/store';
 import { transitionEndMs, TRANSITIONS, type ActiveTransition, type TransitionKind } from '../../castle/transition';
+import { allLampsOn } from '../../castle/reveal';
 import { loadView, saveView, type CameraView } from '../../castle/view';
 import { useMembers } from '../../hooks/useMembers';
 import MemberModal from '../members/MemberModal';
@@ -150,6 +151,21 @@ export default function CastleGame({ session, statues, statuesError }: CastleGam
       // 포인터 락을 지원하지 않는 환경
     }
   }, [coarse]);
+
+  // B3 다리의 마지막 등이 켜지면 3인칭으로 물러나 석상이 드러나는 장면을 보여 준다 (접속당 한 번, 설정은 저장하지 않는다)
+  const pulledBack = useRef(false);
+  useEffect(() => {
+    if (floorId !== 'B3' || pulledBack.current) return;
+    const t = setInterval(() => {
+      if (!allLampsOn(session.reveal)) return;
+      pulledBack.current = true;
+      clearInterval(t);
+      if (view !== 'first') return;
+      session.look.reset();
+      setView('third');
+    }, 100);
+    return () => clearInterval(t);
+  }, [floorId, view, session]);
 
   const toggleView = useCallback(() => {
     const next: CameraView = view === 'first' ? 'third' : 'first';
