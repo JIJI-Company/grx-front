@@ -407,3 +407,18 @@ VITE_CASTLE_WS_ORIGIN=http://localhost:3000 npm run dev -- --port 5173 --strictP
 - 석상은 아직 도형이다. 멤버별 석상 모델(`statue_{slug}.glb`)로 교체 예정
 - Blender 원본(`.blend`)은 저장소 밖 `assets/castle/`에 있다. 모델을 고치면 GLB를 다시 내보내 `public/castle/`에 덮어쓴다
 
+### 확장 계획 (설계 초안, 아직 구현 전)
+
+지금은 멤버 석상 공간(지하 1~3층)뿐이다. 사람들이 모이는 **광장**을 도착 지점으로 두고, 사이트의 기존 콘텐츠를 걸어 다니며 보는 방을 광장에 문으로 잇는다.
+
+| 공간 | 내용 | 쓰는 데이터 |
+|------|------|-------------|
+| 광장 | 도착 지점. 각 방으로 가는 문, 방송 알림, 이번 주 일정 게시판 | `/live/status` · `/calendar` |
+| History 전당 | 대회 수상 기록을 종목별 단에 트로피·사진으로 전시 | `/history` (19건) |
+| Content 화랑 | 콘텐츠 포스터를 족자처럼 건 화랑 + 팬아트 벽 | `/contents` (35건) · `/fanart` (18건) |
+| 관람실 | 영화관 형식. 방송 중인 멤버의 SOOP 방송을 큰 스크린에 | `/live/status` + SOOP 임베드 |
+
+- SOOP 임베드는 재생과 1080p까지 확인했다. 1080p는 iframe에 `allow="local-network-access; local-network; loopback-network"`가 있어야 하고, 시청자 PC에 「고화질 스트리머」가 설치되어 있어야 한다. 개발 서버의 `/soop-test`(`src/pages/SoopEmbedTestPage.tsx`)에서 직접 시험할 수 있다.
+- 서버는 공간을 `B1`·`B2`·`B3`로만 알고 있어서 공간 추가는 grx-back 변경이 함께 필요하다.
+- 전체 설계·순서·미확인 사항·정해야 할 것: [planning/castle/spaces-20261112.md](planning/castle/spaces-20261112.md)
+

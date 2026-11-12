@@ -34,4 +34,8 @@ export const router = createBrowserRouter([
   },
   // 전체 화면 3D 공간 — 사이트 헤더·Lenis 없이 lazy-load
   { path: '/castle', lazy: () => import('./pages/CastlePage').then((m) => ({ Component: m.default })) },
+  // 개발 서버에서만: SOOP 방송 임베드 시험 페이지 (배포 번들에는 들어가지 않는다)
+  ...(import.meta.env.DEV
+    ? [{ path: '/soop-test', lazy: () => import('./pages/SoopEmbedTestPage').then((m) => ({ Component: m.default })) }]
+    : []),
 ]);
