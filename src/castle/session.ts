@@ -3,6 +3,7 @@ import { FIRST_FLOOR, FLOORS } from './floors';
 import { LookInput, MoveInput } from './input';
 import { createMotion, placeMotion, type Motion } from './movement';
 import { decodePoint, encodeAt, encodePos, type CastleError, type FloorId } from './protocol';
+import { createReveal } from './reveal';
 import { CastleStore } from './store';
 import { createTransport, type CastleTransport, type ServerMessage } from './transport';
 
@@ -23,6 +24,8 @@ export class CastleSession {
   readonly input = new MoveInput();
   /** 1인칭 시점 회전 (서버로 보내지 않는다) */
   readonly look = new LookInput();
+  /** B3 입장 연출 진행 (접속당 한 번) */
+  readonly reveal = createReveal();
   readonly motion: Motion;
   private floorId: FloorId;
   /** join ack를 받았고 floor:change ack를 기다리는 중이 아님 → pos를 보내도 된다 */

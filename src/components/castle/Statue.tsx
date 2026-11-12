@@ -1,14 +1,16 @@
 // 석상 (임시 도형): 등롱 수에 따라 멤버 색으로 밝아지고, 방송 중이면 각성한다(눈빛·받침대 붉은 기운·이름표).
 // 등롱 단계가 오를수록 몸 발광·광원 세기·도달 거리·발치 빛 번짐이 함께 커진다 (castle/brightness.ts).
 // 등롱이 바쳐진 순간에는 같은 값들이 잠깐 튀었다가 단계 값으로 돌아온다 (castle/offering.ts statueFlash).
-import { Suspense, useEffect, useMemo, useRef } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { lanternTier, MAX_LANTERN_MODELS, statueGlow } from '../../castle/brightness';
 import type { PlacedStatue } from '../../castle/floors';
 import { statueFlash, type OfferEvent } from '../../castle/offering';
+import { revealEmerge, type Reveal } from '../../castle/reveal';
 import { lanternCountLabel, statueCaption } from './castlePresentation';
+import { opaqueMaterials, setFade } from './fadeIn';
 import { glowTexture } from './floors/sceneParts';
 import LanternRing from './LanternRing';
 
@@ -52,9 +54,14 @@ interface StatueProps {
   awake: boolean;
   /** 이 석상의 등롱 연출 이벤트 (대개 빈 배열) */
   offers: readonly OfferEvent[];
+  /** 있으면 입장 연출에 맞춰 숨겼다가 서서히 나타난다 (B3) */
+  reveal?: Reveal;
 }
 
-export default function Statue({ statue: s, count, awake, offers }: StatueProps) {
+export default function Statue({ statue: s, count, awake, offers, reveal }: StatueProps) {
+  /** hidden: 아직 안 보임 → emerging: 서서히 나타나는 중 → shown: 다 나타남(이름표도 보임) */
+  const [phase, setPhase] = useState<'hidden' | 'emerging' | 'shown'>(!reveal || reveal.revealedAt !== null ? 'shown' : 'hidden');
+  const fading = useRef<THREE.Material[] | null>(null);
   const tier = lanternTier(count);
   const glow = statueGlow(tier);
   const stone = useMemo(
@@ -93,22 +100,25 @@ export default function Statue({ statue: s, count, awake, offers }: StatueProps)
     b.light += (glow.light * s.scale - b.light) * k;
     b.reach += (glow.reach * s.scale - b.reach) * k;
     b.pool += (glow.pool - b.pool) * k;
-    let flash = 0;
-    if (offers.length) {
-      const now = performance.now();
-      for (const e of offers) flash = Math.max(flash, statueFlash(e, now));
+    const now = performance.now();
+    const emerge = reveal ? revealEmerge(reveal, now) : 1;
+    if (phase !== 'shown' && emerge > 0) {
+      setFade((fading.current ??= opaqueMaterials(root.current)), emerge);
+      setPhase(emerge >= 1 ? 'shown' : 'emerging');
     }
+    let flash = 0;
+    for (const e of offers) flash = Math.max(flash, statueFlash(e, now));
     stone.emissiveIntensity = b.emissive + flash * FLASH.emissive;
-    light.current.intensity = b.light + flash * FLASH.light * s.scale;
+    light.current.intensity = (b.light + flash * FLASH.light * s.scale) * emerge;
     light.current.distance = b.reach + flash * FLASH.reach * s.scale;
-    poolMat.opacity = b.pool + flash * FLASH.pool;
+    poolMat.opacity = (b.pool + flash * FLASH.pool) * emerge;
     pool.current.scale.setScalar(pool.current.scale.x + (glow.poolRadius * 2 * s.scale - pool.current.scale.x) * k);
     if (s.float) root.current.position.y = s.lift + Math.sin(clock.elapsedTime * 0.6) * 0.35;
     pool.current.position.y = 0.03 - root.current.position.y; // 석상이 떠 있어도 바닥에 붙어 있게
   });
 
   return (
-    <group ref={root} position={[s.x, s.lift, s.z]} rotation={[0, s.rotY, 0]}>
+    <group ref={root} position={[s.x, s.lift, s.z]} rotation={[0, s.rotY, 0]} visible={phase !== 'hidden'}>
       <group scale={s.scale}>
         <mesh position={[0, 0.3, 0]}>
           <boxGeometry args={[1.5, 0.6, 1.5]} />
@@ -151,15 +161,17 @@ export default function Statue({ statue: s, count, awake, offers }: StatueProps)
         <planeGeometry args={[1, 1]} />
       </mesh>
       {/* distanceFactor: 먼 석상 이름표는 작아져서 서로 겹치지 않는다 */}
-      <Html position={[0, 0.25 * s.scale, 0.95 * s.scale]} center zIndexRange={[100, 0]} distanceFactor={8} style={{ pointerEvents: 'none' }}>
-        <div className="text-center whitespace-nowrap [text-shadow:0_0_6px_#000]">
-          <div className="text-xs font-semibold text-ink-200">{statueCaption(s)}</div>
-          <div className="text-[10px]" style={{ color: s.color }}>
-            {lanternCountLabel(count)}
+      {phase === 'shown' && (
+        <Html position={[0, 0.25 * s.scale, 0.95 * s.scale]} center zIndexRange={[100, 0]} distanceFactor={8} style={{ pointerEvents: 'none' }}>
+          <div className="text-center whitespace-nowrap [text-shadow:0_0_6px_#000]">
+            <div className="text-xs font-semibold text-ink-200">{statueCaption(s)}</div>
+            <div className="text-[10px]" style={{ color: s.color }}>
+              {lanternCountLabel(count)}
+            </div>
+            {awake && <div className="mt-0.5 text-[10px] font-semibold tracking-widest text-red-400 animate-pulse">● 방송 중</div>}
           </div>
-          {awake && <div className="mt-0.5 text-[10px] font-semibold tracking-widest text-red-400 animate-pulse">● 방송 중</div>}
-        </div>
-      </Html>
+        </Html>
+      )}
     </group>
   );
 }

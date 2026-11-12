@@ -40,7 +40,7 @@ export default function CastleCanvas({ session, floor, statues, onTrigger, onNea
   return (
     <Canvas dpr={[1, dpr]} camera={{ fov: 50, near: 0.1, far: 600 }} gl={{ antialias: false }} aria-hidden>
       <PerformanceMonitor onDecline={() => setDpr(1)} onIncline={() => setDpr(DPR_MAX)} />
-      <FloorScene floor={floor} statues={statues} low={low} fx={fx} />
+      <FloorScene floor={floor} statues={statues} low={low} fx={fx} motion={session.motion} reveal={session.reveal} />
       {statues.map((s) => (
         <Statue
           key={s.memberId}
@@ -48,6 +48,7 @@ export default function CastleCanvas({ session, floor, statues, onTrigger, onNea
           count={store.lanternCount(s.memberId)}
           awake={store.isLive(s.memberId)}
           offers={store.offerEvents.filter((e) => e.memberId === s.memberId)}
+          reveal={floor.id === 'B3' ? session.reveal : undefined}
         />
       ))}
       {store.offerEvents.map((e) => {

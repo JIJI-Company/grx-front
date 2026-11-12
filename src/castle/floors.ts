@@ -164,7 +164,7 @@ const B2: FloorDef = {
 };
 
 // ── B3: 심층. 떠 있는 단 + 다리. 다리 끝 계단으로 B1 입구 복귀
-const B3_EXIT: Rect = { x0: -1.4, x1: 1.4, z0: 13, z1: 18 };
+const B3_EXIT: Rect = { x0: -1.4, x1: 1.4, z0: 29, z1: 34 };
 /** 단 둘레 검사 전시(B3Exhibit)의 배율. 바꾸면 아래 B3 blockers(쓰러진 검사 2기)도 다시 맞춘다 */
 export const B3_EXHIBIT_GROW = 1.45;
 const B3: FloorDef = {
@@ -173,11 +173,11 @@ const B3: FloorDef = {
   sub: '심층',
   walk: [
     { x0: -7, x1: 7, z0: -2.5, z1: 6 }, // 단 (석상 앞까지만)
-    { x0: -1.4, x1: 1.4, z0: 6, z1: 18 }, // 다리
+    { x0: -1.4, x1: 1.4, z0: 6, z1: 34 }, // 다리 (끝에 도착해 석상까지 걸어 들어간다. 입장 연출은 castle/reveal.ts)
   ],
   // 걷기 영역에 걸치는 쓰러진 검사 2기 (B3_EXHIBIT_GROW 배율 기준 머리·팔 범위)
   blockers: [box(-7.4, -6.7, -1.9, -0.15), box(5.55, 7, 1.2, 2.55)],
-  spawn: [0, 4],
+  spawn: [0, 27],
   heightAt: () => 0,
   slot: () => ({ x: 0, z: -7, rotY: 0, scale: 4.4, lift: 2.2, float: true }),
   maxStatues: 1,
