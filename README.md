@@ -420,7 +420,8 @@ src/components/castle/            # 화면
   ColorGrade.tsx · fadeIn.ts      # 층별 색감 / 서서히 나타나기
   floors/                         # 층별 장면 (SceneB1~B3, B3Exhibit, 공용 부품)
   ui/                             # 입장 화면, HUD, 조이스틱, 층 이동 덮개 등
-public/castle/                    # kkuro.glb, lantern.glb, mark.webp(꾸한성 마크)
+  spaces/                         # 새 공간 미리보기 장면 (광장, History 전당, 트로피)
+public/castle/                    # kkuro.glb, lantern.glb, mark.webp(꾸한성 마크), trophies.glb(종목별 트로피)
 ```
 
 ### 실행
@@ -454,18 +455,23 @@ VITE_CASTLE_WS_ORIGIN=http://localhost:3000 npm run dev -- --port 5173 --strictP
 - 배포: 프론트(`floors.ts`)와 grx-back(`castle.constants.ts`)의 층 범위·도착 위치는 같은 값이어야 하므로 **함께 배포**한다
 - 진행 상태와 미검증 항목: [planning/castle/upgrade-20261111.md](planning/castle/upgrade-20261111.md)
 
-### 확장 계획 (설계 초안, 아직 구현 전)
+### 확장 계획 (설계 초안 + 미리보기)
 
-지금은 멤버 석상 공간(지하 1~3층)뿐이다. 사람들이 모이는 **광장**을 도착 지점으로 두고, 사이트의 기존 콘텐츠를 걸어 다니며 보는 방을 광장에 문으로 잇는다.
+지금 걸어 다닐 수 있는 곳은 멤버 석상 공간(지하 1~3층)뿐이다. 사람들이 모이는 **광장**을 도착 지점으로 두고, 사이트의 기존 콘텐츠를 걸어 다니며 보는 방을 광장에 문으로 잇는다.
 
 | 공간 | 내용 | 쓰는 데이터 |
 |------|------|-------------|
 | 광장 | 도착 지점. 각 방으로 가는 문, 방송 알림, 이번 주 일정 게시판 | `/live/status` · `/calendar` |
-| History 전당 | 대회 수상 기록을 종목별 단에 트로피·사진으로 전시 | `/history` (19건) |
-| Content 화랑 | 콘텐츠 포스터를 족자처럼 건 화랑 + 팬아트 벽 | `/contents` (35건) · `/fanart` (18건) |
+| History 전당 | 수상 기록마다 유리 케이스 속 종목별 트로피 + 수상 사진. 가까이 가면 참가 멤버 카드 | `/history` (19건) |
+| Content 화랑 | 콘텐츠 포스터를 족자처럼 건 화랑 | `/contents` (35건) |
 | 관람실 | 영화관 형식. 방송 중인 멤버의 SOOP 방송을 큰 스크린에 | `/live/status` + SOOP 임베드 |
+| 팬아트 방 | 팬이 올린 그림을 거는 작은 방. **가장 나중에** 만든다 | `/fanart` (18건) |
 
 - SOOP 임베드는 재생과 1080p까지 확인했다. 1080p는 iframe에 `allow="local-network-access; local-network; loopback-network"`가 있어야 하고, 시청자 PC에 「고화질 스트리머」가 설치되어 있어야 한다. 개발 서버의 `/soop-test`(`src/pages/SoopEmbedTestPage.tsx`)에서 직접 시험할 수 있다.
+- **미리보기 (개발 서버 전용)**: `/castle-preview`에서 광장 외관과 History 전당 내부를 돌려 볼 수 있다(끌어서 회전, 휠로 확대). 캐릭터·충돌·실시간 연결은 없다. 장면은 `src/components/castle/spaces/`
+- 로컬 서버에 수상 기록이 없으면 미리보기는 개발용 프록시 `/prod-api`(`vite.config.ts`)로 운영 공개 API를 **읽기만** 한다
+- 종목별 트로피 9종: `public/castle/trophies.glb` (메시 `trophy_{lol|pubg|minecraft|overwatch|valorant|multi|etc|fifa|rust}`, 금속 재질 `tr_metal`은 메달 색으로 바뀐다). Blender 원본과 생성 스크립트는 저장소 밖 `assets/castle/trophies.blend`·`trophies.py`
 - 서버는 공간을 `B1`·`B2`·`B3`로만 알고 있어서 공간 추가는 grx-back 변경이 함께 필요하다.
-- 전체 설계·순서·미확인 사항·정해야 할 것: [planning/castle/spaces-20261112.md](planning/castle/spaces-20261112.md)
+- **먼저 해결할 것**: Supabase 이미지 전송량(무료 한도). 수상 사진이 장당 약 500KB에 캐시가 꺼져 있어 전당을 공개하기 전에 R2 이전·작은 이미지가 필요하다
+- 앞으로 할 일(순서), 전체 설계, 미확인 사항, 정해야 할 것: [planning/castle/spaces-20261112.md](planning/castle/spaces-20261112.md)
 
