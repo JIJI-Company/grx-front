@@ -442,7 +442,7 @@ VITE_CASTLE_WS_ORIGIN=http://localhost:3000 npm run dev -- --port 5173 --strictP
 
 - `public/castle/kkuro.glb`: 꾸로. 클립 `idle`·`walk`·`run`·`bow`, 뿔 재질(`kk_horn`)은 플레이어가 고른 색으로 바뀐다
 - `public/castle/lantern.glb`: 종이 등롱. 메시 2개(`lt_paper`·`lt_frame`), 종이는 멤버 퍼스널 컬러로 빛난다
-- 석상은 아직 도형이다. 멤버별 석상 모델(`statue_{slug}.glb`)로 교체 예정
+- 석상: 운영은 아직 도형(서버 `modelUrl: null`). 멤버별 석상 GLB는 `public/castle/statues/`에 있고 **Git LFS**로 관리한다 — 받으려면 `git lfs install` 후 pull ([planning/castle/glb-lfs.md](planning/castle/glb-lfs.md)). mock에서 보기: `VITE_MOCK_STATUE_MODELS=gguu,damu VITE_MOCK_STATUE_VARIANT=_face_paint npm run dev:mock` (생성·변형은 [planning/castle/statues-20261113.md](planning/castle/statues-20261113.md))
 - `public/castle/mark.webp`: 꾸한성 마크. 지하 3층 석상 뒤에서 천천히 돈다
 - 지하 3층 둘레의 쓰러진 검사 조각과 소품도 도형이다(회색 돌 조각, 얼굴·무늬 없음)
 - Blender 원본(`.blend`)은 저장소 밖 `assets/castle/`에 있다. 모델을 고치면 GLB를 다시 내보내 `public/castle/`에 덮어쓴다
