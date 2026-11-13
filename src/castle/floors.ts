@@ -2,6 +2,7 @@
 // 수치는 PoC에서 검증한 값을 그대로 쓴다.
 import type { CastleStatueFloor } from '../api/types';
 import { getMemberColor } from '../utils/memberColor';
+import type { CameraBox } from './orbit';
 import type { FloorId } from './protocol';
 import type { TransitionKind } from './transition';
 
@@ -59,6 +60,8 @@ export interface FloorDef extends WalkArea {
   triggers: FloorTrigger[];
   /** [높이, 뒤로 거리, 바라볼 높이] */
   camera: [number, number, number];
+  /** 카메라가 돌 때 넘지 않을 범위(벽·천장 안쪽). 없으면 제한 없음(트인 공간) */
+  cameraBox?: CameraBox;
   fog: string;
   fogDensity: number;
   grade: FloorGrade;
@@ -69,6 +72,8 @@ export interface PlacedStatue extends StatueSlot {
   name: string;
   rankName: string;
   color: string;
+  /** 석상 3D 모델(GLB). null이면 임시 도형 */
+  modelUrl: string | null;
 }
 
 export const inRect = (r: Rect, x: number, z: number) => x >= r.x0 && x <= r.x1 && z >= r.z0 && z <= r.z1;
@@ -104,6 +109,7 @@ const B1: FloorDef = {
   maxStatues: Infinity,
   triggers: [{ rect: B1_STAIRS, to: 'B2', meters: STEPS_5, fade: '#000000', effect: 'stairs' }],
   camera: [3.2, 6.5, 1.4], // 천장 보(5.8m) 아래에 카메라를 둔다
+  cameraBox: { x0: -5.7, x1: 5.7, z0: -60, z1: 9, y1: 5.5 }, // 장지문 벽(x ±6.04) · 천장 보 안쪽
   fog: '#0d0503',
   fogDensity: 0.022,
   grade: { lift: [0.006, 0.002, 0], gain: [1.08, 0.96, 0.8], saturation: 1.05 }, // 따뜻한 주황
@@ -158,6 +164,7 @@ const B2: FloorDef = {
   maxStatues: Infinity,
   triggers: [{ rect: B2_HATCH, to: 'B3', meters: STEPS_5, fade: '#3a0306', effect: 'hatch' }],
   camera: [9, 12, 1],
+  cameraBox: { x0: -19, x1: 19, z0: -48, z1: 14, y1: 14 }, // 병풍 벽(x ±16.8) 바깥 상자 방 안쪽
   fog: '#140a02',
   fogDensity: 0.012,
   grade: { lift: [0.005, 0.004, 0], gain: [1.02, 0.94, 0.7], saturation: 0.8 }, // 탁한 금색
@@ -239,6 +246,7 @@ export function placeStatues(floor: FloorDef, floors: CastleStatueFloor[]): Plac
         name: s.stageName,
         rankName: rankLabel(entry, s.order),
         color: getMemberColor(s),
+        modelUrl: s.modelUrl,
       }));
     });
 }

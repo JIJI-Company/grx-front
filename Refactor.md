@@ -13,6 +13,37 @@
 
 ---
 
+## v3.4.0 - 2026-11-13
+
+### 목표
+
+- 멤버 석상을 임시 도형 대신 3D 모델(GLB)로 그릴 수 있게 하고, 석상을 앞뒤좌우에서 보는 카메라(석상 둘러보기·3인칭 회전)를 넣는다. 서버 프로토콜·운영 데이터는 그대로(`modelUrl`은 여전히 `null`).
+
+### 변경 사항
+
+- `Statue.tsx`: `modelUrl`이 있으면 GLB(높이 2.4m, 받침대 위). 재질은 Paint 텍스처 → 정점 색 → 돌 순, 발광·반짝임은 공통. 불러오기 실패 시 임시 도형(에러 경계). 돌 색에 멤버 색 25%(`STONE_TINT`).
+- 석상 둘러보기: 석상 앞 F(모바일 버튼) → 석상 중심 궤도, 드래그 회전·휠 확대, 움직이거나 F·Esc·층 이동·석상에서 멀어지면 끝. 계산은 신규 `castle/orbit.ts`.
+- 3인칭 회전: 마우스·모바일 드래그로 `look.yaw`만큼 꾸로 중심 회전, 이동도 그 yaw 기준. yaw 0이면 기존 구도.
+- 카메라 상자 `FloorDef.cameraBox`: B1 복도 벽·천장, B2 방 안쪽. B3는 제한 없음.
+- mock 전용 `VITE_MOCK_STATUE_MODELS`·`VITE_MOCK_STATUE_VARIANT`로 `public/castle/statues/{slug}{variant}.glb` 시험. 그 폴더는 `.gitignore`.
+
+### 변경 파일
+
+- `src/castle/`: `floors.ts`, 신규 `orbit.ts`
+- `src/components/castle/`: `Statue.tsx`, `FollowCamera.tsx`, `CastleCanvas.tsx`, `CastleGame.tsx`, `Player.tsx`, `castlePresentation.ts`, `ui/LookPad.tsx`, `ui/LanternPrompt.tsx`
+- `src/api/mockDb.ts`, `.gitignore`, `planning/castle/statues-20261113.md`(이어받기 문서)
+
+### Verification
+
+- `tsc -b`, `npm run build`: PASS.
+- `orbit.ts`를 esbuild로 묶어 Node에서 확인: yaw 0 = 기존 구도, B1 석상 뒤 감상 카메라가 x −5.7(벽 안쪽)에서 멈춤(상자 없으면 −8.25), 각도·확대 한계.
+
+### 미검증 항목
+
+- 화면 전부(사용자 확인 예정): 둘러보기·3인칭 회전 조작감, B1 벽 근처 카메라, 모바일 드래그, GLB 석상 크기·재질·발광, 물들이기 비율.
+
+---
+
 ## v3.3.0 - 2026-11-11
 
 ### 목표

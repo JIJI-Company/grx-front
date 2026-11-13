@@ -461,6 +461,13 @@ const CASTLE_FLOORS = [
   { floor: 'B3', rank: R.master },
 ] as const;
 
+/** 석상 모델 시험용: VITE_MOCK_STATUE_MODELS=gguu,damu → public/castle/statues/{slug}{VITE_MOCK_STATUE_VARIANT}.glb를 쓴다
+ *  (VARIANT 예: '_color' → 3면도 투영 채색본) */
+const MOCK_STATUE_VARIANT: string = import.meta.env.VITE_MOCK_STATUE_VARIANT ?? '';
+const MOCK_STATUE_MODELS = new Set(
+  (import.meta.env.VITE_MOCK_STATUE_MODELS ?? '').split(',').map((s: string) => s.trim()).filter(Boolean),
+);
+
 export const mockGetCastleStatues = async (): Promise<CastleStatueFloor[]> => {
   const live = await mockGetLiveStatus().catch(() => [] as LiveStatus[]);
   const liveSlugs = new Set(live.filter(l => l.isLive).map(l => l.memberSlug));
@@ -477,7 +484,7 @@ export const mockGetCastleStatues = async (): Promise<CastleStatueFloor[]> => {
         stageName: m.stageName,
         personalColor: m.personalColor ?? null,
         order,
-        modelUrl: null,
+        modelUrl: MOCK_STATUE_MODELS.has(m.slug) ? `/castle/statues/${m.slug}${MOCK_STATUE_VARIANT}.glb` : null,
         isLive: liveSlugs.has(m.slug),
       })),
   }));

@@ -1,5 +1,5 @@
 // 내 캐릭터: 매 프레임 입력 → 이동 → 트리거·석상 판정 → 전송. React state를 거치지 않는다.
-// 이동은 카메라가 보는 방향 기준 (3인칭은 yaw 0이라 화면 기준과 같다). 1인칭이면 내 몸(그림자 포함)은 그리지 않는다.
+// 이동은 카메라가 보는 방향 기준 (3인칭도 드래그로 돌린 yaw를 쓴다). 1인칭이면 내 몸(그림자 포함)은 그리지 않는다.
 import { useMemo, useRef, type MutableRefObject } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -34,7 +34,7 @@ export default function Player({ session, floor, statues, onTrigger, onNear, vie
   const area = useMemo(() => walkAreaOf(floor, statues), [floor, statues]);
 
   useFrame((_, dt) => {
-    const moved = stepMotion(m, toWorld(session.input.read(), view === 'first' ? session.look.yaw : 0), area, dt);
+    const moved = stepMotion(m, toWorld(session.input.read(), session.look.yaw), area, dt);
     const hit = tracker.current.update(floor, m, moved);
     if (hit) onTrigger(hit.to, hit.fade, hit.effect);
 

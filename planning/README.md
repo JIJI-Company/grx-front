@@ -11,6 +11,7 @@
 | [design-system/component-taxonomy.md](design-system/component-taxonomy.md) | 사이트 디자인 시스템(토큰·컴포넌트) — `src/styles/tokens.css`·`global.css`에서 추출 |
 | [castle/upgrade-20261111.md](castle/upgrade-20261111.md) | 무한성(`/castle`) 업그레이드 계획과 진행 상태 — 끝난 것·남은 것·미검증 항목·결정 사항 |
 | [castle/spaces-20261112.md](castle/spaces-20261112.md) | 무한성 공간 확장 설계안 — **앞으로 할 일(순서)**, 광장·History 전당·Content 화랑·관람실·팬아트 방(후순위), 데이터 현황, 서버 변경, 순서, 정해야 할 것 |
+| [castle/statues-20261113.md](castle/statues-20261113.md) | 석상 3D 모델 생성(Hunyuan3D-2mv + Paint, 얼굴 B안)·석상 둘러보기/3인칭 회전 카메라 — 바뀐 코드, 생성 도구, 8GB 우회, 생성 결과, 남은 일 |
 
 Figma: [꾸한성 게임](https://www.figma.com/design/zGfCShCi3wE7YK0ipJd4Fk/%EA%BE%B8%ED%95%9C%EC%84%B1-%EA%B2%8C%EC%9E%84) — `Foundations`·`Components`(디자인 시스템), `GGU CASTLE FC`(게임 화면).
 

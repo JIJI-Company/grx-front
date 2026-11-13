@@ -1,10 +1,11 @@
 // 입장 후 화면: 캔버스 + HUD + 층 이동 연출 + 등롱 바치기 + 1인칭/3인칭. 상태 변경은 세션 메서드로만 한다.
 // 층 이동 연출은 시간표(castle/transition.ts)대로만 진행한다. 서버 floor:change ack는 세션이 따로 기다리므로
 // ack가 늦거나 실패해도(세션이 재연결) 화면이 가려진 채 멈추지 않는다.
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import type { CastleStatueFloor, Member } from '../../api/types';
 import { findStatue, FLOORS, placeStatues, type PlacedStatue } from '../../castle/floors';
-import { MOUSE_SENSITIVITY } from '../../castle/input';
+import { MOUSE_SENSITIVITY, TOUCH_SENSITIVITY } from '../../castle/input';
+import { initialInspect, turnInspect, zoomInspect } from '../../castle/orbit';
 import type { FloorId } from '../../castle/protocol';
 import type { CastleSession } from '../../castle/session';
 import { castleSound } from '../../castle/sound';
@@ -15,9 +16,12 @@ import { loadView, saveView, type CameraView } from '../../castle/view';
 import { useMembers } from '../../hooks/useMembers';
 import MemberModal from '../members/MemberModal';
 import CastleCanvas from './CastleCanvas';
+import type { InspectState } from './FollowCamera';
 import {
   awakenMessage,
   connectionLabel,
+  inspectHint,
+  inspectLabel,
   lanternActionLabel,
   memberInfoLabel,
   populationLabel,
@@ -47,6 +51,9 @@ export default function CastleGame({ session, statues, statuesError }: CastleGam
   const [overlay, setOverlay] = useState<TransitionOverlay | null>(null);
   /** 3D 연출이 매 프레임 읽는 진행 중인 연출 */
   const fx = useRef<ActiveTransition | null>(null);
+  /** 석상 감상 시점: 카메라가 매 프레임 읽는다. 화면 표시는 inspecting으로 */
+  const inspect = useRef<InspectState | null>(null);
+  const [inspecting, setInspecting] = useState(false);
   const [view, setView] = useState<CameraView>(loadView);
   const [locked, setLocked] = useState(false);
   const coarse = useMemo(() => window.matchMedia('(pointer: coarse)').matches, []);
@@ -77,6 +84,8 @@ export default function CastleGame({ session, statues, statuesError }: CastleGam
     (to: FloorId, color: string, kind: TransitionKind) => {
       const plan = TRANSITIONS[kind];
       session.motion.frozen = true;
+      inspect.current = null;
+      setInspecting(false);
       castleSound.cue(to === 'B3' ? 'fall' : 'descend');
       fx.current = { kind, phase: 'out', start: performance.now() };
       setOverlay({ kind, phase: 'out', color });
@@ -113,6 +122,10 @@ export default function CastleGame({ session, statues, statuesError }: CastleGam
   const onNear = useCallback((s: PlacedStatue | null) => {
     nearRef.current = s;
     setNear(s);
+    if (!s) {
+      inspect.current = null;
+      setInspecting(false);
+    }
   }, []);
 
   const offer = useCallback(() => {
@@ -129,6 +142,66 @@ export default function CastleGame({ session, statues, statuesError }: CastleGam
     setInfoMemberId(s.memberId);
   }, [session]);
   const closeInfo = useCallback(() => setInfoMemberId(null), []);
+
+  // 석상 앞 F → 석상 감상: 카메라가 석상을 중심으로 돈다(드래그·휠). 움직이거나 F·Esc로 끝
+  const stopInspect = useCallback(() => {
+    inspect.current = null;
+    setInspecting(false);
+  }, []);
+  const startInspect = useCallback(() => {
+    const s = nearRef.current;
+    if (!s || session.motion.frozen) return;
+    inspect.current = { statue: s, view: initialInspect() };
+    setInspecting(true);
+    if (document.pointerLockElement) document.exitPointerLock();
+  }, [session]);
+  const toggleInspect = useCallback(() => (inspect.current ? stopInspect() : startInspect()), [startInspect, stopInspect]);
+
+  useEffect(() => {
+    if (!inspecting) return;
+    const t = setInterval(() => {
+      const axis = session.input.read();
+      if (axis.x !== 0 || axis.z !== 0) stopInspect();
+    }, 80);
+    return () => clearInterval(t);
+  }, [inspecting, session, stopInspect]);
+
+  /** 화면 드래그 → 감상 중이면 석상 회전, 3인칭이면 꾸로 중심 카메라 회전(yaw만), 1인칭이면 둘러보기 */
+  const turnView = useCallback(
+    (dx: number, dy: number, sensitivity: number) => {
+      if (inspect.current) turnInspect(inspect.current.view, dx, dy, sensitivity);
+      else if (view === 'third') session.look.turn(dx, 0, sensitivity);
+      else session.look.turn(dx, dy, sensitivity);
+    },
+    [view, session],
+  );
+
+  // 데스크톱 마우스 드래그 (1인칭은 포인터 락이 따로 처리)
+  const drag = useRef<{ id: number; x: number; y: number } | null>(null);
+  const dragStart = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (e.pointerType !== 'mouse' || e.button !== 0 || (view === 'first' && !inspect.current)) return;
+    drag.current = { id: e.pointerId, x: e.clientX, y: e.clientY };
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+  const dragMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const d = drag.current;
+    if (!d || d.id !== e.pointerId) return;
+    turnView(e.clientX - d.x, e.clientY - d.y, MOUSE_SENSITIVITY * 1.4);
+    drag.current = { id: e.pointerId, x: e.clientX, y: e.clientY };
+  };
+  const dragEnd = () => (drag.current = null);
+  useEffect(() => {
+    const el = spaceRef.current;
+    if (!el || !inspecting) return;
+    // passive가 아니어야 페이지 스크롤을 막을 수 있다
+    const wheel = (e: WheelEvent) => {
+      if (!inspect.current) return;
+      e.preventDefault();
+      zoomInspect(inspect.current.view, e.deltaY);
+    };
+    el.addEventListener('wheel', wheel, { passive: false });
+    return () => el.removeEventListener('wheel', wheel);
+  }, [inspecting]);
 
   useEffect(() => {
     if (!infoMemberId) return;
@@ -172,7 +245,7 @@ export default function CastleGame({ session, statues, statuesError }: CastleGam
     saveView(next);
     session.look.reset();
     setView(next);
-    if (next === 'first' && !infoMemberId) lockPointer();
+    if (next === 'first' && !infoMemberId && !inspect.current) lockPointer();
   }, [view, session, infoMemberId, lockPointer]);
 
   // 3인칭이거나 정보 창이 떠 있으면 포인터 락을 푼다
@@ -206,11 +279,19 @@ export default function CastleGame({ session, statues, statuesError }: CastleGam
         else openInfo();
         return;
       }
+      if (e.code === 'KeyF' && !infoMemberId) {
+        toggleInspect();
+        return;
+      }
+      if (e.code === 'Escape' && inspect.current) {
+        stopInspect();
+        return;
+      }
       if (e.code === 'Space' && !infoMemberId) offer();
     };
     window.addEventListener('keydown', down);
     return () => window.removeEventListener('keydown', down);
-  }, [offer, openInfo, closeInfo, infoMemberId, toggleView]);
+  }, [offer, openInfo, closeInfo, infoMemberId, toggleView, toggleInspect, stopInspect]);
 
   const awaken = store.lastAwaken;
   const awakened = awaken?.isLive ? findStatue(statues, awaken.memberId) : null;
@@ -222,11 +303,19 @@ export default function CastleGame({ session, statues, statuesError }: CastleGam
   return (
     <div className="relative h-full">
       <FloorTransition overlay={overlay} banner={banner ? FLOORS[banner] : null}>
-        <div ref={spaceRef} className="h-full" onClick={() => view === 'first' && !infoMemberId && lockPointer()}>
-          <CastleCanvas session={session} floor={floor} statues={placed} onTrigger={onTrigger} onNear={onNear} view={view} fx={fx} />
+        <div
+          ref={spaceRef}
+          className={`h-full ${(view === 'third' || inspecting) && !coarse ? 'cursor-grab active:cursor-grabbing' : ''}`}
+          onClick={() => view === 'first' && !infoMemberId && !inspect.current && lockPointer()}
+          onPointerDown={dragStart}
+          onPointerMove={dragMove}
+          onPointerUp={dragEnd}
+          onPointerCancel={dragEnd}
+        >
+          <CastleCanvas session={session} floor={floor} statues={placed} onTrigger={onTrigger} onNear={onNear} view={view} inspect={inspect} fx={fx} />
         </div>
       </FloorTransition>
-      {view === 'first' && <LookPad look={session.look} />}
+      <LookPad onTurn={(dx, dy) => turnView(dx, dy, TOUCH_SENSITIVITY)} />
       <Hud
         floor={floor}
         onPickFloor={pickFloor}
@@ -235,14 +324,17 @@ export default function CastleGame({ session, statues, statuesError }: CastleGam
         notice={problemLabel(store.problem) ?? (statuesError ? '석상 정보를 불러오지 못했습니다' : null)}
         view={view}
         onToggleView={toggleView}
-        lookHint={view === 'first' && !locked && !coarse && !infoMember}
+        lookHint={view === 'first' && !locked && !coarse && !infoMember && !inspecting}
       />
       {near && !infoMember && (
         <LanternPrompt
           label={lanternActionLabel(near, store.myLanternExpiry(near.memberId))}
           infoLabel={memberInfoLabel(near)}
+          inspectLabel={inspectLabel(inspecting)}
+          inspectHint={inspecting ? inspectHint(coarse) : null}
           onOffer={offer}
           onInfo={openInfo}
+          onInspect={toggleInspect}
         />
       )}
       {infoMember && (

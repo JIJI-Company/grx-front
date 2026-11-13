@@ -14,7 +14,7 @@ import type { ActiveTransition, TransitionKind } from '../../castle/transition';
 import type { CameraView } from '../../castle/view';
 import ColorGrade from './ColorGrade';
 import FloorScene from './floors/FloorScene';
-import FollowCamera from './FollowCamera';
+import FollowCamera, { type InspectState } from './FollowCamera';
 import { RemoteOni } from './Oni';
 import OfferFx from './OfferFx';
 import Player from './Player';
@@ -30,10 +30,11 @@ interface CastleCanvasProps {
   onTrigger: (to: FloorId, fade: string, effect: TransitionKind) => void;
   onNear: (s: PlacedStatue | null) => void;
   view: CameraView;
+  inspect: MutableRefObject<InspectState | null>;
   fx: MutableRefObject<ActiveTransition | null>;
 }
 
-export default function CastleCanvas({ session, floor, statues, onTrigger, onNear, view, fx }: CastleCanvasProps) {
+export default function CastleCanvas({ session, floor, statues, onTrigger, onNear, view, inspect, fx }: CastleCanvasProps) {
   const [dpr, setDpr] = useState(DPR_MAX);
   const low = useMemo(() => isLowSpec(), []);
   const { store } = session;
@@ -59,7 +60,7 @@ export default function CastleCanvas({ session, floor, statues, onTrigger, onNea
       {store.peers.map((p) => (
         <RemoteOni key={p.id} peer={p} floor={floor} />
       ))}
-      <FollowCamera floor={floor} motion={session.motion} view={view} look={session.look} fx={fx} />
+      <FollowCamera floor={floor} motion={session.motion} view={view} look={session.look} inspect={inspect} fx={fx} />
       <EffectComposer multisampling={low ? 0 : 4}>
         <Bloom mipmapBlur luminanceThreshold={0.85} luminanceSmoothing={0.2} intensity={0.7} resolutionScale={low ? 0.5 : 1} levels={low ? 5 : 8} />
         <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />

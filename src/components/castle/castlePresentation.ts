@@ -52,6 +52,15 @@ export function memberInfoLabel(s: PlacedStatue): string {
   return `${s.name} 정보 보기`;
 }
 
+export function inspectLabel(inspecting: boolean): string {
+  return inspecting ? '둘러보기 끝' : '석상 둘러보기';
+}
+
+/** 감상 중 조작 안내 */
+export function inspectHint(touch: boolean): string {
+  return touch ? '오른쪽 화면을 끌어 돌려 보기 · 움직이면 끝' : '드래그로 돌려 보기 · 휠로 확대 · 움직이거나 Esc로 끝';
+}
+
 export function awakenMessage(name: string, floor: FloorDef | null): string {
   const where = floor ? `${floor.sub}에서 ` : '';
   return `${where}${josa(name, '이', '가')} 깨어났다`;
