@@ -13,6 +13,7 @@ import { lanternCountLabel, statueCaption } from './castlePresentation';
 import { opaqueMaterials, setFade } from './fadeIn';
 import { glowTexture } from './floors/sceneParts';
 import LanternRing from './LanternRing';
+import { plainStone, sculptMaterial, STATUE_FINISH } from './sculpt';
 
 const AWAKE_EYE_BOOST = 6; // 1을 넘겨야 블룸이 잡힌다
 const DORMANT_EYE = '#2a2226';
@@ -101,7 +102,15 @@ function StatueModel({
         const m = o as THREE.Mesh;
         const map = (m.material as THREE.MeshStandardMaterial).map;
         if (map) {
-          const mat = new THREE.MeshStandardMaterial({ map, roughness: 0.8, emissive: (paint as THREE.MeshStandardMaterial).emissive });
+          const emissive = (paint as THREE.MeshStandardMaterial).emissive;
+          const mat =
+            (STATUE_FINISH === 'sculpt' && sculptMaterial(map, emissive)) ||
+            new THREE.MeshStandardMaterial({ map, roughness: 0.8, emissive });
+          textured.current.push(mat);
+          m.material = mat;
+        } else if (STATUE_FINISH === 'sculpt' && !m.geometry.attributes.color) {
+          // 조각 머리(텍스처 없는 형태): 멤버 색 없이 몸과 같은 회색 돌
+          const mat = plainStone((paint as THREE.MeshStandardMaterial).emissive);
           textured.current.push(mat);
           m.material = mat;
         } else {

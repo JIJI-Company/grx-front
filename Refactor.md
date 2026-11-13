@@ -13,6 +13,31 @@
 
 ---
 
+## v3.4.1 - 2026-11-13
+
+### 목표
+
+- 석상을 색 없이 조각한 돌로 그리는 재질을 시험할 수 있게 한다. 기본 동작(Paint 텍스처)은 그대로.
+
+### 변경 사항
+
+- 신규 `src/components/castle/sculpt.ts`: `VITE_STATUE_FINISH=sculpt`일 때 텍스처 석상은 텍스처 밝기만 남긴 회색 맵을 명암(map)과 새김(bumpMap)으로 쓰는 조각 재질, 텍스처 없는 메시(형태로 깎은 머리·목)는 멤버 색 없는 맨 돌(`plainStone`). 회색 맵 평균을 맞춰 두 재질의 돌 밝기가 같다. 같은 텍스처는 한 번만 변환(WeakMap).
+- `Statue.tsx`: 위 재질 선택. 설정이 없으면 기존과 같다.
+
+### 변경 파일
+
+- `src/components/castle/sculpt.ts`(신규), `src/components/castle/Statue.tsx`, `planning/castle/statues-20261113.md`
+
+### Verification
+
+- `tsc -b`, `npm run build`: PASS.
+
+### 미검증 항목
+
+- 화면 전부(사용자 확인 예정): 조각 재질 명암·새김 정도, 윤타미 조각 머리.
+
+---
+
 ## v3.4.0 - 2026-11-13
 
 ### 목표
