@@ -6,12 +6,14 @@ import { useFrame } from '@react-three/fiber';
 import { Html, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import { canvasTexture, Embers } from '../floors/sceneParts';
-import GameTrophy from './GameTrophy';
-import { GlowPool, Label, PaperLantern, Signboard, Trophy, type Medal, type Vec3 } from './parts';
+import GameTrophy, { GrandTrophy } from './GameTrophy';
+import { ExitMarker, GlowPool, Label, PaperLantern, Signboard, type Vec3 } from './parts';
 import { formatDate, getAchievementMemberProfiles, MEDAL_LABEL, type HistoryMemberProfileMap } from '../../history/historyPresentation';
 import {
   EXHIBIT_SPACING,
   exhibitSpots,
+  HALL_FIRST_Z,
+  hallEndZ,
   groupByCategory,
   medalTotals,
   nearestExhibit,
@@ -28,7 +30,6 @@ const PILLAR_X = 4.6;
 const CEILING = 9;
 /** 기둥 간격과 첫 전시대가 시작하는 z */
 const PILLAR_GAP = 7;
-const FIRST_Z = -1.5;
 /** 전시대 줄의 x(통로 가운데에서)와, 그 줄에서 뒤 벽까지의 거리 */
 const EXHIBIT_X = 6.3;
 const WALL_BEHIND = HALF_W - 0.2 - EXHIBIT_X;
@@ -151,7 +152,16 @@ function Exhibit({ record, position, active, profiles, onHover }: ExhibitProps) 
 }
 
 /** 종목 하나: 전시대가 한 줄로 서고, 뒤 벽에 전시대마다 사진 액자, 그 위에 종목 현판 */
-function CategoryRow({ bay, activeId, profiles, onHover }: { bay: BayPlacement; activeId: string | null; profiles: HistoryMemberProfileMap; onHover: (id: string | null) => void }) {
+interface CategoryRowProps {
+  bay: BayPlacement;
+  activeId: string | null;
+  profiles: HistoryMemberProfileMap;
+  onHover: (id: string | null) => void;
+  /** 사진을 불러올 전시대 (가까이 간 적이 있는 것만) */
+  photoIds: ReadonlySet<string>;
+}
+
+function CategoryRow({ bay, activeId, profiles, onHover, photoIds }: CategoryRowProps) {
   const n = bay.records.length;
   const length = n * EXHIBIT_SPACING;
   return (
@@ -175,7 +185,7 @@ function CategoryRow({ bay, activeId, profiles, onHover }: { bay: BayPlacement; 
                 <planeGeometry args={[PHOTO.w, PHOTO.h]} />
                 <meshStandardMaterial color="#3a2a26" emissive="#5a3a20" emissiveIntensity={0.35} roughness={0.9} />
               </mesh>
-              {r.image && (
+              {r.image && photoIds.has(r.id) && (
                 <Suspense fallback={null}>
                   <Photo url={r.image} w={PHOTO.w} h={PHOTO.h} />
                 </Suspense>
@@ -203,17 +213,16 @@ function TotalsWall({ z, gold, silver, bronze }: { z: number; gold: number; silv
         <boxGeometry args={[9, 1, 3]} />
         <meshStandardMaterial color="#17100f" roughness={0.35} metalness={0.2} />
       </mesh>
-      <Trophy medal="gold" position={[0, 1, 1.2]} scale={2.6} />
-      {([['silver', -2.6], ['silver', 2.6]] as [Medal, number][]).map(([m, x]) => (
-        <Trophy key={x} medal={m} position={[x, 1, 1.4]} scale={1.7} />
-      ))}
-      <mesh position={[0, 7.1, 0.1]} rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[1.5, 1.5, 0.14, 48]} />
-        <meshStandardMaterial color="#d9a520" emissive="#d49a10" emissiveIntensity={0.55} metalness={0.4} roughness={0.3} />
-      </mesh>
-      <Label text={text} width={7.5} height={1.1} color="#ffe08a" glow={2} position={[0, 4.9, 0.3]} />
-      <Label text="RECORD OF GLORY" width={5} height={0.42} color="#c9a04a" glow={1.3} position={[0, 4.05, 0.3]} />
-      <pointLight position={[0, 4, 5]} color="#ffd070" intensity={55} distance={22} decay={1.6} />
+      {/* 꾸한성 대표 트로피 하나만 크게. 붉은 달 구슬이 통로 끝에서 먼저 눈에 띈다 */}
+      <Suspense fallback={null}>
+        <GrandTrophy position={[0, 1, 1.2]} scale={2.1} />
+      </Suspense>
+      <pointLight position={[0, 3.3, 2.4]} color="#ff4020" intensity={14} distance={7} decay={1.6} />
+      <Label text={text} width={7.5} height={1.1} color="#ffe08a" glow={2} position={[0, 5.9, 0.3]} />
+      <Label text="RECORD OF GLORY" width={5} height={0.42} color="#c9a04a" glow={1.3} position={[0, 5.05, 0.3]} />
+      {/* 앞은 약하게, 옆에서 비스듬히 비춰 칼날 윤곽이 살게 */}
+      <pointLight position={[0, 4, 5]} color="#ffd070" intensity={22} distance={22} decay={1.6} />
+      <pointLight position={[-3, 3, 3]} color="#ffe0b0" intensity={18} distance={9} decay={1.6} />
     </group>
   );
 }
@@ -223,19 +232,30 @@ interface HistoryHallSceneProps {
   /** 멤버 이름 → 색·아바타 (없는 멤버는 이름만 보여 준다) */
   memberProfiles: HistoryMemberProfileMap;
   low: boolean;
+  /** "가까이"의 기준 위치(m). 게임에서는 내 캐릭터, 없으면 카메라(미리보기) */
+  focus?: { x: number; z: number };
 }
 
-export default function HistoryHallScene({ records, memberProfiles, low }: HistoryHallSceneProps) {
-  const { placed, endZ: rowsEnd } = useMemo(() => placeBays(groupByCategory(records), FIRST_Z), [records]);
+/** 이 거리 안의 전시대 사진만 불러온다(m). 한 번 불러온 사진은 유지.
+ *  입구에서 앞쪽 2/3쯤이 바로 보이고 조금 걸으면 전부 찬다. 사진 R2 이전 뒤에는 전부 바로 불러와도 된다 */
+const PHOTO_RADIUS = 24;
+
+export default function HistoryHallScene({ records, memberProfiles, low, focus }: HistoryHallSceneProps) {
+  const placed = useMemo(() => placeBays(groupByCategory(records), HALL_FIRST_Z).placed, [records]);
   const totals = useMemo(() => medalTotals(records), [records]);
-  const endZ = rowsEnd - 4;
+  const endZ = useMemo(() => hallEndZ(records), [records]);
   // 정보 카드는 한 번에 하나: 마우스를 올린 전시대가 먼저, 없으면 보는 위치에서 가장 가까운 전시대
   const spots = useMemo(() => exhibitSpots(placed, EXHIBIT_X), [placed]);
   const [hoverId, setHoverId] = useState<string | null>(null);
   const [nearId, setNearId] = useState<string | null>(null);
+  const [photoIds, setPhotoIds] = useState<ReadonlySet<string>>(() => new Set());
   useFrame(({ camera }) => {
-    const id = nearestExhibit(spots, camera.position.x, camera.position.z, NEAR_RADIUS);
+    const at = focus ?? { x: camera.position.x, z: camera.position.z };
+    const id = nearestExhibit(spots, at.x, at.z, NEAR_RADIUS);
     if (id !== nearId) setNearId(id);
+    // 사진은 다가간 전시대 것만 받는다 (전송량: 수상 사진은 장당 수백 KB)
+    const fresh = spots.filter((s) => !photoIds.has(s.id) && Math.hypot(s.x - at.x, s.z - at.z) < PHOTO_RADIUS);
+    if (fresh.length) setPhotoIds(new Set([...photoIds, ...fresh.map((s) => s.id)]));
   });
   const activeId = hoverId ?? nearId;
   const length = 8 - endZ;
@@ -322,9 +342,10 @@ export default function HistoryHallScene({ records, memberProfiles, low }: Histo
         </group>
       ))}
       {placed.map((b) => (
-        <CategoryRow key={b.category} bay={b} activeId={activeId} profiles={memberProfiles} onHover={setHoverId} />
+        <CategoryRow key={b.category} bay={b} activeId={activeId} profiles={memberProfiles} onHover={setHoverId} photoIds={photoIds} />
       ))}
       <TotalsWall z={endZ} {...totals} />
+      <ExitMarker z={7.2} />
       <pointLight position={[0, 7, zc] as Vec3} color="#ffb870" intensity={160} distance={60} decay={1.7} />
       <Embers count={low ? 80 : 200} seed={63} bounds={[-10, 10, 0, 8, endZ, 6]} color="#ffcf7a" size={0.06} rise={0.1} opacity={0.6} />
     </group>

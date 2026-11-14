@@ -1,5 +1,5 @@
 // 종목별 트로피 (public/castle/trophies.glb, Blender 원본: 저장소 밖 assets/castle/trophies.blend · trophies.py).
-// 모델 9종이 메시 하나씩 들어 있다(trophy_{slug}). 금속 재질(tr_metal)만 메달 색으로 바꾸고 받침 재질(tr_dark)은 그대로 둔다.
+// 종목 트로피 9종(trophy_{slug})과 전당 맨 안쪽의 대표 트로피(trophy_grand)가 들어 있다. 금속 재질(tr_metal)만 메달 색으로 바꾸고 받침 재질(tr_dark)은 그대로 둔다.
 // 높이 약 1m, 원점 = 바닥 가운데. 실제 게임의 로고·공식 트로피를 본뜨지 않은 일반 사물이다.
 import { useMemo } from 'react';
 import { useGLTF } from '@react-three/drei';
@@ -57,6 +57,51 @@ export default function GameTrophy({ category, medal, position, scale = 1 }: { c
         return { geometry: m.geometry, material: mat.name.startsWith('tr_metal') ? METALS[medal] : mat };
       }),
     [node, medal],
+  );
+  return (
+    <group position={position} scale={scale}>
+      {parts.map((p, i) => (
+        <mesh key={i} geometry={p.geometry} material={p.material} />
+      ))}
+    </group>
+  );
+}
+
+/** 꾸한성 붉은 달 구슬: 블룸에 잡히게 1을 넘는 색 */
+const MOON = new THREE.MeshBasicMaterial({ color: new THREE.Color('#ff2410').multiplyScalar(1.5) });
+/** 대표 트로피 금: 종목 트로피보다 자체 발광을 낮춰 칼날·고리 같은 세부가 빛에 묻히지 않게 */
+const GRAND_GOLD = new THREE.MeshStandardMaterial({ color: '#d9a520', emissive: '#5a3a06', emissiveIntensity: 0.5, metalness: 0.75, roughness: 0.22 });
+
+/** 크리스털 기둥: 붉은 기가 도는 투명 유리 (실시간 굴절 대신 반투명 + 은은한 자체 발광) */
+const GLASS = new THREE.MeshPhysicalMaterial({
+  color: '#ffb0a0',
+  emissive: '#ff3a1a',
+  emissiveIntensity: 0.35,
+  roughness: 0.05,
+  metalness: 0,
+  transparent: true,
+  opacity: 0.45,
+  depthWrite: false,
+});
+
+/** 전당 맨 안쪽의 대표 트로피 "붉은 달의 첨탑": 팔각 흑석 받침·월계 고리·크리스털 기둥·비틀린 금 칼날 4장·붉은 달 구슬·초승달 칼날·두 뿔. 높이 약 1.4m */
+export function GrandTrophy({ position, scale = 1 }: { position?: Vec3; scale?: number }) {
+  const { nodes } = useGLTF(URL);
+  const node = nodes.trophy_grand;
+  const parts = useMemo(
+    () =>
+      partsOf(node).map((m) => {
+        const mat = m.material as THREE.Material;
+        const material = mat.name.startsWith('tr_moon')
+          ? MOON
+          : mat.name.startsWith('tr_glass')
+            ? GLASS
+            : mat.name.startsWith('tr_metal')
+              ? GRAND_GOLD
+              : mat;
+        return { geometry: m.geometry, material };
+      }),
+    [node],
   );
   return (
     <group position={position} scale={scale}>

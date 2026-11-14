@@ -71,7 +71,7 @@ export function stepMotion(m: Motion, axis: MoveAxis, area: WalkArea, dtRaw: num
 export class FloorTriggerTracker {
   private acc = 0;
 
-  update(floor: FloorDef, m: Motion, moved: number): { to: FloorId; fade: string; effect: TransitionKind } | null {
+  update(floor: FloorDef, m: Motion, moved: number): { to: FloorId; fade: string; effect: TransitionKind; arrive?: [number, number] } | null {
     const t = floor.triggers.find((tr) => inRect(tr.rect, m.x, m.z));
     if (!t || m.frozen) {
       this.acc = 0;
@@ -80,7 +80,7 @@ export class FloorTriggerTracker {
     this.acc += moved;
     if (this.acc < t.meters) return null;
     this.acc = 0;
-    return { to: t.to, fade: t.fade, effect: t.effect };
+    return { to: t.to, fade: t.fade, effect: t.effect, arrive: t.arrive };
   }
 }
 

@@ -125,7 +125,7 @@ export function coverStyle(o: TransitionOverlay | null): CSSProperties {
   const p = TRANSITIONS[o.kind];
   if (o.phase === 'out') return { background: o.color, opacity: 1, transition: `opacity ${p.coverMs}ms ${EASE_IN_OUT} ${p.coverDelayMs}ms` };
   // 계단은 덮개 대신 닫힌 장지문이 열리므로 덮개는 장지문 뒤에서 금방 걷힌다
-  const reveal = o.kind === 'stairs' ? 'opacity 200ms linear 200ms' : `opacity ${p.revealMs}ms ${EASE} ${p.revealDelayMs}ms`;
+  const reveal = o.kind === 'stairs' || o.kind === 'door' ? 'opacity 200ms linear 200ms' : `opacity ${p.revealMs}ms ${EASE} ${p.revealDelayMs}ms`;
   return { background: o.color, opacity: 0, transition: reveal };
 }
 

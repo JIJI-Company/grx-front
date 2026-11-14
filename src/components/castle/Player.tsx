@@ -17,7 +17,7 @@ interface PlayerProps {
   session: CastleSession;
   floor: FloorDef;
   statues: PlacedStatue[];
-  onTrigger: (to: FloorId, fade: string, effect: TransitionKind) => void;
+  onTrigger: (to: FloorId, fade: string, effect: TransitionKind, arrive?: [number, number]) => void;
   onNear: (s: PlacedStatue | null) => void;
   view: CameraView;
   fx: MutableRefObject<ActiveTransition | null>;
@@ -36,7 +36,7 @@ export default function Player({ session, floor, statues, onTrigger, onNear, vie
   useFrame((_, dt) => {
     const moved = stepMotion(m, toWorld(session.input.read(), session.look.yaw), area, dt);
     const hit = tracker.current.update(floor, m, moved);
-    if (hit) onTrigger(hit.to, hit.fade, hit.effect);
+    if (hit) onTrigger(hit.to, hit.fade, hit.effect, hit.arrive);
 
     const best = nearestStatue(statues, m.x, m.z);
     if (best !== near.current) {

@@ -28,7 +28,7 @@ export default function FloorTransition({ overlay, banner, children }: FloorTran
         {children}
       </div>
       <div className="pointer-events-none absolute inset-0 z-10" style={coverStyle(overlay)} />
-      {overlay?.kind === 'stairs' && (
+      {(overlay?.kind === 'stairs' || overlay?.kind === 'door') && (
         <div className="pointer-events-none absolute inset-0 z-10 flex overflow-hidden" aria-hidden>
           {([-1, 1] as const).map((side) => (
             <div key={side} className="h-full w-1/2" style={{ ...SHOJI, ...shojiStyle(overlay, side) }} />

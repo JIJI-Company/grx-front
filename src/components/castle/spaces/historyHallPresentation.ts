@@ -93,3 +93,10 @@ export function nearestExhibit(spots: ExhibitSpot[], x: number, z: number, radiu
   }
   return best;
 }
+
+/** 첫 전시대가 시작하는 z (입구 쪽) */
+export const HALL_FIRST_Z = -1.5;
+/** 맨 안쪽 벽의 z: 마지막 전시대에서 4m 더 들어간다(합계 단 자리) */
+export function hallEndZ(records: HallRecord[]): number {
+  return placeBays(groupByCategory(records), HALL_FIRST_Z).endZ - 4;
+}

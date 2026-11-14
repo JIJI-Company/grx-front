@@ -1,4 +1,4 @@
-// 새 공간(광장·전당 등) 공용 부품: 글씨 현판, 기와지붕, 종이등, 트로피. 텍스처 파일 없이 캔버스·도형으로만 만든다.
+// 새 공간(광장·전당 등) 공용 부품: 글씨 현판, 기와지붕, 종이등, 빛 번짐. 텍스처 파일 없이 캔버스·도형으로만 만든다 (트로피는 GameTrophy.tsx).
 import { useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 import { glowTexture } from '../floors/sceneParts';
@@ -134,31 +134,28 @@ export function GlowPool({ position, size, color, opacity = 0.5 }: { position: V
   );
 }
 
-const CUP_PROFILE = [
-  [0.0, 0.0], [0.24, 0.0], [0.24, 0.07], [0.11, 0.11], [0.05, 0.2], [0.05, 0.36], [0.1, 0.43], [0.2, 0.58], [0.25, 0.8], [0.27, 0.86],
-].map(([r, y]) => new THREE.Vector2(r, y));
-const CUP_GEOMETRY = new THREE.LatheGeometry(CUP_PROFILE, 20);
-const MEDAL = {
-  gold: { color: '#d9a520', emissive: '#c8860a' },
-  silver: { color: '#c9ced6', emissive: '#6f7a8a' },
-  bronze: { color: '#b0703a', emissive: '#7a4010' },
-} as const;
-export type Medal = keyof typeof MEDAL;
+/** 메달 종류 (종목 트로피 색) */
+export type Medal = 'gold' | 'silver' | 'bronze';
 
-/** 트로피: 컵 + 손잡이 둘. 금·은·동 세 가지만 (특정 대회 트로피를 본뜨지 않는다). 높이 ≈ 0.86 * scale */
-export function Trophy({ medal, position, scale = 1 }: { medal: Medal; position?: Vec3; scale?: number }) {
-  const m = MEDAL[medal];
+/** 바닥의 나가는 곳 표시: 금빛 테두리 + 빛 번짐 + 글씨. 건물 입구(트리거 자리)에 깐다 */
+export function ExitMarker({ x = 0, z, width = 4, text = '광장으로 나가기' }: { x?: number; z: number; width?: number; text?: string }) {
+  const depth = 1.2;
+  const edge = useMemo(() => new THREE.Color('#ffcf60').multiplyScalar(1.6), []);
   return (
-    <group position={position} scale={scale}>
-      <mesh geometry={CUP_GEOMETRY}>
-        <meshStandardMaterial color={m.color} emissive={m.emissive} emissiveIntensity={0.55} metalness={0.5} roughness={0.3} side={THREE.DoubleSide} />
-      </mesh>
-      {[-1, 1].map((s) => (
-        <mesh key={s} position={[s * 0.27, 0.66, 0]} rotation={[0, 0, s * -0.2]}>
-          <torusGeometry args={[0.1, 0.022, 8, 16, Math.PI * 1.2]} />
-          <meshStandardMaterial color={m.color} emissive={m.emissive} emissiveIntensity={0.55} metalness={0.5} roughness={0.3} />
+    <group position={[x, 0.03, z]}>
+      {[
+        [0, -depth / 2, width, 0.06],
+        [0, depth / 2, width, 0.06],
+        [-width / 2, 0, 0.06, depth],
+        [width / 2, 0, 0.06, depth],
+      ].map(([x, zz, w, d], i) => (
+        <mesh key={i} position={[x, 0, zz]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[w, d]} />
+          <meshBasicMaterial color={edge} />
         </mesh>
       ))}
+      <GlowPool position={[0, 0, 0]} size={width * 1.3} color="#ffcf60" opacity={0.35} />
+      <Label text={text} width={width * 0.8} height={0.5} color="#ffe08a" glow={1.8} position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]} />
     </group>
   );
 }

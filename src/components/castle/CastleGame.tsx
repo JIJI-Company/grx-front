@@ -3,7 +3,7 @@
 // ack가 늦거나 실패해도(세션이 재연결) 화면이 가려진 채 멈추지 않는다.
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import type { CastleStatueFloor, Member } from '../../api/types';
-import { findStatue, FLOORS, placeStatues, type PlacedStatue } from '../../castle/floors';
+import { findStatue, FLOOR_ORDER, FLOORS, galleryFloor, historyFloor, inRect, placeStatues, PLAZA_BOARD, PLAZA_CENTER, type PlacedStatue } from '../../castle/floors';
 import { MOUSE_SENSITIVITY, TOUCH_SENSITIVITY } from '../../castle/input';
 import { initialInspect, turnInspect, zoomInspect } from '../../castle/orbit';
 import type { FloorId } from '../../castle/protocol';
@@ -14,6 +14,12 @@ import { transitionEndMs, TRANSITIONS, type ActiveTransition, type TransitionKin
 import { allLampsOn } from '../../castle/reveal';
 import { loadView, saveView, type CameraView } from '../../castle/view';
 import { useMembers } from '../../hooks/useMembers';
+import { hallEndZ } from './spaces/historyHallPresentation';
+import { useHallData } from './spaces/useHallData';
+import { usePlazaData } from './spaces/usePlazaData';
+import { galleryEndZ, lastColumnZ, posterDate } from './spaces/galleryPresentation';
+import { useContentsArchive } from '../../hooks/useContent';
+import type { ContentsArchiveItem } from '../../api/types';
 import MemberModal from '../members/MemberModal';
 import CastleCanvas from './CastleCanvas';
 import type { InspectState } from './FollowCamera';
@@ -36,6 +42,8 @@ import LanternPrompt from './ui/LanternPrompt';
 import LookPad from './ui/LookPad';
 
 const BANNER_MS = 3200;
+/** 광장 게시판에서 이만큼 가까우면 이번 주 일정 목록을 띄운다(m) */
+const BOARD_RADIUS = 4;
 
 interface CastleGameProps {
   session: CastleSession;
@@ -68,10 +76,34 @@ export default function CastleGame({ session, statues, statuesError }: CastleGam
     return [...master, ...upper, ...lower, ...newcomers, ...other].find((m) => m.memberId === infoMemberId) ?? null;
   }, [infoMemberId, memberGroups]);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const floor = FLOORS[floorId];
+  // History 전당: 기록 수로 길이가 정해진다 (장면과 걷기 영역이 같은 값을 쓴다)
+  const hall = useHallData();
+  const plaza = usePlazaData();
+  // Content 화랑(PoC): 포스터 수로 길이가 정해진다. 가까이 간 포스터는 화면 아래에 제목을 띄운다
+  const { data: contents } = useContentsArchive();
+  const [nearPoster, setNearPoster] = useState<ContentsArchiveItem | null>(null);
+  const gallery = useMemo(() => ({ items: contents ?? [], onNear: setNearPoster }), [contents]);
+  const floor = useMemo(() => {
+    if (floorId === 'HISTORY') return historyFloor(hallEndZ(hall.records));
+    if (floorId === 'CONTENT') return galleryFloor(galleryEndZ(gallery.items.length), lastColumnZ(gallery.items.length) - 1.3);
+    return FLOORS[floorId];
+  }, [floorId, hall.records, gallery.items.length]);
   const placed = useMemo(() => placeStatues(floor, statues), [floor, statues]);
 
   useEffect(() => session.input.attach(), [session]);
+
+  // 닫힌 문 같은 안내: 내 위치가 안내 구역에 들어가면 화면 아래에 한 줄. 광장 게시판 앞이면 이번 주 일정 목록
+  const [sign, setSign] = useState<string | null>(null);
+  const [atBoard, setAtBoard] = useState(false);
+  useEffect(() => {
+    const signs = floor.signs ?? [];
+    const t = setInterval(() => {
+      const m = session.motion;
+      setSign(signs.find((s) => inRect(s.rect, m.x, m.z))?.text ?? null);
+      setAtBoard(floor.id === 'PLAZA' && Math.hypot(m.x - PLAZA_BOARD.x, m.z - PLAZA_BOARD.z) < BOARD_RADIUS);
+    }, 200);
+    return () => clearInterval(t);
+  }, [floor, session]);
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
   useEffect(() => {
     castleSound.ambience(floorId);
@@ -81,7 +113,7 @@ export default function CastleGame({ session, statues, statuesError }: CastleGam
   useEffect(() => () => castleSound.ambience(null), []);
 
   const onTrigger = useCallback(
-    (to: FloorId, color: string, kind: TransitionKind) => {
+    (to: FloorId, color: string, kind: TransitionKind, arrive?: [number, number]) => {
       const plan = TRANSITIONS[kind];
       session.motion.frozen = true;
       inspect.current = null;
@@ -91,7 +123,7 @@ export default function CastleGame({ session, statues, statuesError }: CastleGam
       setOverlay({ kind, phase: 'out', color });
       timers.current.push(
         setTimeout(() => {
-          void session.changeFloor(to);
+          void session.changeFloor(to, arrive);
           session.look.reset(); // 새 층에서는 앞(-z)을 보고 시작
           setFloorId(to);
           setBanner(to);
@@ -114,7 +146,10 @@ export default function CastleGame({ session, statues, statuesError }: CastleGam
   const pickFloor = useCallback(
     (to: FloorId) => {
       if (session.motion.frozen || to === floorId) return;
-      onTrigger(to, '#000000', to > floorId ? 'stairs' : 'return');
+      // 광장이 맨 위, 지하로 갈수록 아래. 전당처럼 광장 옆 건물은 문 연출
+      const building = (f: FloorId) => f === 'HISTORY' || f === 'CONTENT';
+      if (building(to) || building(floorId)) return onTrigger(to, '#000000', 'door', to === 'PLAZA' ? PLAZA_CENTER : undefined);
+      onTrigger(to, '#000000', FLOOR_ORDER.indexOf(to) > FLOOR_ORDER.indexOf(floorId) ? 'stairs' : 'return');
     },
     [session, floorId, onTrigger],
   );
@@ -312,7 +347,7 @@ export default function CastleGame({ session, statues, statuesError }: CastleGam
           onPointerUp={dragEnd}
           onPointerCancel={dragEnd}
         >
-          <CastleCanvas session={session} floor={floor} statues={placed} onTrigger={onTrigger} onNear={onNear} view={view} inspect={inspect} fx={fx} />
+          <CastleCanvas session={session} floor={floor} statues={placed} onTrigger={onTrigger} onNear={onNear} view={view} inspect={inspect} fx={fx} hall={hall} plaza={plaza} gallery={gallery} />
         </div>
       </FloorTransition>
       <LookPad onTurn={(dx, dy) => turnView(dx, dy, TOUCH_SENSITIVITY)} />
@@ -326,6 +361,47 @@ export default function CastleGame({ session, statues, statuesError }: CastleGam
         onToggleView={toggleView}
         lookHint={view === 'first' && !locked && !coarse && !infoMember && !inspecting}
       />
+      {atBoard && (
+        <section
+          aria-label="이번 주 일정"
+          className="pointer-events-none absolute top-1/2 right-6 w-72 -translate-y-1/2 border border-gold-400/40 bg-castle-950/85 px-5 py-4 shadow-[0_0_24px_#000] transition duration-300 starting:opacity-0"
+        >
+          <h3 className="text-xs tracking-[0.4em] text-gold-400">이번 주 일정</h3>
+          {plaza.days.length ? (
+            <ul className="mt-3 max-h-[80vh] space-y-2 overflow-hidden">
+              {plaza.days.map((d) => (
+                <li key={d.date}>
+                  <p className={`text-[11px] tracking-[0.1em] ${d.isToday ? 'text-gold-400' : 'text-ruby-500'}`}>{d.isToday ? `오늘 · ${d.label}` : d.label}</p>
+                  {!d.events.length && <p className="mt-1 text-sm text-ink-500">일정 없음</p>}
+                  <ul className="mt-1 space-y-1">
+                    {d.events.map((e) => (
+                      <li key={e.id} className="text-sm leading-snug text-ink-50">
+                        {e.time && <span className="mr-1.5 text-[11px] text-ink-400">{e.time}</span>}
+                        {e.title}
+                        {e.who && <span className="ml-1.5 text-[11px] text-ink-400">{e.who}</span>}
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-3 text-sm text-ink-400">이번 주 일정이 없습니다</p>
+          )}
+        </section>
+      )}
+      {floorId === 'CONTENT' && nearPoster && (
+        <div className="pointer-events-none absolute bottom-24 w-full text-center [text-shadow:0_0_8px_#000]" role="status">
+          <p className="text-[11px] tracking-[0.3em] text-gold-400">{posterDate(nearPoster.date)}</p>
+          <p className="mt-1 text-lg font-semibold text-ink-50">{nearPoster.title}</p>
+          {!!nearPoster.members.length && <p className="mt-1 text-xs text-ink-300">{nearPoster.members.join(' · ')}</p>}
+        </div>
+      )}
+      {sign && !near && (
+        <p className="pointer-events-none absolute bottom-24 w-full text-center text-sm tracking-[0.3em] text-ink-200 [text-shadow:0_0_8px_#000]" role="status">
+          {sign}
+        </p>
+      )}
       {near && !infoMember && (
         <LanternPrompt
           label={lanternActionLabel(near, store.myLanternExpiry(near.memberId))}

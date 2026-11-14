@@ -2,16 +2,19 @@
 // 지하(B1~B3)의 '끝없는 방' 배경과 달리 여기는 바깥이다: 밤하늘·붉은 달·별·먼 산과 성의 윤곽·구름바다.
 //   북: History 전당(붉은 기둥·2층 지붕·금 트로피)  서: Content 화랑(길고 낮은 회랑·포스터 액자)
 //   동: 관람실(극장·큰 간판 화면·등 기둥)            남서: 화실(팬아트, 아직 닫힘)  남: 무한성으로 내려가는 문
-// 설계: planning/castle/spaces-20261112.md. 아직 미리보기(/castle-preview) 전용이라 걷기 영역·충돌은 없다.
-import { useMemo, useRef, type ReactNode } from 'react';
+// 설계: planning/castle/spaces-20261112.md. 게임에서는 castle/floors.ts의 PLAZA(걷기 영역·충돌·문)와 같은 수치를 쓴다.
+import { useMemo, useRef, type ReactNode, Suspense } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useTexture } from '@react-three/drei';
 import * as THREE from 'three';
+import { PLAZA_BOARD, PLAZA_GATE_X, PLAZA_HALF, PLAZA_LAMPS } from '../../../castle/floors';
 import { canvasTexture, Embers, glowTexture, rng, useWindowTexture } from '../floors/sceneParts';
-import { GlowPool, Label, PaperLantern, Signboard, TileRoof, Trophy, type Vec3 } from './parts';
+import { GrandTrophy } from './GameTrophy';
+import type { BoardDay } from './schedulePresentation';
+import { GlowPool, Label, PaperLantern, Signboard, TileRoof, type Vec3 } from './parts';
 
 export const PLAZA_FOG = { color: '#140c18', density: 0.0045 };
-const HALF = 17; // 마당 반쪽 크기(m)
+const HALF = PLAZA_HALF; // 마당 반쪽 크기(m)
 const MARK_URL = '/castle/mark.webp';
 
 interface Palette {
@@ -140,7 +143,10 @@ function HistoryDecor({ w, d }: { w: number; d: number }) {
             <boxGeometry args={[1.5, 1.6, 1.5]} />
             <meshStandardMaterial color="#231a1d" roughness={0.8} />
           </mesh>
-          <Trophy medal="gold" position={[0, 1.6, 0]} scale={2.6} />
+          {/* 전당 안쪽과 같은 대표 트로피 "붉은 달의 첨탑" */}
+          <Suspense fallback={null}>
+            <GrandTrophy position={[0, 1.6, 0]} scale={2} />
+          </Suspense>
           <GlowPool position={[0, 0.03, 0]} size={5} color="#ffc24a" opacity={0.35} />
         </group>
       ))}
@@ -353,12 +359,15 @@ function Courtyard() {
   );
 }
 
+/** 큰 등롱 높이(m): 도착 지점에서 전당 뒤 달을 가리지 않을 만큼 높이 */
+const LANTERN_Y = 13;
+
 /** 마당 가운데 위에 뜬 큰 등롱: 모이는 기준점이자 주 광원 */
 function GreatLantern() {
   const ref = useRef<THREE.Group>(null!);
-  useFrame(({ clock }) => (ref.current.position.y = 9.5 + Math.sin(clock.elapsedTime * 0.5) * 0.25));
+  useFrame(({ clock }) => (ref.current.position.y = LANTERN_Y + Math.sin(clock.elapsedTime * 0.5) * 0.25));
   return (
-    <group ref={ref} position={[0, 9.5, 0]}>
+    <group ref={ref} position={[0, LANTERN_Y, 0]}>
       <PaperLantern size={4.6} color="#ff9a48" glow={1.35} />
       <pointLight color="#ffb870" intensity={140} distance={70} decay={1.7} />
     </group>
@@ -386,9 +395,21 @@ function StoneLamp({ position }: { position: Vec3 }) {
   );
 }
 
-/** 게시판: 이번 주 일정이 종이쪽지로 걸린다 (지금은 자리만) */
-function NoticeBoard({ position, rotationY }: { position: Vec3; rotationY: number }) {
-  const slips = useMemo(() => Array.from({ length: 12 }, (_, i) => ({ x: -1.5 + (i % 6) * 0.6, y: 2.05 - Math.floor(i / 6) * 0.75, tilt: Math.sin(i * 12.9) * 0.06 })), []);
+/** 게시판에 거는 쪽지 수(날짜 하나 = 쪽지 하나, 4 + 3). 쪽지에는 일정 3개까지, 나머지는 "+n" */
+const BOARD_SLIPS = 7;
+const SLIP_LINES = 3;
+
+/** 게시판: 이번 주 일정을 날짜별 종이쪽지로 건다 (하루에 일정이 여러 개면 한 쪽지에 줄줄이) */
+function NoticeBoard({ position, rotationY, days }: { position: Vec3; rotationY: number; days: BoardDay[] }) {
+  const slips = useMemo(
+    () =>
+      Array.from({ length: BOARD_SLIPS }, (_, i) => {
+        const row = i < 4 ? 0 : 1;
+        const col = row === 0 ? i : i - 4;
+        return { x: (row === 0 ? -1.4 : -0.93) + col * 0.93, y: 2.2 - row * 0.9, tilt: Math.sin(i * 12.9) * 0.04, day: days[i] };
+      }),
+    [days],
+  );
   return (
     <group position={position} rotation={[0, rotationY, 0]}>
       {[-2, 2].map((x) => (
@@ -403,10 +424,24 @@ function NoticeBoard({ position, rotationY }: { position: Vec3; rotationY: numbe
       </mesh>
       <TileRoof w={4} d={0.4} h={0.5} overhang={0.35} position={[0, 2.95, 0]} />
       {slips.map((s, i) => (
-        <mesh key={i} position={[s.x, s.y, 0.07]} rotation={[0, 0, s.tilt]}>
-          <planeGeometry args={[0.46, 0.62]} />
-          <meshStandardMaterial color="#efe6d0" emissive="#efe6d0" emissiveIntensity={0.3} roughness={0.9} />
-        </mesh>
+        <group key={s.day?.date ?? i} position={[s.x, s.y, 0.07]} rotation={[0, 0, s.tilt]}>
+          <mesh>
+            <planeGeometry args={[0.86, 0.82]} />
+            <meshStandardMaterial color={s.day?.isToday ? '#f6e3b0' : '#efe6d0'} emissive="#efe6d0" emissiveIntensity={s.day?.events.length ? 0.3 : 0.1} roughness={0.9} />
+          </mesh>
+          {s.day && (
+            <>
+              <Label text={s.day.isToday ? `오늘 ${s.day.label}` : s.day.label} width={0.74} height={0.15} color="#8a1a12" position={[0, 0.3, 0.01]} />
+              {!s.day.events.length && <Label text="일정 없음" width={0.6} height={0.14} color="#8a7a6a" position={[0, 0.02, 0.01]} />}
+              {s.day.events.slice(0, SLIP_LINES).map((e, k) => (
+                <Label key={e.id} text={e.time ? `${e.time} ${e.title}` : e.title} width={0.78} height={0.15} color="#1a120c" position={[0, 0.12 - k * 0.17, 0.01]} />
+              ))}
+              {s.day.events.length > SLIP_LINES && (
+                <Label text={`+${s.day.events.length - SLIP_LINES}`} width={0.3} height={0.12} color="#5a4a3a" position={[0.26, -0.33, 0.01]} />
+              )}
+            </>
+          )}
+        </group>
       ))}
       <Label text="이번 주 일정" width={2} height={0.34} color="#f3d27a" glow={1.5} position={[0, 2.82, 0.3]} />
     </group>
@@ -566,9 +601,9 @@ function CloudSea() {
   );
 }
 
-const LAMPS: Vec3[] = [-1, 1].flatMap((s) => [-11, 0, 11].flatMap((t): Vec3[] => [[s * (HALF - 1), 0, t], [t === 0 ? 7 * s : t, 0, s * (HALF - 1)]]));
+const LAMPS: Vec3[] = PLAZA_LAMPS.map(([x, z]) => [x, 0, z]);
 
-export default function PlazaScene({ low }: { low: boolean }) {
+export default function PlazaScene({ low, days = [] }: { low: boolean; /** 게시판에 걸 이번 주 일정(날짜별) */ days?: BoardDay[] }) {
   return (
     <group>
       <ambientLight intensity={0.22} color="#ffcf9a" />
@@ -582,7 +617,7 @@ export default function PlazaScene({ low }: { low: boolean }) {
       {LAMPS.map((p, i) => (
         <StoneLamp key={i} position={p} />
       ))}
-      <NoticeBoard position={[9.5, 0, 6.5]} rotationY={-0.7} />
+      <NoticeBoard position={[PLAZA_BOARD.x, 0, PLAZA_BOARD.z]} rotationY={PLAZA_BOARD.rotY} days={days} />
 
       <Pavilion w={18} d={9} wallH={6.6} tiers={2} roofH={3} doorW={4} palette={HISTORY} sign="전당" position={[0, 0, -HALF - 7.5]}>
         <HistoryDecor w={18} d={9} />
@@ -596,7 +631,7 @@ export default function PlazaScene({ low }: { low: boolean }) {
       <Pavilion w={7} d={5} wallH={3.6} base={0.5} roofH={1.7} doorW={2.4} open={false} palette={ATELIER} sign="화실" position={[-10.5, 0, HALF + 5.5]} rotationY={Math.PI}>
         <AtelierDecor d={5} />
       </Pavilion>
-      <DescentGate position={[4, 0, HALF]} />
+      <DescentGate position={[PLAZA_GATE_X, 0, HALF]} />
 
       <Embers count={low ? 160 : 420} seed={51} bounds={[-34, 34, 0, 26, -34, 34]} color="#ffb060" altColor="#8a7f86" size={0.14} rise={0.35} opacity={0.7} />
     </group>

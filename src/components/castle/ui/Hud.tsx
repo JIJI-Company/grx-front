@@ -37,7 +37,7 @@ export default function Hud({ floor, onPickFloor, population, connection, notice
               aria-current={f.id === floor.id}
               className="focus-ring border-b border-transparent pb-0.5 text-ink-500 transition hover:border-gold-400/70 hover:text-gold-400 disabled:border-gold-400/50 disabled:text-gold-400"
             >
-              {f.id}
+              {f.tag}
             </button>
           ))}
         </div>

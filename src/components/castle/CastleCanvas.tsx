@@ -1,6 +1,6 @@
 // 3D 캔버스: 층 장면 + 석상 + 나/다른 사람 + 카메라 + 후처리. 데이터는 받은 그대로 그린다.
 // 후처리 순서: 블룸(HDR) → ACES 톤 매핑 → 층별 색감 → (B3) 색수차 → 비네트.
-import { useMemo, useState, type MutableRefObject } from 'react';
+import { useMemo, useState, type MutableRefObject, type ComponentProps } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { PerformanceMonitor } from '@react-three/drei';
 import { Bloom, ChromaticAberration, EffectComposer, ToneMapping, Vignette } from '@react-three/postprocessing';
@@ -27,21 +27,24 @@ interface CastleCanvasProps {
   session: CastleSession;
   floor: FloorDef;
   statues: PlacedStatue[];
-  onTrigger: (to: FloorId, fade: string, effect: TransitionKind) => void;
+  onTrigger: (to: FloorId, fade: string, effect: TransitionKind, arrive?: [number, number]) => void;
   onNear: (s: PlacedStatue | null) => void;
   view: CameraView;
   inspect: MutableRefObject<InspectState | null>;
   fx: MutableRefObject<ActiveTransition | null>;
+  hall: ComponentProps<typeof FloorScene>['hall'];
+  plaza: ComponentProps<typeof FloorScene>['plaza'];
+  gallery: ComponentProps<typeof FloorScene>['gallery'];
 }
 
-export default function CastleCanvas({ session, floor, statues, onTrigger, onNear, view, inspect, fx }: CastleCanvasProps) {
+export default function CastleCanvas({ session, floor, statues, onTrigger, onNear, view, inspect, fx, hall, plaza, gallery }: CastleCanvasProps) {
   const [dpr, setDpr] = useState(DPR_MAX);
   const low = useMemo(() => isLowSpec(), []);
   const { store } = session;
   return (
     <Canvas dpr={[1, dpr]} camera={{ fov: 50, near: 0.1, far: 600 }} gl={{ antialias: false }} aria-hidden>
       <PerformanceMonitor onDecline={() => setDpr(1)} onIncline={() => setDpr(DPR_MAX)} />
-      <FloorScene floor={floor} statues={statues} low={low} fx={fx} motion={session.motion} reveal={session.reveal} />
+      <FloorScene floor={floor} statues={statues} low={low} fx={fx} motion={session.motion} reveal={session.reveal} hall={hall} plaza={plaza} gallery={gallery} />
       {statues.map((s) => (
         <Statue
           key={s.memberId}

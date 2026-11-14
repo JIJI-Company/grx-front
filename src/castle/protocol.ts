@@ -4,7 +4,8 @@
 export const CASTLE_PROTOCOL_VERSION = 1 as const;
 export const CASTLE_NAMESPACE = '/castle';
 
-export type FloorId = 'B1' | 'B2' | 'B3';
+/** PLAZA = 광장(입장 도착 지점), HISTORY = History 전당, CONTENT = Content 화랑. 지하 층은 B1~B3 (grx-back castle.constants.ts와 같다) */
+export type FloorId = 'PLAZA' | 'B1' | 'B2' | 'B3' | 'HISTORY' | 'CONTENT';
 /** 연결마다 서버가 새로 주는 숫자. 재접속하면 바뀐다. */
 export type PeerId = number;
 /** member.member_id (uuid) */
@@ -107,6 +108,8 @@ export interface Snapshot {
 
 export interface FloorChangeRequest {
   floor: FloorId;
+  /** 도착 위치(cm). 없으면 서버가 그 공간의 기본 도착 위치로 둔다 */
+  at?: [number, number];
 }
 
 export interface FloorSnapshot {

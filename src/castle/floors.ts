@@ -29,6 +29,14 @@ export interface FloorTrigger {
   meters: number;
   /** 이동 연출 페이드 색 */
   fade: string;
+  /** 도착 위치(m). 없으면 목적지의 spawn (예: 전당에서 나오면 광장의 전당 문 앞) */
+  arrive?: [number, number];
+}
+
+/** 가까이 가면 화면 아래에 뜨는 안내 (닫힌 문 등) */
+export interface FloorSign {
+  rect: Rect;
+  text: string;
 }
 
 export interface StatueSlot {
@@ -49,6 +57,8 @@ export interface FloorGrade {
 
 export interface FloorDef extends WalkArea {
   id: FloorId;
+  /** HUD 층 버튼 글자 (B1·광장 등) */
+  tag: string;
   title: string;
   sub: string;
   spawn: [number, number];
@@ -62,6 +72,8 @@ export interface FloorDef extends WalkArea {
   camera: [number, number, number];
   /** 카메라가 돌 때 넘지 않을 범위(벽·천장 안쪽). 없으면 제한 없음(트인 공간) */
   cameraBox?: CameraBox;
+  /** 가까이 가면 뜨는 안내 */
+  signs?: FloorSign[];
   fog: string;
   fogDensity: number;
   grade: FloorGrade;
@@ -88,6 +100,7 @@ const spread = (n: number, span: number, max: number) => (n > 1 ? Math.min(max, 
 const B1_STAIRS: Rect = { x0: -1.6, x1: 1.6, z0: -53, z1: -48 };
 const B1: FloorDef = {
   id: 'B1',
+  tag: 'B1',
   title: '지하 1층',
   sub: '하현의 회랑',
   walk: [
@@ -140,6 +153,7 @@ export const B2_SCREENS: { x: number; z: number; rotY: number; width: number; y:
 export const B2_DAIS = { z0: -46, z1: -39, halfW: 8, height: 1.2 };
 const B2: FloorDef = {
   id: 'B2',
+  tag: 'B2',
   title: '지하 2층',
   sub: '상현의 방',
   walk: [{ x0: -18, x1: 18, z0: -38, z1: 4 }],
@@ -176,6 +190,7 @@ const B3_EXIT: Rect = { x0: -1.4, x1: 1.4, z0: 29, z1: 34 };
 export const B3_EXHIBIT_GROW = 1.45;
 const B3: FloorDef = {
   id: 'B3',
+  tag: 'B3',
   title: '지하 3층',
   sub: '심층',
   walk: [
@@ -188,15 +203,141 @@ const B3: FloorDef = {
   heightAt: () => 0,
   slot: () => ({ x: 0, z: -7, rotY: 0, scale: 4.4, lift: 2.2, float: true }),
   maxStatues: 1,
-  triggers: [{ rect: B3_EXIT, to: 'B1', meters: STEPS_5, fade: '#000000', effect: 'return' }],
+  triggers: [{ rect: B3_EXIT, to: 'PLAZA', meters: STEPS_5, fade: '#000000', effect: 'return' }],
   camera: [6, 22, 7],
   fog: '#120203',
   fogDensity: 0.011,
   grade: { lift: [0.002, 0, 0.006], gain: [1.06, 0.84, 0.9], saturation: 0.92 }, // 차가운 붉은색
 };
 
-export const FLOORS: Record<FloorId, FloorDef> = { B1, B2, B3 };
-export const FIRST_FLOOR: FloorId = 'B1';
+// ── 광장: 입장하면 도착하는 돌마당(34 x 34m). 남쪽 무한성 문 계단 → B1, 북쪽 전당 문 → History 전당.
+// 화랑·관람실·화실 문은 아직 닫혀 있다(안내만). 장면은 components/castle/spaces/PlazaScene.tsx가 같은 수치를 쓴다
+export const PLAZA_HALF = 17;
+/** 마당 가장자리 돌등 12개 */
+export const PLAZA_LAMPS: [number, number][] = [-1, 1].flatMap((s) =>
+  [-11, 0, 11].flatMap((t): [number, number][] => [
+    [s * (PLAZA_HALF - 1), t],
+    [t === 0 ? 7 * s : t, s * (PLAZA_HALF - 1)],
+  ]),
+);
+/** 이번 주 일정 게시판: 가운데 (x, z)와 돌린 각도 */
+export const PLAZA_BOARD = { x: 9.5, z: 6.5, rotY: -0.7 };
+/** 무한성 문: 문틀 가운데 x (z는 마당 남쪽 끝) */
+export const PLAZA_GATE_X = 4;
+// 마당 걷기 영역(z ≤ 16.5)과 겹치게 시작해야 이어서 걸어 내려간다
+const PLAZA_GATE_STAIRS: Rect = { x0: PLAZA_GATE_X - 1.8, x1: PLAZA_GATE_X + 1.8, z0: 16.3, z1: 20 };
+/** 광장 가운데: 바닥 꾸한성 마크 위. 전당에서 나오면 여기 */
+export const PLAZA_CENTER: [number, number] = [0, 0];
+/** 화랑 문 앞 (서쪽 회랑 계단 아래) */
+const PLAZA_GALLERY_DOOR: Rect = { x0: -16.5, x1: -15.3, z0: -3, z1: 1 };
+/** 전당 문 앞 (북쪽 계단 아래) */
+const PLAZA_HALL_DOOR: Rect = { x0: -2, x1: 2, z0: -16.5, z1: -15.3 };
+const boardPosts = [-2, 0, 2].map((t): [number, number] => [
+  PLAZA_BOARD.x + t * Math.cos(PLAZA_BOARD.rotY),
+  PLAZA_BOARD.z - t * Math.sin(PLAZA_BOARD.rotY),
+]);
+const PLAZA: FloorDef = {
+  id: 'PLAZA',
+  tag: '광장',
+  title: '꾸한성',
+  sub: '광장',
+  walk: [{ x0: -16.5, x1: 16.5, z0: -16.5, z1: 16.5 }, PLAZA_GATE_STAIRS],
+  blockers: [
+    ...PLAZA_LAMPS.map(([x, z]) => circle(x, z, 0.3)),
+    ...boardPosts.map(([x, z]) => circle(x, z, 0.5)),
+    // 무한성 문 기둥, 전당 계단 양옆 트로피 받침
+    circle(PLAZA_GATE_X - 2.4, PLAZA_HALF, 0.34),
+    circle(PLAZA_GATE_X + 2.4, PLAZA_HALF, 0.34),
+    box(-8.55, -7.05, -17.15, -15.65),
+    box(7.05, 8.55, -17.15, -15.65),
+  ],
+  spawn: [-3, 10], // 무한성 문(x 4) 옆: 카메라가 문틀에 가리지 않는다
+  // 무한성 문 계단은 남쪽으로 내려간다
+  heightAt: (x, z) => (z > 17.2 && Math.abs(x - PLAZA_GATE_X) < 2.1 ? -(z - 17.2) * 0.5 : 0),
+  slot: () => ({ x: 0, z: 0, rotY: 0, scale: 1, lift: 0, float: false }),
+  maxStatues: 0,
+  triggers: [
+    { rect: PLAZA_GATE_STAIRS, to: 'B1', meters: 2.4, fade: '#000000', effect: 'stairs' },
+    { rect: PLAZA_HALL_DOOR, to: 'HISTORY', meters: 1, fade: '#000000', effect: 'door' },
+    { rect: PLAZA_GALLERY_DOOR, to: 'CONTENT', meters: 1, fade: '#000000', effect: 'door' },
+  ],
+  signs: [
+    { rect: { x0: 14, x1: 16.5, z0: -3.5, z1: 1.5 }, text: '관람실 — 준비 중' },
+    { rect: { x0: -12.5, x1: -8.5, z0: 14.5, z1: 16.5 }, text: '화실 — 준비 중' },
+  ],
+  camera: [6.5, 11, 2],
+  // 카메라가 남쪽 무한성 문틀(z 17) 너머로 나가면 문 현판 뒷면이 화면을 가린다 → 문 앞에서 멈춘다
+  cameraBox: { x0: -40, x1: 40, z0: -40, z1: 16, y1: 30 },
+  fog: '#140c18',
+  fogDensity: 0.0045,
+  grade: { lift: [0.002, 0.001, 0.004], gain: [1.02, 0.97, 0.98], saturation: 1 },
+};
+
+// ── History 전당: 기록 수만큼 안쪽(-z)으로 길어진다. 실제 끝은 historyFloor(endZ)로 정한다(장면이 기록으로 계산).
+// 기둥 줄(x ±4.6) 안쪽 통로만 걷는다. 입구(z 6.8~7.6)로 나가면 광장 가운데(꾸한성 마크 위)
+const HISTORY_EXIT: Rect = { x0: -2, x1: 2, z0: 6.8, z1: 7.6 };
+const HISTORY: FloorDef = {
+  id: 'HISTORY',
+  tag: '전당',
+  title: 'History',
+  sub: '영광의 전당',
+  walk: [{ x0: -3.8, x1: 3.8, z0: -30, z1: 7.6 }],
+  blockers: [],
+  spawn: [0, 6],
+  heightAt: () => 0,
+  slot: () => ({ x: 0, z: 0, rotY: 0, scale: 1, lift: 0, float: false }),
+  maxStatues: 0,
+  triggers: [{ rect: HISTORY_EXIT, to: 'PLAZA', meters: 0.6, fade: '#000000', effect: 'door', arrive: PLAZA_CENTER }],
+  signs: [{ rect: { x0: -2.5, x1: 2.5, z0: 5, z1: 7.6 }, text: '뒤쪽 금빛 표시로 나가면 광장' }],
+  camera: [4.2, 7, 2.2],
+  cameraBox: { x0: -10.5, x1: 10.5, z0: -130, z1: 12, y1: 8.4 },
+  fog: '#120807',
+  fogDensity: 0.012,
+  grade: { lift: [0.004, 0.002, 0], gain: [1.04, 0.98, 0.88], saturation: 1 },
+};
+
+/** 전당 걷기 영역의 안쪽 끝을 기록 수로 정해진 길이(endZ = 안쪽 벽)에 맞춘다. 끝의 합계 단(깊이 약 3m) 앞에서 멈춘다 */
+export function historyFloor(endZ: number): FloorDef {
+  return { ...HISTORY, walk: [{ ...HISTORY.walk[0], z0: endZ + 3 }] };
+}
+
+// ── Content 화랑 (PoC): 전시회처럼 한 방향 동선. 가운데 칸막이가 입구까지 이어져 통로 둘이 나뉜다:
+// 왼쪽 통로로 들어가(예전 것부터) 안쪽에서 돌아 오른쪽 통로로 나온다. 포스터 수만큼 길어진다 — galleryFloor(endZ)
+// 오른쪽 통로 출구로 나가면 광장 가운데
+const CONTENT_EXIT: Rect = { x0: 0.9, x1: 4.9, z0: 6.8, z1: 7.6 };
+const CONTENT_SPINE_FRONT = 7.6;
+const CONTENT: FloorDef = {
+  id: 'CONTENT',
+  tag: '화랑',
+  title: 'Content',
+  sub: '화랑',
+  walk: [{ x0: -4.9, x1: 4.9, z0: -30, z1: 7.6 }],
+  blockers: [],
+  spawn: [-2.9, 6], // 왼쪽 통로(입구)
+  heightAt: () => 0,
+  slot: () => ({ x: 0, z: 0, rotY: 0, scale: 1, lift: 0, float: false }),
+  maxStatues: 0,
+  triggers: [{ rect: CONTENT_EXIT, to: 'PLAZA', meters: 0.6, fade: '#000000', effect: 'door', arrive: PLAZA_CENTER }],
+  signs: [
+    { rect: { x0: -5, x1: -0.4, z0: 4.5, z1: 7.6 }, text: '입구 · 안쪽으로 걸으며 예전 콘텐츠부터' },
+    { rect: { x0: 0.4, x1: 5, z0: 4.5, z1: 6.8 }, text: '출구 · 금빛 표시를 지나면 광장' },
+  ],
+  camera: [3.6, 6, 2],
+  cameraBox: { x0: -5.3, x1: 5.3, z0: -100, z1: 12, y1: 5.8 },
+  fog: '#0e0908',
+  fogDensity: 0.014,
+  grade: { lift: [0.004, 0.002, 0], gain: [1.03, 0.98, 0.9], saturation: 1 },
+};
+
+/** 화랑 걷기 영역: 안쪽 벽(endZ) 앞까지, 가운데 칸막이(spineZ0 ~ 입구)는 막는다 */
+export function galleryFloor(endZ: number, spineZ0: number): FloorDef {
+  return { ...CONTENT, walk: [{ ...CONTENT.walk[0], z0: endZ + 0.6 }], blockers: [box(-0.42, 0.42, spineZ0, CONTENT_SPINE_FRONT)] };
+}
+
+/** HUD 순서(FLOORS의 넣은 순서)이자 "내려가기/올라가기" 판단 순서: 광장·전당이 위, 지하로 갈수록 아래 */
+export const FLOOR_ORDER: readonly FloorId[] = ['PLAZA', 'HISTORY', 'CONTENT', 'B1', 'B2', 'B3'];
+export const FLOORS: Record<FloorId, FloorDef> = { PLAZA, HISTORY, CONTENT, B1, B2, B3 };
+export const FIRST_FLOOR: FloorId = 'PLAZA';
 
 function blocks(b: Blocker, x: number, z: number): boolean {
   return b.kind === 'circle' ? Math.hypot(x - b.x, z - b.z) < b.r : inRect(b, x, z);

@@ -2,7 +2,7 @@
 // (join/floor:change ack로 스냅샷, 석상당 1인 1개·다시 바치면 7일 연장, 같은 층 석상만 허용)
 import { mockGetCastleStatues } from '../api/mockDb';
 import type { CastleStatueFloor } from '../api/types';
-import { FLOORS } from './floors';
+import { FIRST_FLOOR, FLOORS } from './floors';
 import { CASTLE_LIMITS, encodeAt, type Ack, type FloorId, type MemberId, type PosTuple } from './protocol';
 import type { CastleTransport, RequestName, RequestOf, ResultOf, ServerMessage, TransportHandlers } from './transport';
 
@@ -18,7 +18,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export class MockTransport implements CastleTransport {
   private handlers: TransportHandlers | null = null;
-  private floor: FloorId = 'B1';
+  private floor: FloorId = FIRST_FLOOR;
   private statues: CastleStatueFloor[] | null = null;
   private lanterns = new Map<MemberId, number>();
   private mine = new Map<MemberId, string>();
@@ -67,9 +67,9 @@ export class MockTransport implements CastleTransport {
       };
     }
     if (name === 'floor:change') {
-      const { floor } = req as RequestOf<'floor:change'>;
+      const { floor, at } = req as RequestOf<'floor:change'>;
       this.floor = floor;
-      const [x, z] = encodeAt(...FLOORS[floor].spawn);
+      const [x, z] = at ?? encodeAt(...FLOORS[floor].spawn);
       return { ok: true, data: { self: { id: SELF_ID, floor, x, z }, peers: [] } satisfies ResultOf<'floor:change'> };
     }
     const { memberId } = req as RequestOf<'lantern:offer'>;

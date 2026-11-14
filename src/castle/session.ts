@@ -69,14 +69,14 @@ export class CastleSession {
     this.transport.disconnect();
   }
 
-  /** 층 이동. 로컬은 즉시 새 층 스폰에 두고, 서버 ack가 오면 서버가 정한 위치로 맞춘다 */
-  async changeFloor(to: FloorId): Promise<void> {
+  /** 층 이동. 로컬은 즉시 도착 위치(없으면 새 층 스폰)에 두고, 서버 ack가 오면 서버가 정한 위치로 맞춘다 */
+  async changeFloor(to: FloorId, arrive?: [number, number]): Promise<void> {
     this.floorId = to;
-    placeMotion(this.motion, ...FLOORS[to].spawn);
+    placeMotion(this.motion, ...(arrive ?? FLOORS[to].spawn));
     if (!this.ready) return; // 아직 join 전이면 다음 join이 새 층으로 들어간다
     this.ready = false;
     this.store.beginSync();
-    const res = await this.transport.request('floor:change', { floor: to });
+    const res = await this.transport.request('floor:change', arrive ? { floor: to, at: encodeAt(...arrive) } : { floor: to });
     if (this.stopped || this.floorId !== to) return;
     if (!res.ok) return this.transport.reconnect(); // 재연결 → 현재 층으로 다시 join
     this.store.applyFloorSnapshot(res.data);

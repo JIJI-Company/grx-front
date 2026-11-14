@@ -491,7 +491,7 @@ export const mockGetCastleStatues = async (): Promise<CastleStatueFloor[]> => {
 };
 
 export const mockGetCastleHalls = async (): Promise<CastleHallSummary[]> => [
-  { slug: 'hall-1', name: '제1성', capacity: 100, total: 19, floors: { B1: 12, B2: 5, B3: 2 }, isFull: false },
-  { slug: 'hall-2', name: '제2성', capacity: 100, total: 4, floors: { B1: 3, B2: 0, B3: 1 }, isFull: false },
-  { slug: 'hall-3', name: '제3성', capacity: 100, total: 100, floors: { B1: 70, B2: 20, B3: 10 }, isFull: true },
+  { slug: 'hall-1', name: '제1성', capacity: 100, total: 19, floors: { PLAZA: 0, B1: 12, B2: 5, B3: 2, HISTORY: 0, CONTENT: 0 }, isFull: false },
+  { slug: 'hall-2', name: '제2성', capacity: 100, total: 4, floors: { PLAZA: 0, B1: 3, B2: 0, B3: 1, HISTORY: 0, CONTENT: 0 }, isFull: false },
+  { slug: 'hall-3', name: '제3성', capacity: 100, total: 100, floors: { PLAZA: 0, B1: 70, B2: 20, B3: 10, HISTORY: 0, CONTENT: 0 }, isFull: true },
 ];

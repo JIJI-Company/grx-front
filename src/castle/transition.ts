@@ -1,6 +1,6 @@
 // 층 이동 연출 타임라인. 화면(CSS 오버레이)·3D(다다미·낙하·카메라)가 같은 시각표를 읽는다.
 // 서버 ack와 무관하게 시간으로만 진행하므로 ack가 늦거나 실패해도 화면을 가린 채 멈추지 않는다.
-export type TransitionKind = 'stairs' | 'hatch' | 'return';
+export type TransitionKind = 'stairs' | 'door' | 'hatch' | 'return';
 /** out: 트리거 → 층 전환, in: 층 전환 → 끝 */
 export type TransitionPhase = 'out' | 'in';
 
@@ -18,6 +18,8 @@ export interface TransitionPlan {
 export const TRANSITIONS: Record<TransitionKind, TransitionPlan> = {
   // 계단: 카메라가 내려가며 어두워짐 → 닫힌 장지문 → 좌우로 열림
   stairs: { coverDelayMs: 0, coverMs: 900, switchMs: 950, revealDelayMs: 450, revealMs: 1000 },
+  // 문: 계단과 같지만 카메라가 내려가지 않는다 (광장 ↔ 건물)
+  door: { coverDelayMs: 0, coverMs: 900, switchMs: 950, revealDelayMs: 450, revealMs: 1000 },
   // 해치: 다다미가 차례로 뒤집힘 → 낙하 → 붉은 페이드 → 흔들림과 함께 걷힘
   hatch: { coverDelayMs: 1150, coverMs: 550, switchMs: 1750, revealDelayMs: 150, revealMs: 800 },
   // 복귀: 화면이 반 바퀴 돌며 어두워짐 → 나머지 반 바퀴 돌며 밝아짐
