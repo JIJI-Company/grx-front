@@ -3,7 +3,7 @@ import type { CastleHallSummary } from '../../api/types';
 import type { FloorDef, PlacedStatue } from '../../castle/floors';
 import { CASTLE_LIMITS, type CastleErrorCode } from '../../castle/protocol';
 import type { CastleProblem } from '../../castle/store';
-import { TRANSITIONS, type TransitionKind, type TransitionPhase } from '../../castle/transition';
+import { transitionPlan, type TransitionKind, type TransitionPhase } from '../../castle/transition';
 import type { ConnectionStatus } from '../../castle/transport';
 import type { CameraView } from '../../castle/view';
 import type { CSSProperties } from 'react';
@@ -114,6 +114,8 @@ export interface TransitionOverlay {
   phase: TransitionPhase;
   /** 덮개 색 (floors.ts 트리거 fade) */
   color: string;
+  /** 층 거리 (재배치 연출 길이) */
+  span: number;
 }
 
 const EASE = 'cubic-bezier(0.22, 1, 0.36, 1)';
@@ -122,26 +124,22 @@ const EASE_IN_OUT = 'cubic-bezier(0.65, 0, 0.35, 1)';
 /** 화면 전체 덮개(페이드) */
 export function coverStyle(o: TransitionOverlay | null): CSSProperties {
   if (!o) return { opacity: 0 };
-  const p = TRANSITIONS[o.kind];
+  const p = transitionPlan(o.kind, o.span);
   if (o.phase === 'out') return { background: o.color, opacity: 1, transition: `opacity ${p.coverMs}ms ${EASE_IN_OUT} ${p.coverDelayMs}ms` };
-  // 계단은 덮개 대신 닫힌 장지문이 열리므로 덮개는 장지문 뒤에서 금방 걷힌다
-  const reveal = o.kind === 'stairs' || o.kind === 'door' ? 'opacity 200ms linear 200ms' : `opacity ${p.revealMs}ms ${EASE} ${p.revealDelayMs}ms`;
+  // 계단은 덮개 대신 닫힌 장지문이 열리므로 덮개는 장지문 뒤에서 금방 걷힌다. 재배치는 3D 벽이 덮고 있다가 갈라진다
+  const reveal =
+    o.kind === 'stairs' || o.kind === 'door'
+      ? 'opacity 200ms linear 200ms'
+      : o.kind === 'shift'
+        ? 'opacity 150ms linear'
+        : `opacity ${p.revealMs}ms ${EASE} ${p.revealDelayMs}ms`;
   return { background: o.color, opacity: 0, transition: reveal };
-}
-
-/** 3D 공간 자체: 복귀(B3→B1) 때 반 바퀴씩 돌며 뒤집힌다 */
-export function spaceStyle(o: TransitionOverlay | null): CSSProperties {
-  if (!o || o.kind !== 'return') return {};
-  const p = TRANSITIONS.return;
-  return o.phase === 'out'
-    ? { transform: 'rotate(180deg) scale(0.55)', transition: `transform ${p.switchMs}ms ${EASE_IN_OUT}` }
-    : { transform: 'rotate(360deg) scale(1)', transition: `transform ${p.revealMs}ms ${EASE_IN_OUT}` };
 }
 
 /** 장지문 한 짝 (계단 연출). out 동안은 닫힌 채 숨어 있다가 층이 바뀌면 나타나 좌우로 열린다 */
 export function shojiStyle(o: TransitionOverlay, side: -1 | 1): CSSProperties {
   if (o.phase === 'out') return { opacity: 0, transform: 'translateX(0)' };
-  const p = TRANSITIONS.stairs;
+  const p = transitionPlan('stairs');
   return {
     opacity: 1,
     transform: `translateX(${side * 101}%)`,

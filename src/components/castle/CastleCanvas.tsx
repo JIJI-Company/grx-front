@@ -18,6 +18,7 @@ import FollowCamera, { type InspectState } from './FollowCamera';
 import { RemoteOni } from './Oni';
 import OfferFx from './OfferFx';
 import Player from './Player';
+import ShiftRooms from './ShiftRooms';
 import Statue from './Statue';
 
 const DPR_MAX = 1.5;
@@ -64,6 +65,8 @@ export default function CastleCanvas({ session, floor, statues, onTrigger, onNea
         <RemoteOni key={p.id} peer={p} floor={floor} />
       ))}
       <FollowCamera floor={floor} motion={session.motion} view={view} look={session.look} inspect={inspect} fx={fx} />
+      {/* 카메라 다음에 둬야 같은 프레임의 카메라 자리에 붙는다 */}
+      <ShiftRooms fx={fx} low={low} />
       <EffectComposer multisampling={low ? 0 : 4}>
         <Bloom mipmapBlur luminanceThreshold={0.85} luminanceSmoothing={0.2} intensity={0.7} resolutionScale={low ? 0.5 : 1} levels={low ? 5 : 8} />
         <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />

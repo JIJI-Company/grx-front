@@ -1,13 +1,13 @@
-// 층 이동 연출: 계단은 어두워진 뒤 장지문이 좌우로 열리고, 해치는 붉게 덮이고, 복귀는 공간이 뒤집힌다.
-// 3D 쪽 연출(다다미·낙하·카메라)은 같은 시각표(castle/transition.ts)를 캔버스 안에서 읽는다. 덮개는 HUD까지 가린다.
+// 층 이동 연출: 계단은 어두워진 뒤 장지문이 좌우로 열리고, 해치는 붉게 덮이고, 재배치는 3D 방들이 덮었다 갈라진다.
+// 3D 쪽 연출(다다미·낙하·방·카메라)은 같은 시각표(castle/transition.ts)를 캔버스 안에서 읽는다. 덮개는 HUD까지 가린다.
 import type { CSSProperties, ReactNode } from 'react';
 import type { FloorDef } from '../../../castle/floors';
-import { coverStyle, shojiStyle, spaceStyle, type TransitionOverlay } from '../castlePresentation';
+import { coverStyle, shojiStyle, type TransitionOverlay } from '../castlePresentation';
 
 interface FloorTransitionProps {
   overlay: TransitionOverlay | null;
   banner: FloorDef | null;
-  /** 3D 캔버스. 복귀 연출 때 통째로 회전한다 */
+  /** 3D 캔버스 */
   children: ReactNode;
 }
 
@@ -24,7 +24,7 @@ const SHOJI: CSSProperties = {
 export default function FloorTransition({ overlay, banner, children }: FloorTransitionProps) {
   return (
     <>
-      <div className="absolute inset-0 isolate" style={spaceStyle(overlay)}>
+      <div className="absolute inset-0 isolate">
         {children}
       </div>
       <div className="pointer-events-none absolute inset-0 z-10" style={coverStyle(overlay)} />

@@ -204,7 +204,7 @@ const B3: FloorDef = {
   heightAt: () => 0,
   slot: () => ({ x: 0, z: -7, rotY: 0, scale: 4.4, lift: 2.2, float: true }),
   maxStatues: 1,
-  triggers: [{ rect: B3_EXIT, to: 'PLAZA', meters: STEPS_5, fade: '#000000', effect: 'return' }],
+  triggers: [{ rect: B3_EXIT, to: 'PLAZA', meters: STEPS_5, fade: '#000000', effect: 'shift' }],
   camera: [6, 22, 7],
   fog: '#120203',
   fogDensity: 0.011,

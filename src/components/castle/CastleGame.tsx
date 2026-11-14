@@ -3,14 +3,14 @@
 // ack가 늦거나 실패해도(세션이 재연결) 화면이 가려진 채 멈추지 않는다.
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import type { CastleStatueFloor, Member } from '../../api/types';
-import { findStatue, FLOOR_ORDER, FLOORS, galleryFloor, historyFloor, inRect, placeStatues, PLAZA_BOARD, PLAZA_CENTER, type PlacedStatue } from '../../castle/floors';
+import { findStatue, FLOORS, galleryFloor, historyFloor, inRect, placeStatues, PLAZA_BOARD, PLAZA_CENTER, type PlacedStatue } from '../../castle/floors';
 import { MOUSE_SENSITIVITY, TOUCH_SENSITIVITY } from '../../castle/input';
 import { initialInspect, turnInspect, zoomInspect } from '../../castle/orbit';
 import type { FloorId } from '../../castle/protocol';
 import type { CastleSession } from '../../castle/session';
 import { castleSound } from '../../castle/sound';
 import { useCastleStore } from '../../castle/store';
-import { transitionEndMs, TRANSITIONS, type ActiveTransition, type TransitionKind } from '../../castle/transition';
+import { effectiveKind, transitionEndMs, transitionPlan, transitionRoute, type ActiveTransition, type TransitionKind } from '../../castle/transition';
 import { allLampsOn } from '../../castle/reveal';
 import { loadView, saveView, type CameraView } from '../../castle/view';
 import { useMembers } from '../../hooks/useMembers';
@@ -65,6 +65,7 @@ export default function CastleGame({ session, statues, statuesError }: CastleGam
   const [view, setView] = useState<CameraView>(loadView);
   const [locked, setLocked] = useState(false);
   const coarse = useMemo(() => window.matchMedia('(pointer: coarse)').matches, []);
+  const reducedMotion = useMemo(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches, []);
   const spaceRef = useRef<HTMLDivElement>(null);
   const [banner, setBanner] = useState<FloorId | null>(session.floor);
   const nearRef = useRef<PlacedStatue | null>(null);
@@ -113,43 +114,45 @@ export default function CastleGame({ session, statues, statuesError }: CastleGam
   useEffect(() => () => castleSound.ambience(null), []);
 
   const onTrigger = useCallback(
-    (to: FloorId, color: string, kind: TransitionKind, arrive?: [number, number]) => {
-      const plan = TRANSITIONS[kind];
+    (to: FloorId, color: string, effect: TransitionKind, arrive?: [number, number]) => {
+      const kind = effectiveKind(effect, reducedMotion);
+      const route = transitionRoute(session.floor, to);
+      const plan = transitionPlan(kind, route.span);
       session.motion.frozen = true;
       inspect.current = null;
       setInspecting(false);
       castleSound.cue(to === 'B3' ? 'fall' : 'descend');
-      fx.current = { kind, phase: 'out', start: performance.now() };
-      setOverlay({ kind, phase: 'out', color });
+      fx.current = { kind, phase: 'out', start: performance.now(), ...route };
+      setOverlay({ kind, phase: 'out', color, span: route.span });
       timers.current.push(
         setTimeout(() => {
           void session.changeFloor(to, arrive);
           session.look.reset(); // 새 층에서는 앞(-z)을 보고 시작
           setFloorId(to);
           setBanner(to);
-          fx.current = { kind, phase: 'in', start: performance.now() };
-          setOverlay({ kind, phase: 'in', color });
+          fx.current = { kind, phase: 'in', start: performance.now(), ...route };
+          setOverlay({ kind, phase: 'in', color, span: route.span });
           timers.current.push(
             setTimeout(() => (session.motion.frozen = false), plan.revealDelayMs),
             setTimeout(() => {
               fx.current = null;
               setOverlay(null);
-            }, transitionEndMs(kind)),
+            }, transitionEndMs(kind, route.span)),
           );
         }, plan.switchMs),
       );
     },
-    [session],
+    [session, reducedMotion],
   );
 
-  // HUD에서 층을 직접 고름: 내려가면 계단 연출, 올라가면 복귀 연출
+  // HUD에서 층을 직접 고름: 건물을 오가면 문 연출, 그 밖에는 위·아래 모두 재배치 연출
   const pickFloor = useCallback(
     (to: FloorId) => {
       if (session.motion.frozen || to === floorId) return;
       // 광장이 맨 위, 지하로 갈수록 아래. 전당처럼 광장 옆 건물은 문 연출
       const building = (f: FloorId) => f === 'HISTORY' || f === 'CONTENT';
       if (building(to) || building(floorId)) return onTrigger(to, '#000000', 'door', to === 'PLAZA' ? PLAZA_CENTER : undefined);
-      onTrigger(to, '#000000', FLOOR_ORDER.indexOf(to) > FLOOR_ORDER.indexOf(floorId) ? 'stairs' : 'return');
+      onTrigger(to, '#000000', 'shift');
     },
     [session, floorId, onTrigger],
   );
