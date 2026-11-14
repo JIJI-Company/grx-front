@@ -4,6 +4,7 @@ import { useMemo, useRef, type MutableRefObject } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { B2_DAIS, B2_HATCH as HATCH, B2_LANTERN_PATH, B2_PILLAR_RADIUS, B2_PILLARS, B2_SCREENS, type PlacedStatue } from '../../../castle/floors';
+import { statueLightColor } from '../../../castle/brightness';
 import { hatchDoorAngle, type ActiveTransition } from '../../../castle/transition';
 import { BoxField, canvasTexture, Embers, glowTexture, Instanced, rng, scatter, useWindowTexture, type Placement } from './sceneParts';
 
@@ -365,17 +366,21 @@ function HangingLanterns() {
   );
 }
 
-// 석상 뒤 멤버 색 깃발
+// 석상 뒤 멤버 색 깃발. 석상 빛을 받는 큰 면이라 밝은 멤버 색(노랑·하늘)은 하얗게 날아간다 →
+// 색을 한 톤 눌러 천처럼 보이게 하고 자체 발광은 아주 약하게만 둔다
+const BANNER_SHADE = 0.5;
+
 function Banners({ statues }: { statues: PlacedStatue[] }) {
   return (
     <group>
       {statues.map((st) => {
         const side = Math.sign(st.x);
+        const cloth = statueLightColor(st.color).multiplyScalar(BANNER_SHADE);
         return (
           <group key={st.memberId} position={[st.x + side * 3, 0, st.z]} rotation={[0, -side * (Math.PI / 2), 0]}>
             <mesh position={[0, 5.4, 0]}>
               <planeGeometry args={[2.6, 8]} />
-              <meshStandardMaterial color={st.color} emissive={st.color} emissiveIntensity={0.18} side={THREE.DoubleSide} roughness={0.9} />
+              <meshStandardMaterial color={cloth} emissive={cloth} emissiveIntensity={0.12} side={THREE.DoubleSide} roughness={1} />
             </mesh>
             <mesh position={[0, 9.5, 0]}>
               <boxGeometry args={[3.2, 0.16, 0.16]} />

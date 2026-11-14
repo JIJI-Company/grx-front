@@ -5,7 +5,7 @@ import { Component, Suspense, useEffect, useMemo, useRef, useState, type Mutable
 import { useFrame } from '@react-three/fiber';
 import { Html, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
-import { lanternTier, MAX_LANTERN_MODELS, statueGlow } from '../../castle/brightness';
+import { lanternTier, MAX_LANTERN_MODELS, statueGlow, statueLightColor } from '../../castle/brightness';
 import type { PlacedStatue } from '../../castle/floors';
 import { statueFlash, type OfferEvent } from '../../castle/offering';
 import { revealEmerge, type Reveal } from '../../castle/reveal';
@@ -19,7 +19,7 @@ const AWAKE_EYE_BOOST = 6; // 1을 넘겨야 블룸이 잡힌다
 const DORMANT_EYE = '#2a2226';
 const AWAKE_EMBER = '#ff3020';
 /** 반짝임 1일 때 더하는 값: 몸 발광, 광원 세기·도달 거리(scale 1 기준), 발치 빛 번짐 불투명도 */
-const FLASH = { emissive: 1.6, light: 60, reach: 6, pool: 0.5 };
+const FLASH = { emissive: 0, light: 45, reach: 6, pool: 0.4 }; // 몸은 번쩍이지 않고 빛·발치만 (몸 발광은 뺐다)
 /** 돌 기본색과 멤버 색을 섞는 비율: 돌 질감은 유지하고 멤버 색으로 은은하게 물든다 (0 = 회색 돌, 1 = 멤버 색) */
 const STONE_COLOR = '#6d6669';
 const STONE_TINT = 0.25;
@@ -185,17 +185,18 @@ export default function Statue({ statue: s, count, awake, offers, reveal }: Stat
   const root = useRef<THREE.Group>(null!);
   const light = useRef<THREE.PointLight>(null!);
   const pool = useRef<THREE.Mesh>(null!);
+  const lightColor = useMemo(() => statueLightColor(s.color), [s.color]);
   const poolMat = useMemo(
     () =>
       new THREE.MeshBasicMaterial({
         map: glowTexture(),
-        color: s.color,
+        color: lightColor,
         transparent: true,
         opacity: 0,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
       }),
-    [s.color],
+    [lightColor],
   );
   /** 채색 모델용: 색은 정점에서, 발광(등롱·반짝임)은 돌과 같은 값을 매 프레임 따른다 */
   const paint = useMemo(
@@ -259,8 +260,8 @@ export default function Statue({ statue: s, count, awake, offers, reveal }: Stat
       </group>
       <pointLight
         ref={light}
-        position={[0, 1.4 * s.scale, 1.6 * s.scale]}
-        color={s.color}
+        position={[0, 2.6 * s.scale, 2 * s.scale]} // 석상에서 떨어뜨려 가까이서도 한 곳만 타지 않게
+        color={lightColor}
         intensity={glow.light * s.scale}
         distance={glow.reach * s.scale}
         decay={1.6}
