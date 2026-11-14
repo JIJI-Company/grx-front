@@ -62,7 +62,7 @@ export default function CastleCanvas({ session, floor, statues, onTrigger, onNea
       })}
       <Player key={floor.id} session={session} floor={floor} statues={statues} onTrigger={onTrigger} onNear={onNear} view={view} fx={fx} low={low} />
       {store.peers.map((p) => (
-        <RemoteOni key={p.id} peer={p} floor={floor} />
+        <RemoteOni key={p.id} peer={p} floor={floor} view={view} />
       ))}
       <FollowCamera floor={floor} motion={session.motion} view={view} look={session.look} inspect={inspect} fx={fx} />
       {/* 카메라 다음에 둬야 같은 프레임의 카메라 자리에 붙는다 */}

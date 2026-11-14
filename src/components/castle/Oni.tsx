@@ -4,6 +4,7 @@ import { Suspense, useEffect, useMemo, useRef, type Ref } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
+import type { CameraView } from '../../castle/view';
 import type { FloorDef } from '../../castle/floors';
 import { INTERP_DELAY_MS, smoothToward, type Sample } from '../../castle/interpolation';
 import { RUN_SPEED, WALK_SPEED } from '../../castle/movement';
@@ -30,6 +31,8 @@ interface OniProps {
   isMe?: boolean;
   /** 발밑 그림자 (해치 낙하 중 숨기려고 내 캐릭터가 잡는다) */
   shadowRef?: Ref<THREE.Mesh>;
+  /** 이름표 (1인칭에서 가까운 다른 오니를 숨길 때 같이 숨긴다) */
+  labelRef?: Ref<HTMLDivElement>;
 }
 
 function Kkuro({ hornColor, getSpeed, getBowSeq }: Omit<OniProps, 'nickname' | 'isMe' | 'shadowRef'>) {
@@ -94,7 +97,7 @@ function Kkuro({ hornColor, getSpeed, getBowSeq }: Omit<OniProps, 'nickname' | '
   return <primitive object={model} />;
 }
 
-export function Oni({ hornColor, nickname, getSpeed, getBowSeq, isMe = false, shadowRef }: OniProps) {
+export function Oni({ hornColor, nickname, getSpeed, getBowSeq, isMe = false, shadowRef, labelRef }: OniProps) {
   return (
     <group>
       {/* 발밑 그림자 (지면 높이에 붙는다: 캐릭터 그룹이 heightAt 위에 있다) */}
@@ -105,7 +108,7 @@ export function Oni({ hornColor, nickname, getSpeed, getBowSeq, isMe = false, sh
         <Kkuro hornColor={hornColor} getSpeed={getSpeed} getBowSeq={getBowSeq} />
       </Suspense>
       <Html position={[0, 1.7, 0]} center zIndexRange={[100, 0]} style={{ pointerEvents: 'none' }}>
-        <div className={`text-[11px] font-semibold whitespace-nowrap [text-shadow:0_0_4px_#000] ${isMe ? 'text-gold-400' : 'text-ink-200'}`}>{nickname}</div>
+        <div ref={labelRef} className={`text-[11px] font-semibold whitespace-nowrap [text-shadow:0_0_4px_#000] ${isMe ? 'text-gold-400' : 'text-ink-200'}`}>{nickname}</div>
       </Html>
     </group>
   );
@@ -114,18 +117,26 @@ export function Oni({ hornColor, nickname, getSpeed, getBowSeq, isMe = false, sh
 useGLTF.preload(KKURO_URL);
 
 /** 다른 사람: 100ms 과거 시점 보간 + 부드러운 보정 */
-export function RemoteOni({ peer, floor }: { peer: RemotePeer; floor: FloorDef }) {
+// 1인칭에서 이만큼(수평 m) 안에 들어온 다른 오니는 숨긴다. 서로 통과할 수 있어서, 내 자리를 지나가면 몸이 시야를 통째로 덮는다
+const FIRST_PERSON_HIDE_M = 2;
+
+export function RemoteOni({ peer, floor, view }: { peer: RemotePeer; floor: FloorDef; view: CameraView }) {
   const ref = useRef<THREE.Group>(null!);
+  const label = useRef<HTMLDivElement>(null);
   const shown = useRef<Sample>({ ...peer.buffer.latest, speed: 0 });
-  useFrame((_, dt) => {
+  useFrame(({ camera }, dt) => {
     const cur = shown.current;
     smoothToward(cur, peer.buffer.sampleAt(performance.now() - INTERP_DELAY_MS), dt);
     ref.current.position.set(cur.x, floor.heightAt(cur.x, cur.z), cur.z);
     ref.current.rotation.y = cur.rot;
+    const show = view !== 'first' || Math.hypot(cur.x - camera.position.x, cur.z - camera.position.z) > FIRST_PERSON_HIDE_M;
+    ref.current.visible = show;
+    // 이름표(Html)는 부모 visible을 따르지 않아 따로 숨긴다
+    if (label.current) label.current.style.visibility = show ? '' : 'hidden';
   });
   return (
     <group ref={ref}>
-      <Oni hornColor={peer.hornColor} nickname={peer.nickname} getSpeed={() => shown.current.speed} />
+      <Oni hornColor={peer.hornColor} nickname={peer.nickname} getSpeed={() => shown.current.speed} labelRef={label} />
     </group>
   );
 }
