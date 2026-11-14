@@ -1,6 +1,6 @@
 // B3 심층: 수직 허공에 떠 있는 거울 단 + 다리. 단 둘레에 패배한 검사 전시, 붉은 균열·탑 불빛·뒤집힌 방 조각은 배경.
 // 입장 연출(castle/reveal.ts): 짙은 안개 속 어둠 → 다리를 걸을수록 등이 켜지며 밝아짐 → 단 앞에서 석상·왕좌·마크가 서서히 드러남.
-import { useEffect, useMemo, useRef } from 'react';
+import { Suspense, useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { MeshReflectorMaterial, useTexture } from '@react-three/drei';
@@ -248,7 +248,9 @@ export default function SceneB3({ low, motion, reveal }: { low: boolean; motion:
 
       {/* 거울 바닥: 단과 그 둘레 허공을 반사면 하나로 (가장자리로 갈수록 투명) */}
       <MirrorFloor low={low} />
-      <DefeatedSwordsmen />
+      <Suspense fallback={null}>
+        <DefeatedSwordsmen />
+      </Suspense>
       <FloatingFragments />
       {RINGS.map(([r, o]) => (
         <mesh key={r} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, -1.5]}>

@@ -1,9 +1,11 @@
-// B3 심층의 배경 부품: 거꾸로 떠서 천천히 도는 방·계단 조각, 그리고 '패배한 검사' 전시.
-// 전시는 이름 없는 일반 검사의 석화된 형상과 유물(부러진 칼·빈 겉옷·민무늬 가면)뿐이다.
-// 특정 작품 캐릭터의 얼굴·옷 무늬·칼 모양을 따르지 않고, 피·시체 같은 표현 없이 회색 돌로만 만든다.
+// B3 심층의 배경 부품: 거꾸로 떠서 천천히 도는 방·계단 조각, 그리고 '전장의 유물' 전시.
+// 전시는 사람 없이 바닥에 떨어진 칼·장병기(카타나·와키자시·곧은 양날검·창·나기나타·십자창·칼집), 땅에 꽂힌 창·부러진 칼,
+// 빈 겉옷·민무늬 가면을 건 옷걸이뿐이다. 특정 작품의 칼 모양을 따르지 않는 일반형이고, 피 표현은 없다.
 // 어두운 심층에서 실루엣이 읽히도록 아래에서 약한 붉은 빛: 광원 2개 + 발밑 붉은 번짐(발광 평면 InstancedMesh 1개).
+// 형상·유물은 public/castle/b3_exhibit.glb(원본 스크립트: 저장소 밖 assets/castle/b3_exhibit.py, Blender). 색은 정점 색.
 import { useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import { B3_EXHIBIT_GROW as GROW } from '../../../castle/floors';
 import { glowTexture, Instanced, rng, useWindowTexture, type Placement, type Vec3 } from './sceneParts';
@@ -36,49 +38,53 @@ function place(a: Anchor, local: Placement): Placement {
   return { p: tmpP.toArray() as Vec3, r: [tmpE.x, tmpE.y, tmpE.z], s: tmpS.toArray() as Vec3, c: local.c };
 }
 
-// ── 석화된 검사: 캡슐(몸·팔다리) + 구(머리)로만. 앞 = +z
-type Pose = 'kneel' | 'fallen';
-type Part = Placement & { shape: 'capsule' | 'sphere' };
-const H = Math.PI / 2;
-/** 캡슐 지오메트리는 반지름 1·전체 길이 3 → s = [r, 길이/3, r] (len = 끝까지 전체 길이) */
-const limb = (p: Vec3, r: Vec3, radius: number, len: number): Part => ({ shape: 'capsule', p, r, s: [radius, len / 3, radius] });
+// ── 떨어진 칼·장병기 7종 + 꽂힌 창 + 꽂힌 부러진 칼 + 옷걸이: GLB 메시. 앞 = +z, 바닥 = y 0
+const EXHIBIT_URL = '/castle/b3_exhibit.glb';
+/** 바닥에 눕힌 무기들 (GLB 노드 이름). 길이 가운데가 원점 */
+const DROPPED = ['katana', 'wakizashi', 'straight', 'yari', 'naginata', 'jumonji', 'saya'] as const;
+type Dropped = (typeof DROPPED)[number];
 
-const POSES: Record<Pose, Part[]> = {
-  // 무릎 꿇고 고개 숙임: 두 손은 무릎 위
-  kneel: [
-    { shape: 'sphere', p: [0, 1.0, 0.2], s: [0.13, 0.14, 0.13] },
-    limb([0, 0.72, 0.06], [0.45, 0, 0], 0.18, 0.4),
-    limb([0, 0.36, -0.06], [0, 0, H], 0.17, 0.2), // 허리 (넓은 하카마 자락)
-    limb([-0.12, 0.24, 0.16], [H, 0, 0], 0.1, 0.42),
-    limb([0.12, 0.24, 0.16], [H, 0, 0], 0.1, 0.42),
-    limb([-0.12, 0.07, -0.08], [H, 0, 0], 0.08, 0.42),
-    limb([0.12, 0.07, -0.08], [H, 0, 0], 0.08, 0.42),
-    limb([-0.25, 0.56, 0.2], [0.9, 0, 0.15], 0.06, 0.42),
-    limb([0.25, 0.56, 0.2], [0.9, 0, -0.15], 0.06, 0.42),
-  ],
-  // 앞으로 쓰러짐: 한 팔은 앞으로 뻗었다
-  fallen: [
-    { shape: 'sphere', p: [0.05, 0.14, 0.62], s: [0.13, 0.13, 0.14] },
-    limb([0, 0.18, 0.2], [H, 0, 0], 0.18, 0.5),
-    limb([0, 0.16, -0.15], [H, 0.2, 0], 0.17, 0.2),
-    limb([-0.1, 0.1, -0.62], [H, 0.1, 0], 0.09, 0.8),
-    limb([0.14, 0.1, -0.6], [H, -0.15, 0], 0.09, 0.8),
-    limb([0.32, 0.08, 0.75], [H, -0.2, 0], 0.06, 0.6),
-    limb([-0.3, 0.08, 0.2], [H, 0.6, 0], 0.06, 0.5),
-  ],
-};
-
-/** 전시 배치: 단 위(걷기 영역 밖, 거울에 비침)와 단 둘레 허공의 떠 있는 돌판 위 */
-const FIGURES: (Anchor & { pose: Pose })[] = [
-  { pose: 'kneel', p: [-5.6, 0, -5.4], rotY: 0.75, scale: 1.25 * GROW }, // 석상을 향해 꿇어앉음
-  { pose: 'kneel', p: [5.8, 0, -5.0], rotY: -0.8, scale: 1.25 * GROW },
-  { pose: 'fallen', p: [-7.7, 0, -0.6], rotY: 2.6, scale: 1.25 * GROW },
-  { pose: 'fallen', p: [7.5, 0, 2.2], rotY: -2.2, scale: 1.25 * GROW },
-  { pose: 'kneel', p: [-15, 2.6, -9], rotY: 1.2, scale: 1.3 * GROW },
-  { pose: 'fallen', p: [16, -3.6, -4], rotY: -1.9, scale: 1.3 * GROW },
-  { pose: 'kneel', p: [13, 4.2, -14], rotY: -0.6, scale: 1.3 * GROW },
-  { pose: 'fallen', p: [-13, -4.6, 5], rotY: 0.4, scale: 1.3 * GROW },
+/** 무기가 흩어진 자리: 단 위(걷기 영역 밖, 거울에 비침)와 단 둘레 허공의 떠 있는 돌판 위. 자리마다 몇 자루가 엇갈려 떨어져 있다 */
+const DROP_SITES: (Anchor & { count: number })[] = [
+  { p: [-5.6, 0, -5.4], rotY: 0.75, scale: GROW, count: 4 },
+  { p: [5.8, 0, -5.0], rotY: -0.8, scale: GROW, count: 4 },
+  { p: [-7.7, 0, -0.6], rotY: 2.6, scale: GROW, count: 4 },
+  { p: [7.5, 0, 2.2], rotY: -2.2, scale: GROW, count: 4 },
+  { p: [-15, 2.6, -9], rotY: 1.2, scale: GROW, count: 2 },
+  { p: [16, -3.6, -4], rotY: -1.9, scale: GROW, count: 2 },
+  { p: [13, 4.2, -14], rotY: -0.6, scale: GROW, count: 2 },
+  { p: [-13, -4.6, 5], rotY: 0.4, scale: GROW, count: 2 },
 ];
+const DROP_SPREAD = 0.9;
+/** 실제 비율이면 기본 카메라 거리에서 선처럼 보여, 굵기·폭은 크게, 길이는 조금만 키운다 (지역 축: x 폭, y 두께, z 길이) */
+const DROP_SHAPE: Vec3 = [2.3, 2.3, 1.35];
+const UPRIGHT_SHAPE: Vec3 = [2.0, 1.3, 2.0];
+/** 땅에 꽂힌 창 (창대 끝을 박고 비스듬히) */
+const STUCK_SPEARS: Anchor[] = [
+  { p: [-6.2, 0, -6.6], rotY: 0.4, scale: GROW },
+  { p: [6.9, 0, -4.4], rotY: -0.7, scale: GROW },
+  { p: [16.8, -3.6, -3.2], rotY: 1.1, scale: GROW },
+  { p: [-12.2, -4.6, 5.8], rotY: -0.3, scale: GROW },
+];
+const SPEAR_TILT: Vec3 = [-0.22, 0, 0.16];
+const SPEAR_SINK = 0.25;
+
+/** 자리마다 몇 자루씩, 종류·방향·위치를 고정 난수로 흩는다 (매번 같은 배치) */
+function scatterDropped(): Record<Dropped, Placement[]> {
+  const out = Object.fromEntries(DROPPED.map((k) => [k, [] as Placement[]])) as Record<Dropped, Placement[]>;
+  const r = rng(303);
+  let n = 0;
+  for (const site of DROP_SITES) {
+    for (let i = 0; i < site.count; i++, n++) {
+      const kind = DROPPED[(n * 3 + Math.floor(r() * 2)) % DROPPED.length];
+      const a = r() * Math.PI * 2;
+      const d = r() * DROP_SPREAD;
+      out[kind].push(place(site, { p: [Math.cos(a) * d, 0, Math.sin(a) * d], r: [0, r() * Math.PI * 2, 0], s: DROP_SHAPE }));
+    }
+  }
+  return out;
+}
+
 /** 떠 있는 돌판: 허공 전시대 (위 FIGURES의 허공 자리 아래) */
 const ISLETS: Vec3[] = [
   [-15, 2.6, -9],
@@ -95,12 +101,9 @@ const SWORDS: Anchor[] = [
   { p: [-14.2, 2.6, -8.2], rotY: 0.9, scale: GROW },
   { p: [12.4, 4.2, -13.2], rotY: -0.4, scale: GROW },
 ];
-const SWORD_PARTS: Placement[] = [
-  { p: [0, 0.3, 0], s: [0.05, 0.62, 0.014], c: '#9a9498' }, // 부러진 날
-  { p: [0, 0.63, 0], s: [0.16, 0.025, 0.1], c: '#3a3436' }, // 코등이
-  { p: [0, 0.8, 0], s: [0.045, 0.32, 0.045], c: '#2a2224' }, // 자루
-];
 const SWORD_TILT: Vec3 = [0.28, 0, 0.12];
+/** 칼끝이 바닥에 박혀 보이도록 조금 묻는다 */
+const SWORD_SINK = 0.08;
 
 /** 빈 겉옷을 건 옷걸이(기둥 2 + 가로대) + 겉옷(몸판·소매) + 가로대 끝 민무늬 가면 */
 const RACKS: Anchor[] = [
@@ -113,74 +116,55 @@ const UPLIGHTS: Vec3[] = [
   [6.6, 0.3, -2.4],
 ];
 const UPLIGHT_COLOR = '#ff2a18';
-const RACK_BOXES: Placement[] = [
-  { p: [-0.75, 0.85, 0], s: [0.06, 1.7, 0.06], c: '#2a1f1c' },
-  { p: [0.75, 0.85, 0], s: [0.06, 1.7, 0.06], c: '#2a1f1c' },
-  { p: [0, 1.62, 0], s: [1.9, 0.06, 0.06], c: '#2a1f1c' },
-  { p: [0, 1.65, 0], s: [1.9, 0.04, 0.04], c: '#2a1f1c' },
-  { p: [0, 1.05, 0.02], s: [0.6, 1.1, 0.04], c: '#6a6266' }, // 겉옷 몸판 (빛바랜 회색, 무늬 없음)
-  { p: [-0.5, 1.42, 0.02], s: [0.42, 0.34, 0.04], c: '#5e575b' }, // 소매
-  { p: [0.5, 1.42, 0.02], s: [0.42, 0.34, 0.04], c: '#5e575b' },
-  { p: [-0.98, 1.38, 0.04], s: [0.03, 0.025, 0.02], c: '#120c0d' }, // 가면 눈구멍
-  { p: [-0.9, 1.38, 0.04], s: [0.03, 0.025, 0.02], c: '#120c0d' },
-];
-const MASKS: Placement[] = [{ p: [-0.94, 1.36, 0.0], s: [0.1, 0.13, 0.04], c: '#c9c2bc' }];
 
-/** 단 둘레 전시 일체 (돌 재질 하나 + 인스턴스 색). draw call: 캡슐·구·상자·돌판·붉은 번짐 = 5번 */
+/** 단 둘레 전시 일체. draw call: 무기 9종·옷걸이(GLB 메시, 재질 1개) + 돌판 + 붉은 번짐 = 12번 */
 export function DefeatedSwordsmen() {
-  const items = useMemo(() => {
-    const capsules: Placement[] = [];
-    const spheres: Placement[] = [];
-    const boxes: Placement[] = [];
-    for (const f of FIGURES) {
-      for (const part of POSES[f.pose]) (part.shape === 'sphere' ? spheres : capsules).push(place(f, part));
-    }
-    for (const sw of SWORDS) {
-      const tilted: Anchor = sw;
-      for (const part of SWORD_PARTS) {
-        // 꽂힌 기울기: 부품을 먼저 기울인 뒤 부모 자리로
-        tmpChild.position.set(...part.p);
-        tmpChild.position.applyEuler(tmpE.set(...SWORD_TILT));
-        boxes.push(place(tilted, { ...part, p: tmpChild.position.toArray() as Vec3, r: SWORD_TILT }));
-      }
-    }
-    for (const rack of RACKS) {
-      for (const part of RACK_BOXES) boxes.push(place(rack, part));
-      for (const m of MASKS) spheres.push(place(rack, m));
-    }
-    const islets = ISLETS.map((p): Placement => ({ p: [p[0], p[1] - 0.35, p[2]], s: [3.2 * GROW, 0.7, 2.6 * GROW], r: [0, p[0] * 0.1, 0] }));
-    // 검사·칼·옷걸이 발밑의 붉은 번짐 (바닥에 눕힌 발광 평면)
-    const embers = [...FIGURES, ...SWORDS, ...RACKS].map(
-      (a): Placement => ({ p: [a.p[0], a.p[1] + 0.03, a.p[2]], r: [-Math.PI / 2, 0, 0], s: [a.scale * 2.6, a.scale * 2.6, 1] }),
-    );
-    return { capsules, spheres, boxes, islets, embers };
-  }, []);
-  const g = useMemo(
-    () => ({
-      capsule: new THREE.CapsuleGeometry(1, 1, 4, 10),
-      sphere: new THREE.SphereGeometry(1, 14, 10),
-      box: new THREE.BoxGeometry(1, 1, 1),
+  const { nodes } = useGLTF(EXHIBIT_URL);
+  // Instanced가 언마운트 때 지오메트리를 버리므로 useGLTF 캐시 것은 복제해서 넘긴다(층을 다시 들어와도 재사용)
+  const g = useMemo(() => {
+    const geo = (name: string) => (nodes[name] as THREE.Mesh).geometry.clone();
+    return {
+      dropped: Object.fromEntries(DROPPED.map((k) => [k, geo(k)])) as Record<Dropped, THREE.BufferGeometry>,
+      spear: geo('yari_up'),
+      sword: geo('sword'),
+      rack: geo('rack'),
       islet: new THREE.CylinderGeometry(0.5, 0.36, 1, 7),
       ember: new THREE.PlaneGeometry(1, 1),
-    }),
-    [],
-  );
+    };
+  }, [nodes]);
+  const items = useMemo(() => {
+    const spears = STUCK_SPEARS.map((sp) => place(sp, { p: [0, -SPEAR_SINK, 0], r: SPEAR_TILT, s: UPRIGHT_SHAPE }));
+    const swords = SWORDS.map((sw) => place(sw, { p: [0, -SWORD_SINK, 0], r: SWORD_TILT, s: UPRIGHT_SHAPE }));
+    const racks = RACKS.map((r) => place(r, { p: [0, 0, 0] }));
+    const islets = ISLETS.map((p): Placement => ({ p: [p[0], p[1] - 0.35, p[2]], s: [3.2 * GROW, 0.7, 2.6 * GROW], r: [0, p[0] * 0.1, 0] }));
+    // 무기·옷걸이 발밑의 붉은 번짐 (바닥에 눕힌 발광 평면)
+    const embers = [...DROP_SITES, ...SWORDS, ...RACKS].map(
+      (a): Placement => ({ p: [a.p[0], a.p[1] + 0.03, a.p[2]], r: [-Math.PI / 2, 0, 0], s: [a.scale * 2.6, a.scale * 2.6, 1] }),
+    );
+    return { dropped: scatterDropped(), spears, swords, racks, islets, embers };
+  }, []);
   const m = useMemo(() => {
-    // 어두운 심층에서도 형태가 읽히도록 아주 약하게 스스로 빛나는 회색 돌
-    const stone = () => new THREE.MeshStandardMaterial({ color: '#9a9498', roughness: 0.9, emissive: '#3a3034', emissiveIntensity: 0.5 });
+    // 정점 색(강철·옻칠·놋쇠·나무·천) + 어두운 심층에서도 형태가 읽히도록 아주 약하게 스스로 빛남(세면 색이 회색으로 바랜다)
+    // color 배율: 붉고 어두운 심층 조명에서 묻히지 않게 정점 색을 고르게 밝힌다(색감은 그대로). 메시마다 재질을 따로 둔다(Instanced가 언마운트 때 버림)
+    const exhibit = () =>
+      new THREE.MeshStandardMaterial({ vertexColors: true, color: new THREE.Color().setScalar(1.8), roughness: 0.6, metalness: 0.25, emissive: '#2a2224', emissiveIntensity: 0.35 });
     return {
-      capsule: stone(),
-      sphere: stone(),
-      box: new THREE.MeshStandardMaterial({ roughness: 0.75, metalness: 0.15 }),
+      dropped: Object.fromEntries(DROPPED.map((k) => [k, exhibit()])) as Record<Dropped, THREE.MeshStandardMaterial>,
+      spear: exhibit(),
+      sword: exhibit(),
+      rack: exhibit(),
       islet: new THREE.MeshStandardMaterial({ color: '#2a1e20', roughness: 1 }),
       ember: new THREE.MeshBasicMaterial({ map: glowTexture(), color: '#a01408', transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false }),
     };
   }, []);
   return (
     <group>
-      <Instanced geometry={g.capsule} material={m.capsule} items={items.capsules} />
-      <Instanced geometry={g.sphere} material={m.sphere} items={items.spheres} />
-      <Instanced geometry={g.box} material={m.box} items={items.boxes} />
+      {DROPPED.map((k) => (
+        <Instanced key={k} geometry={g.dropped[k]} material={m.dropped[k]} items={items.dropped[k]} />
+      ))}
+      <Instanced geometry={g.spear} material={m.spear} items={items.spears} />
+      <Instanced geometry={g.sword} material={m.sword} items={items.swords} />
+      <Instanced geometry={g.rack} material={m.rack} items={items.racks} />
       <Instanced geometry={g.islet} material={m.islet} items={items.islets} />
       <Instanced geometry={g.ember} material={m.ember} items={items.embers} />
       {UPLIGHTS.map((p) => (
@@ -189,6 +173,8 @@ export function DefeatedSwordsmen() {
     </group>
   );
 }
+
+useGLTF.preload(EXHIBIT_URL);
 
 // ── 거꾸로 떠 있는 방·계단 조각과 건물 파편. 조각마다 자기 축으로 천천히 돈다. draw call: 나무·창 = 2번
 type Fragment = { p: Vec3; tilt: Vec3; spin: number; scale: number; kind: 'room' | 'stairs' | 'shard' };
