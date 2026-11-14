@@ -439,6 +439,7 @@ VITE_CASTLE_WS_ORIGIN=http://localhost:3000 npm run dev -- --port 5173 --strictP
 | 환경변수 | 설명 |
 |----------|------|
 | `VITE_CASTLE_WS_ORIGIN` | WebSocket 서버 주소. 없으면 `VITE_API_BASE_URL`의 origin, 그것도 없으면 현재 origin. 개발 시 Vite 프록시는 `/api`만 넘기므로 실서버 연결에는 이 값이 필요 |
+| `VITE_AMPLITUDE_API_KEY` | Amplitude 프로젝트 API 키. 없으면 계측 끔(개발 기본). 운영은 Netlify 환경변수. 이벤트 목록은 `src/castle/telemetry.ts`·`src/utils/analytics.ts` |
 
 ### 3D 모델
 

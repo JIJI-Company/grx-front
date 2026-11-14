@@ -2,6 +2,7 @@
 // 층 이동 연출은 시간표(castle/transition.ts)대로만 진행한다. 서버 floor:change ack는 세션이 따로 기다리므로
 // ack가 늦거나 실패해도(세션이 재연결) 화면이 가려진 채 멈추지 않는다.
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
+import { useProgress } from '@react-three/drei';
 import type { CastleStatueFloor, Member } from '../../api/types';
 import { findStatue, FLOORS, galleryFloor, historyFloor, inRect, placeStatues, PLAZA_BOARD, PLAZA_CENTER, type PlacedStatue } from '../../castle/floors';
 import { MOUSE_SENSITIVITY, TOUCH_SENSITIVITY } from '../../castle/input';
@@ -54,6 +55,11 @@ interface CastleGameProps {
 export default function CastleGame({ session, statues, statuesError }: CastleGameProps) {
   const { store } = session;
   useCastleStore(store);
+  // 첫 장면 에셋(GLB·텍스처) 로딩이 끝나면 로딩 시간을 한 번 보낸다
+  const assets = useProgress();
+  useEffect(() => {
+    if (!assets.active && assets.total > 0) session.telemetry.loaded();
+  }, [assets.active, assets.total, session]);
   const [floorId, setFloorId] = useState<FloorId>(session.floor);
   const [near, setNear] = useState<PlacedStatue | null>(null);
   const [overlay, setOverlay] = useState<TransitionOverlay | null>(null);
@@ -160,11 +166,12 @@ export default function CastleGame({ session, statues, statuesError }: CastleGam
   const onNear = useCallback((s: PlacedStatue | null) => {
     nearRef.current = s;
     setNear(s);
+    if (s) session.telemetry.statueVisit(s.memberId, s.name, session.store.isLive(s.memberId));
     if (!s) {
       inspect.current = null;
       setInspecting(false);
     }
-  }, []);
+  },[session]);
 
   const offer = useCallback(() => {
     const s = nearRef.current;

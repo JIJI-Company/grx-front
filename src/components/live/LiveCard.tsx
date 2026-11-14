@@ -1,4 +1,5 @@
 import type { LiveStatus } from '../../api/types';
+import { trackOutbound } from '../../utils/analytics';
 
 interface LiveCardProps {
   stream: LiveStatus;
@@ -14,7 +15,9 @@ export default function LiveCard({ stream }: LiveCardProps) {
 
   const handleClick = () => {
     const url = stream.streamUrl ?? stream.channelUrl;
-    if (url) window.open(url, '_blank');
+    if (!url) return;
+    trackOutbound(url, { member: stream.memberSlug ?? undefined, is_live: stream.isLive, viewers: stream.viewerCount ?? undefined });
+    window.open(url, '_blank');
   };
   const canOpen = !!(stream.streamUrl || stream.channelUrl);
 
