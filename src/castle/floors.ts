@@ -159,7 +159,8 @@ const B2: FloorDef = {
   walk: [{ x0: -18, x1: 18, z0: -38, z1: 4 }],
   blockers: [
     ...B2_PILLARS.map(([x, z]) => circle(x, z, B2_PILLAR_RADIUS)),
-    ...B2_LANTERN_PATH.map(([x, z]) => circle(x, z, 0.28)),
+    // 석등 지붕(반지름 0.46)이 눈높이(1.2~1.55m)에 있어, 붙어 서면 1인칭 화면이 지붕으로 하얗게 덮인다 → 지붕에서 한 걸음 떨어지게 막는다
+    ...B2_LANTERN_PATH.map(([x, z]) => circle(x, z, 0.9)),
     ...B2_SCREENS.filter((s) => s.y === 0).map((s) => box(s.x - 0.35, s.x + 0.35, s.z - s.width / 2, s.z + s.width / 2)),
     // 해치 테두리: 옆과 뒤는 막고 앞(+z)으로만 들어간다
     box(-1.9, -1.6, -36.3, -30),
@@ -350,7 +351,8 @@ export function isWalkable(a: WalkArea, x: number, z: number): boolean {
 
 /** 석상 받침대(1.5 x 1.5, scale배) 반지름. 떠 있는 석상은 막지 않는다 */
 export function statueRadius(s: StatueSlot): number {
-  return 0.8 * s.scale;
+  // 발치 등롱이 중심에서 1.3까지 놓인다(LanternRing). 그 안까지 걸어 들어가면 1인칭 카메라가 등롱 안에 묻혀 화면이 하얗게 덮인다
+  return 1.45 * s.scale;
 }
 
 /** 층 정의 + 이 층 석상 → 충돌 영역 */

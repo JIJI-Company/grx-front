@@ -255,7 +255,7 @@ export default function Statue({ statue: s, count, awake, offers, reveal }: Stat
         {awake && <AwakeAura color={s.color} />}
         {/* 발치 등롱 */}
         <Suspense fallback={null}>
-          <LanternRing count={lanterns} color={s.color} />
+          <LanternRing count={lanterns} color={`#${lightColor.getHexString()}`} />
         </Suspense>
       </group>
       <pointLight

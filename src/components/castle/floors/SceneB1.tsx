@@ -53,16 +53,18 @@ export default function SceneB1() {
   );
   const shoji = useMemo(() => {
     const tex = shojiTexture(HALL_LEN / 3);
-    return new THREE.MeshStandardMaterial({ map: tex, emissiveMap: tex, emissive: '#ffb070', emissiveIntensity: 0.35, roughness: 0.9 });
+    // 양쪽 벽 전체가 빛나는 면이라 세면 눈이 피로하다(2026-11-14 B2 기준에 맞춰 낮춤). 종이 결이 보일 만큼만 은은하게
+    return new THREE.MeshStandardMaterial({ map: tex, emissiveMap: tex, emissive: '#ffb070', emissiveIntensity: 0.14, roughness: 0.9 });
   }, []);
   return (
     <group>
-      <hemisphereLight args={['#7a5a40', '#100605', 1.1]} />
+      <hemisphereLight args={['#7a5a40', '#100605', 0.6]} />
       <ambientLight intensity={0.25} />
       {/* 복도 바닥은 z HALL_BACK ~ -40. 발코니 바닥(-40 ~ -48)과 겹치면 깜빡이므로 딱 맞춘다 */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, (HALL_BACK - 40) / 2]}>
         <planeGeometry args={[3.8, HALL_BACK + 40]} />
-        <meshStandardMaterial color="#8d8576" roughness={0.85} />
+        {/* 밝은 돌색이면 석상 빛이 하얗게 번져 눈부시다 → 한 톤 어둡게 */}
+        <meshStandardMaterial color="#544d43" roughness={0.95} />
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, (HALL_BACK - 40) / 2]}>
         <planeGeometry args={[12.4, HALL_BACK + 40]} />
@@ -182,7 +184,7 @@ function Chochin() {
   );
   const m = useMemo(
     () => ({
-      body: new THREE.MeshStandardMaterial({ color: '#d8492c', emissive: '#ff5a24', emissiveIntensity: 1.25, roughness: 0.8 }),
+      body: new THREE.MeshStandardMaterial({ color: '#d8492c', emissive: '#ff5a24', emissiveIntensity: 0.85, roughness: 0.8 }),
       rim: new THREE.MeshStandardMaterial({ color: '#120806' }),
       cord: new THREE.MeshBasicMaterial({ color: '#120806' }),
     }),
