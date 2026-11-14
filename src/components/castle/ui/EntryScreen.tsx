@@ -2,6 +2,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import type { JoinProfile } from '../../../castle/session';
 import { useCastleHalls } from '../../../hooks/useCastle';
+import { track } from '../../../utils/analytics';
 import { DEFAULT_NICKNAME, HORN_COLORS, NICKNAME_MAX } from '../castlePresentation';
 import HallPicker from './HallPicker';
 
@@ -18,6 +19,9 @@ export default function EntryScreen({ onEnter, rejection, initial }: EntryScreen
   const [hornColor, setHornColor] = useState<string>(initial?.hornColor ?? HORN_COLORS[0].value);
   const [hallSlug, setHallSlug] = useState<string | null>(initial?.hall ?? null);
 
+  // 입장 퍼널 1단계: 화면 노출 (거절 후 되돌아온 경우 포함)
+  useEffect(() => track('castle_entry_view', { after_rejection: rejection ?? undefined }), [rejection]);
+
   useEffect(() => {
     if (hallSlug || !halls.data) return;
     setHallSlug(halls.data.find((h) => !h.isFull)?.slug ?? null);
@@ -26,6 +30,12 @@ export default function EntryScreen({ onEnter, rejection, initial }: EntryScreen
   const submit = (e: FormEvent) => {
     e.preventDefault();
     if (!hallSlug) return;
+    track('castle_entry_submit', {
+      hall: hallSlug,
+      horn_color: hornColor,
+      default_nickname: !nickname.trim(),
+      halls_open: halls.data?.filter((h) => !h.isFull).length,
+    });
     onEnter({ hall: hallSlug, nickname: nickname.trim() || DEFAULT_NICKNAME, hornColor });
   };
 

@@ -28,7 +28,7 @@ export class CastleSession {
   /** B3 입장 연출 진행 (접속당 한 번) */
   readonly reveal = createReveal();
   readonly motion: Motion;
-  private readonly telemetry = new CastleTelemetry();
+  readonly telemetry = new CastleTelemetry();
   private floorId: FloorId;
   /** join ack를 받았고 floor:change ack를 기다리는 중이 아님 → pos를 보내도 된다 */
   private ready = false;
@@ -176,6 +176,7 @@ export class CastleSession {
 
   private handle(msg: ServerMessage) {
     if (msg.type === 'peers:tick') this.telemetry.tick(msg.payload.length);
+    if (msg.type === 'statue:awaken') this.telemetry.awaken(msg.payload.memberId, msg.payload.isLive);
     if (msg.type === 'pos:reject') {
       this.moveTo(msg.payload);
       return;

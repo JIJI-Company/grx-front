@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import type { CSSProperties } from 'react';
 import type { Member } from '../../api/types';
+import { track } from '../../utils/analytics';
 import { getMemberColor } from '../../utils/memberColor';
 import { getMemberRankLabel, getMemberSummary, splitHashTags } from './memberPresentation';
 
@@ -10,6 +11,8 @@ interface MemberModalProps {
 }
 
 export default function MemberModal({ member, onClose }: MemberModalProps) {
+  useEffect(() => track('member_view', { member: member.slug, active: member.isActive }), [member.slug, member.isActive]);
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose();
@@ -113,6 +116,7 @@ export default function MemberModal({ member, onClose }: MemberModalProps) {
             {soopAccount?.channelUrl && (
               <a
                 href={soopAccount.channelUrl}
+                data-member={member.slug}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="member-modal-visit"

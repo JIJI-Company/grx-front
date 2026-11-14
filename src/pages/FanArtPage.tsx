@@ -6,6 +6,7 @@ import { FANART_MEMBERS, MOCK_FANARTS, type FanArt, type FanArtMember } from '..
 import { apiGetFanArt, apiUploadFanArt } from '../api/client';
 import { useMembers } from '../hooks/useMembers';
 import type { FanArtItem } from '../api/types';
+import { track } from '../utils/analytics';
 
 const ALL = '전체';
 const USE_MOCK = import.meta.env.VITE_MOCK === 'true';
@@ -81,6 +82,7 @@ export default function FanArtPage() {
       return;
     }
     setUploading(true);
+    const props = { size_kb: Math.round(data.file.size / 1024), type: data.file.type, members: data.memberNames.length };
     try {
       await apiUploadFanArt({
         file: data.file,
@@ -88,9 +90,11 @@ export default function FanArtPage() {
         authorName: data.authorName,
         memberNames: data.memberNames,
       });
+      track('fanart_upload', { ok: true, ...props });
       setShowUpload(false);
       loadFanArt();
     } catch (err) {
+      track('fanart_upload', { ok: false, error: err instanceof Error ? err.message : 'unknown', ...props });
       alert(err instanceof Error ? err.message : '업로드에 실패했습니다');
     } finally {
       setUploading(false);

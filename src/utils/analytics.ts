@@ -55,6 +55,12 @@ export function initAmplitude(): void {
       fileDownloads: false,
     },
   });
+  // External <a> clicks (SOOP·YouTube·boards). The nearest [data-member] names the member.
+  document.addEventListener('click', (e) => {
+    const a = (e.target as Element | null)?.closest?.('a[href]');
+    if (!(a instanceof HTMLAnchorElement) || a.origin === window.location.origin) return;
+    trackOutbound(a.href, { member: a.closest<HTMLElement>('[data-member]')?.dataset.member });
+  }, { capture: true });
   // Events queued at tab close would be lost with fetch; beacon survives unload.
   window.addEventListener('pagehide', () => {
     amplitude.setTransport('beacon');
@@ -65,6 +71,17 @@ export function initAmplitude(): void {
 export function track(event: string, props?: Record<string, unknown>): void {
   if (!AMPLITUDE_KEY) return;
   amplitude.track(event, props);
+}
+
+/** 사이트 밖(방송·영상·게시판)으로 나간 클릭 — 팬 사이트가 실제 시청으로 이어지는지 */
+export function trackOutbound(url: string, props?: Record<string, unknown>): void {
+  let host = '';
+  try {
+    host = new URL(url).hostname;
+  } catch {
+    return;
+  }
+  track('outbound_click', { host, url, from_path: window.location.pathname, ...props });
 }
 
 export function flushAnalytics(): void {

@@ -2,6 +2,7 @@
 // 클라이언트 쪽 지표 — 연결 지연, ack 왕복 시간, 거절 코드, 틱 수신량, 프레임 — 를 남긴다.
 // 서버 쪽 인스턴스별 집계는 castle.gateway.ts logStats(1분 로그)가 맡는다.
 import { flushAnalytics, track } from '../utils/analytics';
+import { isLowSpec } from './quality';
 import type { Ack, FloorId } from './protocol';
 import type { ConnectionStatus } from './transport';
 
@@ -26,12 +27,19 @@ function percentile(sorted: number[], p: number): number | null {
 }
 
 export class CastleTelemetry {
-  private startedAt = 0;
-  private connectingAt = 0;
+  /** 세션 생성(입장 클릭·저장된 입장 복귀) 시각 — 로딩·체류 시간의 기준 */
+  private readonly startedAt = performance.now();
+  private connectingAt = this.startedAt;
   private lastStatus = '';
   private reconnects = 0;
   private floorChanges = 0;
   private offers = 0;
+  private floorSince = this.startedAt;
+  private loadedSent = false;
+  /** 이번 접속에서 방송 시작(statue:awaken)을 받은 시각 */
+  private readonly awakenAt = new Map<string, number>();
+  /** 석상 접근은 (석상, 방송 여부)마다 한 번만 */
+  private readonly visited = new Set<string>();
   // 하트비트 창 (60초마다 비운다)
   private ticks = 0;
   private entries = 0;
@@ -45,7 +53,7 @@ export class CastleTelemetry {
 
   start(live: () => CastleLiveState): void {
     this.live = live;
-    this.startedAt = this.connectingAt = performance.now();
+    this.connectingAt = performance.now();
     const frame = () => {
       this.frames++;
       this.raf = requestAnimationFrame(frame);
@@ -75,12 +83,55 @@ export class CastleTelemetry {
 
   floorChange(started: number, r: Ok, from: FloorId, to: FloorId, peers?: number): void {
     this.floorChanges++;
-    track('castle_floor_change', { ...okProps(r), rtt_ms: ms(started), from, to, peers });
+    track('castle_floor_change', { ...okProps(r), rtt_ms: ms(started), from, to, peers, from_dwell_s: this.dwell() });
+    this.floorSince = performance.now();
   }
 
   offer(started: number, r: Ok, extended?: boolean): void {
     this.offers++;
     track('castle_lantern_offer', { ...okProps(r), rtt_ms: ms(started), extended });
+  }
+
+  /** 첫 장면의 에셋(GLB 등) 로딩이 끝났을 때 한 번. 로딩 시간과 기기 사양 */
+  loaded(): void {
+    if (this.loadedSent) return;
+    this.loadedSent = true;
+    const res = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
+    const glb = res.filter((e) => e.name.includes('.glb'));
+    const chunk = res.find((e) => /\/CastlePage-[^/]+\.js/.test(e.name));
+    const nav = navigator as Navigator & { deviceMemory?: number };
+    track('castle_load', {
+      ready_ms: ms(this.startedAt),
+      chunk_ms: chunk ? Math.round(chunk.duration) : undefined,
+      glb_count: glb.length,
+      glb_cached: glb.filter((e) => e.transferSize === 0).length,
+      glb_kb: Math.round(glb.reduce((n, e) => n + e.transferSize, 0) / 1024),
+      glb_max_ms: glb.length ? Math.round(Math.max(...glb.map((e) => e.duration))) : undefined,
+      low_spec: isLowSpec(),
+      gpu: gpuName(),
+      dpr: window.devicePixelRatio,
+      screen: `${window.screen.width}x${window.screen.height}`,
+      cores: navigator.hardwareConcurrency,
+      memory_gb: nav.deviceMemory,
+    });
+  }
+
+  awaken(memberId: string, isLive: boolean): void {
+    if (isLive) this.awakenAt.set(memberId, performance.now());
+  }
+
+  /** 석상 앞에 섰다. 방송 시작 알림 뒤 몇 초 만에 왔는지 보면 실시간 알림의 효과가 보인다 */
+  statueVisit(memberId: string, name: string, live: boolean): void {
+    const key = `${memberId}:${live}`;
+    if (this.visited.has(key)) return;
+    this.visited.add(key);
+    const at = this.awakenAt.get(memberId);
+    track('castle_statue_visit', {
+      member: name,
+      live,
+      since_awaken_s: live && at ? Math.round((performance.now() - at) / 1000) : undefined,
+      ...this.live(),
+    });
   }
 
   tick(entries: number): void {
@@ -104,6 +155,7 @@ export class CastleTelemetry {
       reconnects: this.reconnects,
       floor_changes: this.floorChanges,
       offers: this.offers,
+      last_floor_dwell_s: this.dwell(),
       ...this.live(),
     });
     flushAnalytics();
@@ -126,8 +178,20 @@ export class CastleTelemetry {
     this.resetWindow();
   }
 
+  private dwell() {
+    return Math.round((performance.now() - this.floorSince) / 1000);
+  }
+
   private resetWindow() {
     this.ticks = this.entries = this.frames = 0;
     this.tickGaps = [];
   }
+}
+
+/** WebGL 렌더러 이름 (예: "ANGLE (Apple, Apple M2, OpenGL 4.1)"). 이미 만든 컨텍스트를 다시 얻는다 */
+function gpuName(): string | undefined {
+  const gl = document.querySelector('canvas')?.getContext('webgl2');
+  if (!gl) return undefined;
+  const ext = gl.getExtension('WEBGL_debug_renderer_info');
+  return String(gl.getParameter(ext ? ext.UNMASKED_RENDERER_WEBGL : gl.RENDERER));
 }
