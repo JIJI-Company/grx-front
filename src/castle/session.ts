@@ -5,6 +5,7 @@ import { createMotion, placeMotion, type Motion } from './movement';
 import { decodePoint, encodeAt, encodePos, type CastleError, type FloorId } from './protocol';
 import { createReveal } from './reveal';
 import { CastleStore } from './store';
+import { CastleTelemetry } from './telemetry';
 import { createTransport, type CastleTransport, type ServerMessage } from './transport';
 
 export interface JoinProfile {
@@ -27,6 +28,7 @@ export class CastleSession {
   /** B3 입장 연출 진행 (접속당 한 번) */
   readonly reveal = createReveal();
   readonly motion: Motion;
+  private readonly telemetry = new CastleTelemetry();
   private floorId: FloorId;
   /** join ack를 받았고 floor:change ack를 기다리는 중이 아님 → pos를 보내도 된다 */
   private ready = false;
@@ -51,11 +53,13 @@ export class CastleSession {
 
   start(): void {
     this.stopped = false;
+    this.telemetry.start(() => ({ floor: this.floorId, peers: this.store.population }));
     this.transport.connect({
       onMessage: (msg) => this.handle(msg),
       onStatus: (status, code) => {
         if (this.stopped) return;
         this.ready = false;
+        this.telemetry.status(status, code);
         this.store.setConnection(status, code);
         if (status === 'open') void this.join();
       },
@@ -65,19 +69,23 @@ export class CastleSession {
   stop(): void {
     this.stopped = true;
     this.ready = false;
+    this.telemetry.end();
     if (this.retryTimer) clearTimeout(this.retryTimer);
     this.transport.disconnect();
   }
 
   /** 층 이동. 로컬은 즉시 도착 위치(없으면 새 층 스폰)에 두고, 서버 ack가 오면 서버가 정한 위치로 맞춘다 */
   async changeFloor(to: FloorId, arrive?: [number, number]): Promise<void> {
+    const from = this.floorId;
     this.floorId = to;
     placeMotion(this.motion, ...(arrive ?? FLOORS[to].spawn));
     if (!this.ready) return; // 아직 join 전이면 다음 join이 새 층으로 들어간다
     this.ready = false;
     this.store.beginSync();
+    const sentAt = performance.now();
     const res = await this.transport.request('floor:change', arrive ? { floor: to, at: encodeAt(...arrive) } : { floor: to });
     if (this.stopped || this.floorId !== to) return;
+    this.telemetry.floorChange(sentAt, res, from, to, res.ok ? res.data.peers.length + 1 : undefined);
     if (!res.ok) return this.transport.reconnect(); // 재연결 → 현재 층으로 다시 join
     this.store.applyFloorSnapshot(res.data);
     this.moveTo(res.data.self);
@@ -90,8 +98,10 @@ export class CastleSession {
   async offerLantern(memberId: string): Promise<void> {
     if (!this.ready) return;
     this.offerSeq++;
+    const sentAt = performance.now();
     const res = await this.transport.request('lantern:offer', { memberId });
     if (this.stopped) return;
+    this.telemetry.offer(sentAt, res, res.ok ? res.data.extended : undefined);
     if (res.ok) this.store.applyOffer(res.data, { x: this.motion.x, z: this.motion.z });
     else this.store.setProblem(res.error.code);
   }
@@ -115,6 +125,7 @@ export class CastleSession {
     const floor = this.floorId;
     const { hall, nickname, hornColor } = this.profile;
     this.store.beginSync();
+    const sentAt = performance.now();
     const res = await this.transport.request('join', {
       hall,
       floor,
@@ -124,6 +135,13 @@ export class CastleSession {
       at: this.joinedOnce ? encodeAt(this.motion.x, this.motion.z) : undefined,
     });
     if (this.stopped) return;
+    this.telemetry.join(sentAt, res, {
+      rejoin: this.joinedOnce,
+      hall,
+      floor,
+      peers: res.ok ? res.data.peers.length + 1 : undefined,
+      capacity: res.ok ? res.data.hall.capacity : undefined,
+    });
     if (!res.ok) {
       const fatal = JOIN_FATAL.has(res.error.code);
       if (fatal && !this.joinedOnce) return this.store.rejectJoin(res.error.code);
@@ -157,6 +175,7 @@ export class CastleSession {
   }
 
   private handle(msg: ServerMessage) {
+    if (msg.type === 'peers:tick') this.telemetry.tick(msg.payload.length);
     if (msg.type === 'pos:reject') {
       this.moveTo(msg.payload);
       return;

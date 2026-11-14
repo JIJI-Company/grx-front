@@ -2,10 +2,11 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
-import { initGA } from './utils/analytics';
+import { initAmplitude, initGA } from './utils/analytics';
 import './styles/global.css';
 
 initGA();
+initAmplitude();
 
 const queryClient = new QueryClient({
   defaultOptions: {

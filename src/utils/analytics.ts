@@ -1,3 +1,5 @@
+import * as amplitude from '@amplitude/analytics-browser';
+
 // Google Analytics 4 — loads only when VITE_GA_ID is set (empty in dev → no-op).
 // This is a SPA, so route views are sent manually via trackPageView; the GA4
 // auto page_view is disabled to avoid double counting the first load.
@@ -30,4 +32,41 @@ export function initGA(): void {
 export function trackPageView(path: string): void {
   if (!GA_ID) return;
   window.gtag('event', 'page_view', { page_path: path });
+}
+
+// Amplitude — loads only when VITE_AMPLITUDE_API_KEY is set (empty in dev → no-op).
+// Autocapture covers page views, sessions, attribution, Web Vitals, clicks on
+// links/buttons and failed network requests; castle connection metrics are sent
+// explicitly through `track` (src/castle/telemetry.ts).
+const AMPLITUDE_KEY = import.meta.env.VITE_AMPLITUDE_API_KEY as string | undefined;
+
+export function initAmplitude(): void {
+  if (!AMPLITUDE_KEY) return;
+  amplitude.init(AMPLITUDE_KEY, {
+    autocapture: {
+      attribution: true,
+      pageViews: true,
+      sessions: true,
+      webVitals: true,
+      elementInteractions: true,
+      // default: only status 0 / 5xx — API and asset failures, not every request
+      networkTracking: true,
+      formInteractions: false,
+      fileDownloads: false,
+    },
+  });
+  // Events queued at tab close would be lost with fetch; beacon survives unload.
+  window.addEventListener('pagehide', () => {
+    amplitude.setTransport('beacon');
+    amplitude.flush();
+  });
+}
+
+export function track(event: string, props?: Record<string, unknown>): void {
+  if (!AMPLITUDE_KEY) return;
+  amplitude.track(event, props);
+}
+
+export function flushAnalytics(): void {
+  if (AMPLITUDE_KEY) amplitude.flush();
 }
