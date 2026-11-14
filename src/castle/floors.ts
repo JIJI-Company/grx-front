@@ -96,13 +96,13 @@ const circle = (x: number, z: number, r: number): Blocker => ({ kind: 'circle', 
 const box = (x0: number, x1: number, z0: number, z1: number): Blocker => ({ kind: 'box', x0: x0 - R, x1: x1 + R, z0: z0 - R, z1: z1 + R });
 const spread = (n: number, span: number, max: number) => (n > 1 ? Math.min(max, span / (n - 1)) : 0);
 
-// ── B1: 하현의 회랑 → 복도 끝 발코니 → 계단 5칸
+// ── B1: 하현의 방 → 복도 끝 발코니 → 계단 5칸
 const B1_STAIRS: Rect = { x0: -1.6, x1: 1.6, z0: -53, z1: -48 };
 const B1: FloorDef = {
   id: 'B1',
   tag: 'B1',
   title: '지하 1층',
-  sub: '하현의 회랑',
+  sub: '하현의 방',
   walk: [
     { x0: -1.9, x1: 1.9, z0: -40, z1: 2 }, // 복도
     { x0: -6, x1: 6, z0: -48, z1: -40 }, // 발코니
