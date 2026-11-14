@@ -13,6 +13,163 @@
 
 ---
 
+## v3.4.1 - 2026-11-13
+
+### 목표
+
+- 석상을 색 없이 조각한 돌로 그리는 재질을 시험할 수 있게 한다. 기본 동작(Paint 텍스처)은 그대로.
+
+### 변경 사항
+
+- 신규 `src/components/castle/sculpt.ts`: `VITE_STATUE_FINISH=sculpt`일 때 텍스처 석상은 텍스처 밝기만 남긴 회색 맵을 명암(map)과 새김(bumpMap)으로 쓰는 조각 재질, 텍스처 없는 메시(형태로 깎은 머리·목)는 멤버 색 없는 맨 돌(`plainStone`). 회색 맵 평균을 맞춰 두 재질의 돌 밝기가 같다. 같은 텍스처는 한 번만 변환(WeakMap).
+- `Statue.tsx`: 위 재질 선택. 설정이 없으면 기존과 같다.
+
+### 변경 파일
+
+- `src/components/castle/sculpt.ts`(신규), `src/components/castle/Statue.tsx`, `planning/castle/statues-20261113.md`
+
+### Verification
+
+- `tsc -b`, `npm run build`: PASS.
+
+### 미검증 항목
+
+- 화면 전부(사용자 확인 예정): 조각 재질 명암·새김 정도, 윤타미 조각 머리.
+
+---
+
+## v3.4.0 - 2026-11-13
+
+### 목표
+
+- 멤버 석상을 임시 도형 대신 3D 모델(GLB)로 그릴 수 있게 하고, 석상을 앞뒤좌우에서 보는 카메라(석상 둘러보기·3인칭 회전)를 넣는다. 서버 프로토콜·운영 데이터는 그대로(`modelUrl`은 여전히 `null`).
+
+### 변경 사항
+
+- `Statue.tsx`: `modelUrl`이 있으면 GLB(높이 2.4m, 받침대 위). 재질은 Paint 텍스처 → 정점 색 → 돌 순, 발광·반짝임은 공통. 불러오기 실패 시 임시 도형(에러 경계). 돌 색에 멤버 색 25%(`STONE_TINT`).
+- 석상 둘러보기: 석상 앞 F(모바일 버튼) → 석상 중심 궤도, 드래그 회전·휠 확대, 움직이거나 F·Esc·층 이동·석상에서 멀어지면 끝. 계산은 신규 `castle/orbit.ts`.
+- 3인칭 회전: 마우스·모바일 드래그로 `look.yaw`만큼 꾸로 중심 회전, 이동도 그 yaw 기준. yaw 0이면 기존 구도.
+- 카메라 상자 `FloorDef.cameraBox`: B1 복도 벽·천장, B2 방 안쪽. B3는 제한 없음.
+- mock 전용 `VITE_MOCK_STATUE_MODELS`·`VITE_MOCK_STATUE_VARIANT`로 `public/castle/statues/{slug}{variant}.glb` 시험. 그 폴더는 `.gitignore`.
+
+### 변경 파일
+
+- `src/castle/`: `floors.ts`, 신규 `orbit.ts`
+- `src/components/castle/`: `Statue.tsx`, `FollowCamera.tsx`, `CastleCanvas.tsx`, `CastleGame.tsx`, `Player.tsx`, `castlePresentation.ts`, `ui/LookPad.tsx`, `ui/LanternPrompt.tsx`
+- `src/api/mockDb.ts`, `.gitignore`, `planning/castle/statues-20261113.md`(이어받기 문서)
+
+### Verification
+
+- `tsc -b`, `npm run build`: PASS.
+- `orbit.ts`를 esbuild로 묶어 Node에서 확인: yaw 0 = 기존 구도, B1 석상 뒤 감상 카메라가 x −5.7(벽 안쪽)에서 멈춤(상자 없으면 −8.25), 각도·확대 한계.
+
+### 미검증 항목
+
+- 화면 전부(사용자 확인 예정): 둘러보기·3인칭 회전 조작감, B1 벽 근처 카메라, 모바일 드래그, GLB 석상 크기·재질·발광, 물들이기 비율.
+
+---
+
+## v3.3.0 - 2026-11-11
+
+### 목표
+
+- 무한성 `/castle` 마감 묶음 5개(B2 등 색, 데스크톱 거울 바닥, 발밑 그림자, 달리기 먼지, B3 검사 전시 가독성)와 등롱 바치기 순간의 연출. 서버 프로토콜·사운드·GLB·각성 표현(AwakeAura)·해치 문짝은 그대로.
+
+### 변경 사항
+
+- 등롱 연출: 타이밍·곡선은 순수 함수 `castle/offering.ts`(`flightPose`·`statueFlash`·`ripple`·`pillar`). 이벤트는 store가 쌓는다 — 내 `lantern:offer` ack 성공(`mine`, 연장 포함, 실패·제한 응답은 없음) / `lantern:count`로 수가 늘었을 때(`other`). 입장 snapshot은 연출 없음. 내 바치기의 뒤이은 방송은 수가 같아 중복 재생되지 않는다. 밝기 단계(1/5/20/50)를 넘으면 `tierUp`.
+- `mine`: lantern.glb(발치 등롱과 같은 지오메트리, `useLanternGeometry`)가 머리 위에서 호를 그리며 1.05초 동안 석상 앞 첫 줄 자리로 날아가 내려앉는다(종이는 멤버 색). 내려앉는 순간 석상 몸 발광·기존 광원 세기·도달 거리·발치 빛 번짐이 튀었다가 단계 값으로 돌아오고 바닥에 멤버 색 파동. `other`: 날아가는 등롱 없이 반짝임+파동. `tierUp`: 더 센 반짝임 + 빛기둥 + 큰 파동. 후광·고리 없음, 새 광원 없음. 연출이 끝나면 그룹을 숨겨 draw call이 남지 않고, 입력은 막지 않는다.
+- B2: 매달린 종이등(emissive 1.6 → 0.75, 색 낮춤)·석등 불창(2.2 → 1.0)이 ACES 뒤에도 주황빛 크림으로 보인다.
+- `isLowSpec()`: 터치 기기만 저사양. 1배율 데스크톱 모니터도 B3 반사·블룸 풀 해상도.
+- 발밑 그림자: 기존 단색 원 → 가장자리가 흐린 검은 평면(glowTexture, 공용 재질 1벌). 해치 낙하 중 내 그림자 숨김, 1인칭은 몸과 함께 숨김.
+- 달리기 먼지: 걷기 속도+0.3m/s를 넘을 때만 발뒤에서 일어나는 Points 1개(최대 48, 수명 0.7초). 다 가라앉으면 숨김. 저사양은 끔.
+- B3 전시: 검사·칼·옷걸이·돌판을 1.45배(`B3_EXHIBIT_GROW`). 아래에서 붉은 빛(광원 2개 + 발밑 붉은 번짐 InstancedMesh 1개). 걷기 영역에 걸치는 쓰러진 검사 2기에 충돌 박스 추가.
+
+### 변경 파일
+
+- `src/castle/`: `store.ts`, `session.ts`(applyOffer에 바친 위치 전달), `quality.ts`, `floors.ts`(B3 blockers·`B3_EXHIBIT_GROW`), 신규 `offering.ts`
+- `src/components/castle/`: `CastleCanvas.tsx`, `Statue.tsx`, `LanternRing.tsx`(`useLanternGeometry`·`PAPER_GLOW` export), `Player.tsx`, `Oni.tsx`, 신규 `OfferFx.tsx`
+- `src/components/castle/floors/`: `SceneB2.tsx`, `B3Exhibit.tsx`
+
+### Verification
+
+- `npm run build`: PASS.
+- headless Chrome(1280×800, dpr 2), 로컬 백엔드 연결 상태: B1에서 Space → 날아가는 등롱·반짝임·파동(연장 ack), 다른 게스트 소켓의 바치기로 4→5 단계 상승(반짝임·빛기둥·큰 파동, 등롱 없음), 내 바치기로 4→5 단계 상승(등롱 → 빛기둥). B2 등 색, B3 전시 크기·붉은 빛·충돌, 달리기에서만 먼지, 원격 꾸로 발밑 그림자.
+
+### 미검증 항목
+
+- 해치 낙하 중 그림자 숨김(화면 캡처 없음), 1인칭에서 날아가는 등롱(석상이 시야 밖이라 파동 가장자리만 확인), B2·B3 석상에서의 연출, 실제 1배율 모니터·실기기 프레임레이트.
+
+---
+
+## v3.2.0 - 2026-11-11
+
+### 목표
+
+- 무한성 `/castle` 업그레이드 1차(계획서 `grx-back/docs/design/castle-courtyard-20261110/upgrade-20261111.md`의 충돌·조명·거울 바닥·층 이동 연출·1/3인칭·배경 디테일·UI). 사운드·이모트·석상 모델·서버 프로토콜은 범위 밖.
+
+### 변경 사항
+
+- 충돌: `FloorDef.blockers`(원·박스, 몸 반지름 0.3m 포함)와 `walkAreaOf(floor, statues)`. 석상은 배치 결과로 자동 등록(반지름 0.8×scale, 떠 있는 석상 제외). `isWalkable` = 걷기 영역 안 && 막힌 곳 아님, 축별 미끄러짐 유지. 막힌 곳 안에 세워지면 걷기 영역 안에서 빠져나올 수 있다.
+- B2 배치: 장식 수치(`B2_PILLARS`·`B2_LANTERN_PATH`·`B2_SCREENS`·`B2_DAIS`·`B2_HATCH`)를 floors.ts로 옮겨 장면과 충돌이 같은 값을 쓴다. 상현 석상은 통로를 사이에 두고 짝지어 방 가운데(z -16, x ±8.5, scale 2).
+- 조명·후처리: 등롱 단계별 광원 도달 거리·발치 빛 번짐(가산 혼합 평면) 추가, 단계 변화는 보간. 블룸 → ACES 톤 매핑 → 층별 색감(`FloorDef.grade`, 자체 GradeEffect) → B3만 색수차 → 비네트. B3 불티·먼지 Points 1개. 저사양 판정 `isLowSpec()`(터치 기기 또는 devicePixelRatio < 1.5) 하나로 블룸 해상도·MSAA·입자 수·거울 반사를 낮춘다.
+- B3 거울 바닥: 단과 둘레 허공을 반지름 42m 반사면 하나(`MeshReflectorMaterial`, 512 + blur, 가장자리로 투명)로. 저사양은 광택 재질.
+- 층 이동 연출: 트리거에 `effect`(stairs·hatch·return). 시각표는 `castle/transition.ts` 하나를 DOM·3D가 같이 읽는다. 계단=카메라 하강+암전→장지문 열림, 해치=다다미 4장이 차례로 뒤집힘→낙하→붉은 페이드→착지 흔들림, 복귀=공간이 반 바퀴씩 회전. 시간으로만 진행하므로 서버 ack 지연·실패에도 화면이 멈추지 않는다.
+- 1인칭/3인칭: V 키·HUD 버튼, localStorage 저장. 1인칭은 내 몸 숨김·눈높이 1.3m, 데스크톱 포인터 락(정보 창이 뜨면 해제), 모바일 오른쪽 절반 드래그. 이동은 카메라 yaw 기준(`toWorld`, 3인칭 yaw 0 → 기존과 같음). 전송 `[x,z,rotY,speed]`는 그대로.
+- 배경: B1 장지문 벽·초롱·입구 뒤로 이어지는 복도, 난간 살·천장 보 인스턴싱. B2 다다미 줄눈(구멍 뚫린 바닥)·해치 구덩이·기둥 숲·석등 길·병풍·높은 단. B3 거꾸로 떠서 도는 방·계단 조각, 패배한 검사 전시(이름 없는 석화 형상·부러진 칼·빈 겉옷·민무늬 가면, 회색 돌). 텍스처 파일 없이 캔버스 생성.
+- UI: 입장 화면·성 선택·HUD·등롱 힌트·각성 알림·층 배너에 금선 장식과 `starting:` 진입 전환. 기존 문구·기능 유지(추가 문구: 시점 버튼, 1인칭 클릭 안내).
+
+### 변경 파일
+
+- `src/castle/`: `floors.ts`, `movement.ts`, `input.ts`, `brightness.ts`, `session.ts`(look 필드만), 신규 `transition.ts`·`quality.ts`·`view.ts`
+- `src/components/castle/`: `CastleCanvas.tsx`, `CastleGame.tsx`, `FollowCamera.tsx`, `Player.tsx`, `Statue.tsx`, `castlePresentation.ts`, 신규 `ColorGrade.tsx`
+- `src/components/castle/floors/`: `FloorScene.tsx`, `SceneB1.tsx`, `SceneB2.tsx`, `SceneB3.tsx`, `sceneParts.tsx`, 신규 `B3Exhibit.tsx`
+- `src/components/castle/ui/`: `FloorTransition.tsx`, `Hud.tsx`, `EntryScreen.tsx`, `HallPicker.tsx`, `LanternPrompt.tsx`, `AwakenToast.tsx`, 신규 `LookPad.tsx`
+
+### Verification
+
+- `npm run build`: PASS. 테스트 스크립트 없음 — 충돌·도달 거리는 임시 스크립트(22항목)로 확인: B2 기둥·석상·해치 테두리 차단, 세 층 스폰 통과, 석상 정면 충돌 위치에서 등롱·정보 판정 유지(B1·B2·B3), 미끄러짐, 막힌 곳 탈출.
+- headless Chrome(1280×800, dpr 2/모바일 에뮬레이션)으로 입장 화면, B1·B2·B3 3인칭, B1·B2 1인칭, 계단·해치·복귀 연출 중간 프레임, B3 저사양(모바일) 확인.
+
+### 미검증 항목
+
+- 서버 ack 정상 경로: 확인 실행 중 로컬 게스트 생성 제한에 걸려 모든 실행이 "다시 연결하는 중" 상태였다(연출이 ack 없이 끝까지 진행되는 것은 확인).
+- 등롱 단계 1~4의 빛 번짐·광원 차등(로컬 등롱 수 0), 각성 알림 진입 전환, 실제 포인터 락 마우스 회전·모바일 드래그, 실기기 프레임레이트·draw call 수치.
+
+---
+
+## v3.1.0 - 2026-11-10
+
+### 목표
+
+- 무한성 3D 실시간 공간 `/castle` MVP 프론트엔드. PoC를 grx 구조로 이식하고(PoC 폴더는 이식 후 정리), WebSocket 계약은 `grx-back/docs/design/castle-courtyard-20261110/api.md`(승인본)를 따른다.
+
+### 변경 사항
+
+- `/castle` 라우트를 Layout 밖에 lazy route로 추가했다. three.js·socket.io는 `CastlePage` 청크에만 들어간다(메인 청크 +1.3kB). 내비게이션 메뉴 링크는 추가하지 않았다.
+- 데이터 계층 `src/castle/`: api.md §3 계약을 그대로 옮긴 `protocol.ts`, 전송 인터페이스와 구현 2개(socket.io / `VITE_MOCK=true` 로컬 mock), React 밖 store, 세션(입장·층 이동·등롱·10Hz 위치 전송·재연결 복구), 층 정의, 이동, 보간, 밝기, 입력, 게스트 토큰, 사운드 자리.
+- 화면 `src/components/castle/`: PoC 3개 층 장면, 오니·석상·카메라, 블룸·비네트·입자, 입장 화면(닉네임·뿔 색·성), HUD, 등롱 힌트, 층 이동 연출, 각성 알림, 모바일 조이스틱.
+- REST `GET /api/castle/statues`·`/api/castle/halls`를 `client.ts`·`mockDb.ts`·`hooks/useCastle.ts`에 추가했다.
+- 의존성: `three@0.169.0`, `@react-three/fiber@8.17.10`, `@react-three/drei@9.114.0`, `@react-three/postprocessing@2.19.1`, `socket.io-client@4.8.1`, `@types/three@0.169.0`(dev). 버전 고정.
+- 설계 문서: `docs/render/castle-20261110/`.
+
+### 변경 파일
+
+- `package.json`, `package-lock.json`
+- `src/router.tsx`, `src/api/types.ts`, `src/api/client.ts`, `src/api/mockDb.ts`
+- `src/hooks/useCastle.ts`, `src/pages/CastlePage.tsx`
+- `src/castle/*` (13개), `src/components/castle/**` (19개)
+
+### Verification
+
+- `npm run build`: PASS. 메인 청크 490.09kB(이전 488.79kB), `CastlePage` 청크 982.68kB(gzip 268kB). 메인 청크에 WebGLRenderer·engine.io 없음.
+- `VITE_MOCK=true` dev 서버 + headless Chrome(Metal, 60fps) 자동 조작: 금칙어 닉네임 거절 후 입장 화면 복귀·문구 표시, B1 신입 석상 등롱 바치기(0→1)·재바치기 시 "7일 연장"(수 유지), B1→B2→B3→B1 층 이동 모두 PASS.
+
+### 미검증 항목
+
+- 실제 백엔드(socket.io) 연결: 서버가 아직 없어 join·재연결·`session:end`·`connect_error` 경로와 다른 사람 보간 렌더링은 실행해 보지 못했다.
+- 방송 각성 알림(mock 라이브 데이터에 방송 중 멤버가 없었다), 모바일 실기기 조이스틱, 저사양 기기 프레임.
+
 ## v3.0.1 - 2026-10-23
 
 ### 목표

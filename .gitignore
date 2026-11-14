@@ -10,3 +10,7 @@ dist/
 stock/
 legacy/
 docs/
+# 석상 GLB는 Git LFS (planning/castle/glb-lfs.md). 꾸티뉴 비교용 중간 결과만 뺀다
+public/castle/statues/gguu_color.glb
+public/castle/statues/gguu_paint.glb
+public/castle/statues/gguu_hd_paint.glb
