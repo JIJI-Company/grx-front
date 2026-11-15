@@ -1,4 +1,4 @@
-// 석상 (임시 도형): 등롱 수에 따라 멤버 색으로 밝아지고, 방송 중이면 각성한다(눈빛·받침대 붉은 기운·이름표).
+// 석상 (임시 도형): 등롱 수에 따라 멤버 색으로 밝아지고, 방송 중이면 받침대 아래가 붉게 맥동한다(각성). 이름표·눈빛으로는 방송을 표시하지 않는다.
 // 등롱 단계가 오를수록 몸 발광·광원 세기·도달 거리·발치 빛 번짐이 함께 커진다 (castle/brightness.ts).
 // 등롱이 바쳐진 순간에는 같은 값들이 잠깐 튀었다가 단계 값으로 돌아온다 (castle/offering.ts statueFlash).
 import { Component, Suspense, useEffect, useMemo, useRef, useState, type MutableRefObject, type ReactNode } from 'react';
@@ -15,7 +15,6 @@ import { glowTexture } from './floors/sceneParts';
 import LanternRing from './LanternRing';
 import { plainStone, sculptMaterial, STATUE_FINISH } from './sculpt';
 
-const AWAKE_EYE_BOOST = 6; // 1을 넘겨야 블룸이 잡힌다
 const DORMANT_EYE = '#2a2226';
 const AWAKE_EMBER = '#ff3020';
 /** 반짝임 1일 때 더하는 값: 몸 발광, 광원 세기·도달 거리(scale 1 기준), 발치 빛 번짐 불투명도 */
@@ -24,36 +23,26 @@ const FLASH = { emissive: 0, light: 45, reach: 6, pool: 0.4 }; // 몸은 번쩍�
 const STONE_COLOR = '#6d6669';
 const STONE_TINT = 0.25;
 
-/** 각성(방송 중) 표현: 눈빛 번짐 + 받침대 아래 붉은 기운. 석상 로컬 좌표, 천천히 맥동한다 */
-function AwakeAura({ color }: { color: string }) {
-  const mats = useMemo(() => {
-    const glow = (c: THREE.ColorRepresentation) =>
-      new THREE.MeshBasicMaterial({ map: glowTexture(), color: c, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
-    return {
-      eye: glow(color),
-      ember: glow(AWAKE_EMBER),
-    };
-  }, [color]);
-  useEffect(() => () => Object.values(mats).forEach((m) => m.dispose()), [mats]);
+/** 각성(방송 중) 표현: 받침대 아래 붉은 기운만. 천천히 맥동한다.
+ * 눈빛 띠는 뺐다(2026-11-15) — 임시 도형 눈 높이에 고정이라 3D 모델 석상에서는 엉뚱한 곳에 떠 보였다 */
+function AwakeAura() {
+  const ember = useMemo(
+    () => new THREE.MeshBasicMaterial({ map: glowTexture(), color: AWAKE_EMBER, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }),
+    [],
+  );
+  useEffect(() => () => ember.dispose(), [ember]);
   useFrame(({ clock }) => {
-    const pulse = 0.5 + 0.5 * Math.sin(clock.elapsedTime * 1.8);
-    mats.eye.opacity = 0.75 + 0.25 * pulse;
-    mats.ember.opacity = 0.35 + 0.3 * pulse;
+    ember.opacity = 0.35 + 0.3 * (0.5 + 0.5 * Math.sin(clock.elapsedTime * 1.8));
   });
   return (
-    <group>
-      <mesh position={[0, 2.45, 0.37]} material={mats.eye}>
-        <planeGeometry args={[1.1, 0.45]} />
-      </mesh>
-      <mesh position={[0, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]} material={mats.ember} renderOrder={1}>
-        <planeGeometry args={[3.4, 3.4]} />
-      </mesh>
-    </group>
+    <mesh position={[0, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]} material={ember} renderOrder={1}>
+      <planeGeometry args={[3.4, 3.4]} />
+    </mesh>
   );
 }
 
 /** 임시 도형 몸체 (모델이 없거나 못 불러왔을 때) */
-function PlaceholderBody({ stone, eye, awake }: { stone: THREE.Material; eye: THREE.Color; awake: boolean }) {
+function PlaceholderBody({ stone, eye }: { stone: THREE.Material; eye: THREE.Color }) {
   return (
     <>
       <mesh position={[0, 1.35, 0]} material={stone}>
@@ -72,7 +61,7 @@ function PlaceholderBody({ stone, eye, awake }: { stone: THREE.Material; eye: TH
       ))}
       <mesh position={[0, 2.45, 0.33]}>
         <boxGeometry args={[0.38, 0.05, 0.05]} />
-        <meshBasicMaterial color={eye} toneMapped={!awake} />
+        <meshBasicMaterial color={eye} />
       </mesh>
     </>
   );
@@ -178,9 +167,8 @@ export default function Statue({ statue: s, count, awake, offers, reveal }: Stat
     [s.color],
   );
   const eye = useMemo(() => {
-    if (awake) return new THREE.Color(s.color).multiplyScalar(AWAKE_EYE_BOOST);
     return new THREE.Color(tier > 0 ? s.color : DORMANT_EYE);
-  }, [awake, tier, s.color]);
+  }, [tier, s.color]);
   const lanterns = Math.min(count, MAX_LANTERN_MODELS);
   const root = useRef<THREE.Group>(null!);
   const light = useRef<THREE.PointLight>(null!);
@@ -244,15 +232,15 @@ export default function Statue({ statue: s, count, awake, offers, reveal }: Stat
           <meshStandardMaterial color="#231d1f" roughness={0.9} />
         </mesh>
         {s.modelUrl ? (
-          <ModelBoundary fallback={<PlaceholderBody stone={stone} eye={eye} awake={awake} />}>
+          <ModelBoundary fallback={<PlaceholderBody stone={stone} eye={eye} />}>
             <Suspense fallback={null}>
               <StatueModel url={s.modelUrl} stone={stone} paint={paint} textured={textured} />
             </Suspense>
           </ModelBoundary>
         ) : (
-          <PlaceholderBody stone={stone} eye={eye} awake={awake} />
+          <PlaceholderBody stone={stone} eye={eye} />
         )}
-        {awake && <AwakeAura color={s.color} />}
+        {awake && <AwakeAura />}
         {/* 발치 등롱 */}
         <Suspense fallback={null}>
           <LanternRing count={lanterns} color={`#${lightColor.getHexString()}`} />
@@ -278,7 +266,6 @@ export default function Statue({ statue: s, count, awake, offers, reveal }: Stat
             <div className="text-[10px]" style={{ color: s.color }}>
               {lanternCountLabel(count)}
             </div>
-            {awake && <div className="mt-0.5 text-[10px] font-semibold tracking-widest text-red-400 animate-pulse">● 방송 중</div>}
           </div>
         </Html>
       )}
