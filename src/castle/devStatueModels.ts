@@ -13,6 +13,9 @@ const FILE_BY_NAME: Record<string, string> = {
   윤타미: 'yuntami',
   모야: 'moya',
   야무지: 'yamuza',
+  만조: 'manjo',
+  야뿌: 'yappu',
+  하루노츠키: 'tsuki',
 };
 
 const ON = import.meta.env.DEV && import.meta.env.VITE_STATUE_MODELS === 'on';

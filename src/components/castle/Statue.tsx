@@ -13,7 +13,8 @@ import { lanternCountLabel, statueCaption } from './castlePresentation';
 import { opaqueMaterials, setFade } from './fadeIn';
 import { glowTexture } from './floors/sceneParts';
 import LanternRing from './LanternRing';
-import { plainStone, sculptMaterial, STATUE_FINISH } from './sculpt';
+import { marbleStone, plainStone, sculptMaterial, STATUE_FINISH } from './sculpt';
+import { seamlessNormals } from '../../castle/seamNormals';
 
 const DORMANT_EYE = '#2a2226';
 const AWAKE_EMBER = '#ff3020';
@@ -22,6 +23,9 @@ const FLASH = { emissive: 0, light: 45, reach: 6, pool: 0.4 }; // 몸은 번쩍�
 /** 돌 기본색과 멤버 색을 섞는 비율: 돌 질감은 유지하고 멤버 색으로 은은하게 물든다 (0 = 회색 돌, 1 = 멤버 색) */
 const STONE_COLOR = '#6d6669';
 const STONE_TINT = 0.25;
+/** 텍스처(채색) 석상의 비춤 빛 배율. 빛 세기(castle/brightness.ts)는 회색 돌(밝기 ~0.43)에 맞춘 값이라 피부색(~0.9)
+ *  텍스처에는 2배 넘게 밝아 얼굴이 하얗게 날아간다(이목구비가 사라짐) → 돌 대비 피부 밝기 비율만큼 줄인다 */
+const TEXTURED_LIGHT = 0.45;
 
 /** 각성(방송 중) 표현: 받침대 아래 붉은 기운만. 천천히 맥동한다.
  * 눈빛 띠는 뺐다(2026-11-15) — 임시 도형 눈 높이에 고정이라 3D 모델 석상에서는 엉뚱한 곳에 떠 보였다 */
@@ -94,7 +98,13 @@ function StatueModel({
           const emissive = (paint as THREE.MeshStandardMaterial).emissive;
           const mat =
             (STATUE_FINISH === 'sculpt' && sculptMaterial(map, emissive)) ||
-            new THREE.MeshStandardMaterial({ map, roughness: 0.8, emissive });
+            // alphaTest: 투명하게 비운 부분(얼굴 앞에 뜬 앞머리 겹, project_face.py)은 그리지 않는다
+            new THREE.MeshStandardMaterial({ map, roughness: 0.8, emissive, alphaTest: (m.material as THREE.MeshStandardMaterial).alphaTest || 0 });
+          textured.current.push(mat);
+          m.material = mat;
+        } else if (STATUE_FINISH === 'marble') {
+          // 대리석 얼굴: 텍스처 없는 조각 머리·목. 정점 색은 색이 아니라 구운 그늘(bake_ao.py)이다
+          const mat = marbleStone((paint as THREE.MeshStandardMaterial).emissive, !!m.geometry.attributes.color);
           textured.current.push(mat);
           m.material = mat;
         } else if (STATUE_FINISH === 'sculpt' && !m.geometry.attributes.color) {
@@ -105,7 +115,8 @@ function StatueModel({
         } else {
           m.material = m.geometry.attributes.color ? paint : stone;
         }
-        m.geometry.computeVertexNormals();
+        // 이름에 keepnormals: 파일에 든 조명용 법선(얼굴을 매끈하게 다듬은 것, project_face.py)을 그대로 쓴다
+        if (!m.name.includes('keepnormals') || !m.geometry.attributes.normal) seamlessNormals(m.geometry);
       }
     });
     const box = new THREE.Box3().setFromObject(root);
@@ -216,7 +227,8 @@ export default function Statue({ statue: s, count, awake, offers, reveal }: Stat
     stone.emissiveIntensity = b.emissive + flash * FLASH.emissive;
     paint.emissiveIntensity = stone.emissiveIntensity;
     for (const t of textured.current) t.emissiveIntensity = stone.emissiveIntensity;
-    light.current.intensity = (b.light + flash * FLASH.light * s.scale) * emerge;
+    const lightScale = textured.current.length ? TEXTURED_LIGHT : 1;
+    light.current.intensity = (b.light + flash * FLASH.light * s.scale) * emerge * lightScale;
     light.current.distance = b.reach + flash * FLASH.reach * s.scale;
     poolMat.opacity = (b.pool + flash * FLASH.pool) * emerge;
     pool.current.scale.setScalar(pool.current.scale.x + (glow.poolRadius * 2 * s.scale - pool.current.scale.x) * k);
