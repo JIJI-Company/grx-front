@@ -1,6 +1,7 @@
 // 개발 서버 전용: 서버가 아직 석상 모델 주소(modelUrl)를 주지 않으므로, 저장소에 있는 석상 GLB(Git LFS)를
 // 멤버 이름으로 연결해 실제 서버 화면에서도 모델을 볼 수 있게 한다. 배포판에는 영향이 없다(import.meta.env.DEV).
-//   켜기: VITE_STATUE_MODELS=on  (VITE_STATUE_VARIANT로 변형 선택, 기본 '_face_paint' = 채색본, '' = 돌 석상)
+//   켜기: VITE_STATUE_MODELS=on  (파일은 멤버당 {파일}_face_paint.glb 하나: 3면도 → Pixal3D 채색 모델.
+//   VITE_STATUE_VARIANT로 다른 접미사를 고를 수 있지만 지금 저장소에는 '_face_paint'만 있다)
 // 운영 반영은 석상 GLB를 R2에 올리고 서버가 modelUrl을 주는 방식으로 한다(planning/castle/statues-20261113.md).
 import type { CastleStatueFloor } from '../api/types';
 

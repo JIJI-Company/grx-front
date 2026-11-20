@@ -466,8 +466,8 @@ const CASTLE_FLOORS = [
 ] as const;
 
 /** 석상 모델 시험용: VITE_MOCK_STATUE_MODELS=gguu,damu → public/castle/statues/{slug}{VITE_MOCK_STATUE_VARIANT}.glb를 쓴다
- *  (VARIANT 예: '_color' → 3면도 투영 채색본) */
-const MOCK_STATUE_VARIANT: string = import.meta.env.VITE_MOCK_STATUE_VARIANT ?? '';
+ *  (저장소에는 멤버당 '_face_paint' 하나만 있다: 3면도 → Pixal3D 채색 모델) */
+const MOCK_STATUE_VARIANT: string = import.meta.env.VITE_MOCK_STATUE_VARIANT ?? '_face_paint';
 const MOCK_STATUE_MODELS = new Set(
   (import.meta.env.VITE_MOCK_STATUE_MODELS ?? '').split(',').map((s: string) => s.trim()).filter(Boolean),
 );
