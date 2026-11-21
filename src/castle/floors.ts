@@ -132,7 +132,8 @@ const B1: FloorDef = {
 export const B2_HATCH: Rect = { x0: -1.6, x1: 1.6, z0: -36, z1: -30 };
 /** 기둥 숲: 통로 옆 2줄 + 바깥 2줄(걷기 영역 밖은 장식만) */
 export const B2_PILLARS: [number, number][] = [
-  ...[-4, -12, -20, -28].flatMap((z) => [[-5.6, z], [5.6, z]] as [number, number][]),
+  // 통로 옆 줄은 석상(z -11.5·-20.5) 앞을 비워 둔다: 석상 사이와 앞뒤에만
+  ...[-4, -16, -28].flatMap((z) => [[-5.6, z], [5.6, z]] as [number, number][]),
   ...[2, -6, -14, -22, -30].flatMap((z) => [[-13, z], [13, z], [-20.5, z - 4], [20.5, z - 4]] as [number, number][]),
 ];
 export const B2_PILLAR_RADIUS = 0.4;
@@ -211,8 +212,8 @@ const B3: FloorDef = {
   grade: { lift: [0.002, 0, 0.006], gain: [1.06, 0.84, 0.9], saturation: 0.92 }, // 차가운 붉은색
 };
 
-// ── 광장: 입장하면 도착하는 돌마당(34 x 34m). 남쪽 무한성 문 계단 → B1, 북쪽 전당 문 → History 전당.
-// 화랑·관람실·화실 문은 아직 닫혀 있다(안내만). 장면은 components/castle/spaces/PlazaScene.tsx가 같은 수치를 쓴다
+// ── 광장: 입장하면 도착하는 돌마당(34 x 34m). 동쪽 무한성 오두막 → B1, 북쪽 전당 문 → History 전당, 서쪽 화랑 → Content.
+// 화실 문은 아직 닫혀 있다(안내만). 장면은 components/castle/spaces/PlazaScene.tsx가 같은 수치를 쓴다
 export const PLAZA_HALF = 17;
 /** 마당 가장자리 돌등 12개 */
 export const PLAZA_LAMPS: [number, number][] = [-1, 1].flatMap((s) =>
@@ -223,10 +224,10 @@ export const PLAZA_LAMPS: [number, number][] = [-1, 1].flatMap((s) =>
 );
 /** 이번 주 일정 게시판: 가운데 (x, z)와 돌린 각도 */
 export const PLAZA_BOARD = { x: 9.5, z: 6.5, rotY: -0.7 };
-/** 무한성 문: 문틀 가운데 x (z는 마당 남쪽 끝) */
-export const PLAZA_GATE_X = 4;
-// 마당 걷기 영역(z ≤ 16.5)과 겹치게 시작해야 이어서 걸어 내려간다
-const PLAZA_GATE_STAIRS: Rect = { x0: PLAZA_GATE_X - 1.8, x1: PLAZA_GATE_X + 1.8, z0: 16.3, z1: 20 };
+/** 무한성 오두막: 동쪽 가장자리 바깥, 문 가운데 z (예전 관람실 자리, 돌등 z 0·-11 사이) */
+export const PLAZA_CASTLE_Z = -5.5;
+/** 무한성 오두막 문 앞 (동쪽 계단 아래) → B1 */
+const PLAZA_CASTLE_DOOR: Rect = { x0: 15.3, x1: 16.5, z0: PLAZA_CASTLE_Z - 1.5, z1: PLAZA_CASTLE_Z + 1.5 };
 /** 광장 가운데: 바닥 꾸한성 마크 위. 전당에서 나오면 여기 */
 export const PLAZA_CENTER: [number, number] = [0, 0];
 /** 화랑 문 앞 (서쪽 회랑 계단 아래) */
@@ -242,32 +243,28 @@ const PLAZA: FloorDef = {
   tag: '광장',
   title: '꾸한성',
   sub: '광장',
-  walk: [{ x0: -16.5, x1: 16.5, z0: -16.5, z1: 16.5 }, PLAZA_GATE_STAIRS],
+  walk: [{ x0: -16.5, x1: 16.5, z0: -16.5, z1: 16.5 }],
   blockers: [
     ...PLAZA_LAMPS.map(([x, z]) => circle(x, z, 0.3)),
     ...boardPosts.map(([x, z]) => circle(x, z, 0.5)),
-    // 무한성 문 기둥, 전당 계단 양옆 트로피 받침
-    circle(PLAZA_GATE_X - 2.4, PLAZA_HALF, 0.34),
-    circle(PLAZA_GATE_X + 2.4, PLAZA_HALF, 0.34),
+    // 전당 계단 양옆 트로피 받침
     box(-8.55, -7.05, -17.15, -15.65),
     box(7.05, 8.55, -17.15, -15.65),
   ],
-  spawn: [-3, 10], // 무한성 문(x 4) 옆: 카메라가 문틀에 가리지 않는다
-  // 무한성 문 계단은 남쪽으로 내려간다
-  heightAt: (x, z) => (z > 17.2 && Math.abs(x - PLAZA_GATE_X) < 2.1 ? -(z - 17.2) * 0.5 : 0),
+  spawn: [-3, 10],
+  heightAt: () => 0,
   slot: () => ({ x: 0, z: 0, rotY: 0, scale: 1, lift: 0, float: false }),
   maxStatues: 0,
   triggers: [
-    { rect: PLAZA_GATE_STAIRS, to: 'B1', meters: 2.4, fade: '#000000', effect: 'stairs' },
+    { rect: PLAZA_CASTLE_DOOR, to: 'B1', meters: 1, fade: '#000000', effect: 'stairs' },
     { rect: PLAZA_HALL_DOOR, to: 'HISTORY', meters: 1, fade: '#000000', effect: 'door' },
     { rect: PLAZA_GALLERY_DOOR, to: 'CONTENT', meters: 1, fade: '#000000', effect: 'door' },
   ],
   signs: [
-    { rect: { x0: 14, x1: 16.5, z0: -3.5, z1: 1.5 }, text: '관람실 — 준비 중' },
     { rect: { x0: -12.5, x1: -8.5, z0: 14.5, z1: 16.5 }, text: '화실 — 준비 중' },
   ],
   camera: [6.5, 11, 2],
-  // 카메라가 남쪽 무한성 문틀(z 17) 너머로 나가면 문 현판 뒷면이 화면을 가린다 → 문 앞에서 멈춘다
+  // 카메라는 남쪽 마당 끝(z 16) 앞에서 멈춘다
   cameraBox: { x0: -40, x1: 40, z0: -40, z1: 16, y1: 30 },
   fog: '#140c18',
   fogDensity: 0.0045,

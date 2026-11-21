@@ -107,6 +107,11 @@ export default function SceneB1() {
       </mesh>
       <CeilingBeams />
       <Chochin />
+      {/* B2로 내려가는 계단 입구 표시 (B3 출구 표시와 같은 모양) */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, -46.8]}>
+        <ringGeometry args={[0.9, 1.1, 32]} />
+        <meshBasicMaterial color="#facc15" />
+      </mesh>
       {/* 복도 끝 발코니 + 계단 5칸 */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, -44]}>
         <planeGeometry args={[12, 8]} />

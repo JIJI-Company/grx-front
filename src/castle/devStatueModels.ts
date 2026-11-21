@@ -20,7 +20,10 @@ const FILE_BY_NAME: Record<string, string> = {
 };
 
 const ON = import.meta.env.DEV && import.meta.env.VITE_STATUE_MODELS === 'on';
-const VARIANT: string = import.meta.env.VITE_STATUE_VARIANT ?? '_face_paint';
+// 임시 비교용: aa9f4e4 직전(11-19)의 _face_paint 모델({파일}_1119_face_paint.glb). 되돌리려면 '_face_paint'
+const VARIANT: string = import.meta.env.VITE_STATUE_VARIANT ?? '_1119_face_paint';
+/** 멤버별 예외: 윤타미는 11-19 모델 턱 밑 조각 문제로 11-20 모델에 3면도 얼굴을 입힌 파일을 쓴다 */
+const VARIANT_BY_NAME: Record<string, string> = { 윤타미: '_1120_face_paint' };
 
 export function withDevStatueModels(floors: CastleStatueFloor[]): CastleStatueFloor[] {
   if (!ON) return floors;
@@ -28,7 +31,7 @@ export function withDevStatueModels(floors: CastleStatueFloor[]): CastleStatueFl
     ...f,
     statues: f.statues.map((s) => {
       const file = FILE_BY_NAME[s.stageName];
-      return file && !s.modelUrl ? { ...s, modelUrl: `/castle/statues/${file}${VARIANT}.glb` } : s;
+      return file && !s.modelUrl ? { ...s, modelUrl: `/castle/statues/${file}${VARIANT_BY_NAME[s.stageName] ?? VARIANT}.glb` } : s;
     }),
   }));
 }
