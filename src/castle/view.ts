@@ -3,7 +3,7 @@ export type CameraView = 'first' | 'third';
 
 const KEY = 'castle.view';
 /** 1인칭 눈높이(m). 꾸로 키 ≈ 1.5m */
-export const EYE_HEIGHT = 1.3;
+export const EYE_HEIGHT = 1.4;
 
 export function loadView(): CameraView {
   try {
