@@ -1,13 +1,13 @@
 // 광장: 도착 지점이자 방을 고르는 곳. 구름바다 위에 뜬 돌마당 둘레에 컨셉이 다른 건물이 선다.
 // 지하(B1~B3)의 '끝없는 방' 배경과 달리 여기는 바깥이다: 밤하늘·붉은 달·별·먼 산과 성의 윤곽·구름바다.
 //   북: History 전당(붉은 기둥·2층 지붕·금 트로피)  서: Content 화랑(길고 낮은 회랑·포스터 액자)
-//   동: 관람실(극장·큰 간판 화면·등 기둥)            남서: 화실(팬아트, 아직 닫힘)  남: 무한성으로 내려가는 문
+//   동: 무한성으로 내려가는 작은 오두막(어둡고 은밀하게)  남서: 화실(팬아트, 아직 닫힘)
 // 설계: planning/castle/spaces-20261112.md. 게임에서는 castle/floors.ts의 PLAZA(걷기 영역·충돌·문)와 같은 수치를 쓴다.
 import { useMemo, useRef, type ReactNode, Suspense } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useTexture } from '@react-three/drei';
 import * as THREE from 'three';
-import { PLAZA_BOARD, PLAZA_GATE_X, PLAZA_HALF, PLAZA_LAMPS } from '../../../castle/floors';
+import { PLAZA_BOARD, PLAZA_CASTLE_Z, PLAZA_HALF, PLAZA_LAMPS } from '../../../castle/floors';
 import { canvasTexture, Embers, glowTexture, rng, useWindowTexture } from '../floors/sceneParts';
 import { GrandTrophy } from './GameTrophy';
 import type { BoardDay } from './schedulePresentation';
@@ -201,35 +201,16 @@ function GalleryDecor({ w, d }: { w: number; d: number }) {
   );
 }
 
-// ── 관람실: 극장. 문 위 큰 간판 화면이 천천히 숨 쉬듯 밝아지고, 양옆에 등이 세로로 줄지어 달린다
-const THEATER: Palette = { pillar: '#1c1830', wall: '#12101c', roof: '#100e16', trim: '#c23b3b', glow: '#ff4a34' };
-const SCREEN_COLOR = new THREE.Color('#ff4a3a');
-function TheaterDecor({ w, d }: { w: number; d: number }) {
-  const screen = useRef<THREE.MeshBasicMaterial>(null!);
-  useFrame(({ clock }) => screen.current.color.copy(SCREEN_COLOR).multiplyScalar(0.16 + 0.07 * Math.sin(clock.elapsedTime * 1.4)));
+// ── 무한성 입구: 마당 동쪽 끝의 작은 오두막. 창호는 거의 꺼져 있고 문틈으로만 붉은 빛이 새어 나온다
+const CASTLE_HUT: Palette = { pillar: '#3a0f0c', wall: '#120a0c', roof: '#0e0909', trim: '#6a1a14', glow: '#c42a16' };
+function CastleHutDecor({ w, d }: { w: number; d: number }) {
   const z = d / 2 + 1.75;
   return (
     <>
-      {/* 간판 화면 */}
-      <group position={[0, 10.2, z - 0.6]}>
-        <mesh>
-          <boxGeometry args={[9.4, 3.6, 0.3]} />
-          <meshStandardMaterial color="#0c0a12" roughness={0.4} />
-        </mesh>
-        <mesh position={[0, 0, 0.16]}>
-          <planeGeometry args={[8.8, 3]} />
-          <meshBasicMaterial ref={screen} color={SCREEN_COLOR} />
-        </mesh>
-        <Label text="● ON AIR" width={5.4} height={1.2} color="#ff5a48" glow={2.6} position={[0, 0, 0.18]} />
-      </group>
       {[-1, 1].map((s) => (
-        <group key={s} position={[s * (w / 2 + 0.1), 0, z]}>
-          {[0, 1, 2, 3, 4].map((i) => (
-            <PaperLantern key={i} position={[0, 2 + i * 1.15, 0]} size={1.15} color="#ff5040" glow={2.4} />
-          ))}
-          <GlowPool position={[0, 0.03, 0.6]} size={5} color="#ff5040" opacity={0.35} />
-        </group>
+        <PaperLantern key={s} position={[s * (w / 2 - 0.6), 2.6, z]} size={0.7} color="#ff3a1a" glow={1.6} />
       ))}
+      <GlowPool position={[0, 0.03, z + 0.6]} size={4.5} color="#ff3a1a" opacity={0.3} />
     </>
   );
 }
@@ -272,42 +253,6 @@ function AtelierDecor({ d }: { d: number }) {
         <Label text="준비 중" width={1.5} height={0.42} color="#e2cfa6" glow={1.4} position={[0, 1.35, 0.05]} />
       </group>
     </>
-  );
-}
-
-/** 무한성으로 내려가는 문: 붉은 문틀 아래로 계단이 꺼지고 밑에서 붉은 빛이 올라온다 */
-function DescentGate({ position }: { position: Vec3 }) {
-  return (
-    <group position={position}>
-      {[-2.4, 2.4].map((x) => (
-        <mesh key={x} position={[x, 3, 0]}>
-          <cylinderGeometry args={[0.3, 0.34, 6, 12]} />
-          <meshStandardMaterial color="#8f1d14" roughness={0.5} />
-        </mesh>
-      ))}
-      <mesh position={[0, 6.1, 0]}>
-        <boxGeometry args={[7, 0.45, 0.6]} />
-        <meshStandardMaterial color="#17100f" roughness={0.6} />
-      </mesh>
-      <mesh position={[0, 5.2, 0]}>
-        <boxGeometry args={[5.6, 0.3, 0.4]} />
-        <meshStandardMaterial color="#8f1d14" roughness={0.5} />
-      </mesh>
-      <Signboard text="무한성" width={2.6} height={0.9} position={[0, 5.65, 0.34]} rotation={[0, Math.PI, 0]} />
-      {/* 아래로 꺼지는 계단 */}
-      {Array.from({ length: 7 }, (_, i) => (
-        <mesh key={i} position={[0, -0.15 - i * 0.3, 0.6 + i * 0.6]}>
-          <boxGeometry args={[4.2, 0.3, 0.6]} />
-          <meshStandardMaterial color="#2b2327" roughness={0.9} />
-        </mesh>
-      ))}
-      <mesh position={[0, -2.4, 4.6]} rotation={[-0.5, 0, 0]}>
-        <planeGeometry args={[4.2, 3]} />
-        <meshBasicMaterial color={new THREE.Color('#ff3a1a').multiplyScalar(1.6)} />
-      </mesh>
-      <pointLight position={[0, 0.5, 2]} color="#ff3a1a" intensity={26} distance={12} decay={1.6} />
-      <GlowPool position={[0, 0.03, -0.8]} size={7} color="#ff3a1a" opacity={0.4} />
-    </group>
   );
 }
 
@@ -625,13 +570,12 @@ export default function PlazaScene({ low, days = [] }: { low: boolean; /** 게�
       <Pavilion w={24} d={6} wallH={4.4} roofH={1.9} doorW={3.2} palette={GALLERY} sign="화랑" position={[-HALF - 6, 0, -1]} rotationY={Math.PI / 2}>
         <GalleryDecor w={24} d={6} />
       </Pavilion>
-      <Pavilion w={17} d={9} wallH={7.2} roofH={3.4} doorW={4.4} palette={THEATER} sign="관람실" position={[HALF + 7.5, 0, -1]} rotationY={-Math.PI / 2}>
-        <TheaterDecor w={17} d={9} />
+      <Pavilion w={7} d={5} wallH={3.4} base={0.5} roofH={1.7} doorW={2.2} palette={CASTLE_HUT} sign="무한성" position={[HALF + 5.5, 0, PLAZA_CASTLE_Z]} rotationY={-Math.PI / 2}>
+        <CastleHutDecor w={7} d={5} />
       </Pavilion>
       <Pavilion w={7} d={5} wallH={3.6} base={0.5} roofH={1.7} doorW={2.4} open={false} palette={ATELIER} sign="화실" position={[-10.5, 0, HALF + 5.5]} rotationY={Math.PI}>
         <AtelierDecor d={5} />
       </Pavilion>
-      <DescentGate position={[PLAZA_GATE_X, 0, HALF]} />
 
       <Embers count={low ? 160 : 420} seed={51} bounds={[-34, 34, 0, 26, -34, 34]} color="#ffb060" altColor="#8a7f86" size={0.14} rise={0.35} opacity={0.7} />
     </group>

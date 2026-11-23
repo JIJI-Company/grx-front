@@ -125,6 +125,10 @@ const ALL_MEMBERS: Member[] = [
   mkMember('nyangsso','냥쏘','new',3,'분홍 혈귀술','해산물과 매운맛에 진심인 핑크빛 게임 고수.','12.06','ENFJ','방송-씻기-잠의 무한 굴레에 빠진 스트리밍 중독자, 미나리와 공겜을 극도로 혐오함.','#냥빵 #ENFJ #모몽가 #게임광인','img/nangsso.png','leesoi34','#FF9ECF'),
   mkMember('yuntami','윤타미','new',4,'윤타미의 호흡','지-캐슬의 신입 혈귀.','??','??','상세 정보 업데이트 예정입니다.','#윤타미 #타미 #신입','img/tami.png','dbsthdus111','#FFD27A'),
   mkMember('moya','모야','new',6,'모야의 호흡','신입 혈귀.','??','??','상세 정보 업데이트 예정입니다.','#모야 #신입','img/moya.png','neul0908','#B8C9FF'),
+  // 운영 석상 명단에 있는 멤버(석상 모델 확인용). 계급·소개·프로필 그림은 임시값
+  mkMember('manjo','만조','new',7,'','신입 혈귀.','??','??','','','img/crow-silhouette.svg','tadis6997'),
+  mkMember('yappu','야뿌','new',8,'','신입 혈귀.','??','??','','','img/crow-silhouette.svg','ekrekrnfl9'),
+  mkMember('tsuki','하루노츠키','new',9,'','신입 혈귀.','??','??','','','img/crow-silhouette.svg','tsukii0321'),
 ];
 
 const BY_SLUG = Object.fromEntries(ALL_MEMBERS.map(m => [m.slug, m]));
@@ -462,8 +466,8 @@ const CASTLE_FLOORS = [
 ] as const;
 
 /** 석상 모델 시험용: VITE_MOCK_STATUE_MODELS=gguu,damu → public/castle/statues/{slug}{VITE_MOCK_STATUE_VARIANT}.glb를 쓴다
- *  (VARIANT 예: '_color' → 3면도 투영 채색본) */
-const MOCK_STATUE_VARIANT: string = import.meta.env.VITE_MOCK_STATUE_VARIANT ?? '';
+ *  (저장소에는 멤버당 '_face_paint' 하나만 있다: 3면도 → Pixal3D 채색 모델) */
+const MOCK_STATUE_VARIANT: string = import.meta.env.VITE_MOCK_STATUE_VARIANT ?? '_face_paint';
 const MOCK_STATUE_MODELS = new Set(
   (import.meta.env.VITE_MOCK_STATUE_MODELS ?? '').split(',').map((s: string) => s.trim()).filter(Boolean),
 );

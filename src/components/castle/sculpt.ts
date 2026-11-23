@@ -3,8 +3,18 @@
 // 진짜로 깎은 형태가 아니라 밝기로 흉내 낸 것이라 실루엣은 그대로다. 단독 뷰어(assets/castle/statues/viewer)와 같은 계산.
 import * as THREE from 'three';
 
-/** 'paint' = Paint 텍스처 그대로(기본), 'sculpt' = 조각 재질. VITE_STATUE_FINISH로 고른다 */
-export const STATUE_FINISH: 'paint' | 'sculpt' = import.meta.env.VITE_STATUE_FINISH === 'sculpt' ? 'sculpt' : 'paint';
+/** 'paint' = Paint 텍스처 그대로(기본), 'sculpt' = 조각 재질, 'marble' = 몸은 텍스처 그대로·머리만 대리석.
+ *  VITE_STATUE_FINISH로 고른다 */
+export const STATUE_FINISH: 'paint' | 'sculpt' | 'marble' =
+  import.meta.env.VITE_STATUE_FINISH === 'sculpt' ? 'sculpt' : import.meta.env.VITE_STATUE_FINISH === 'marble' ? 'marble' : 'paint';
+
+/** 대리석 머리 색. 색은 넣지 않고 밝은 흰 돌 — 윤곽은 형태의 명암과 구운 그늘(정점 색, bake_ao.py)로만 보인다 */
+const MARBLE = '#e6e1d8';
+
+/** 텍스처 없는 메시(조각 머리·목)용 대리석. 정점 색이 있으면 차폐 그늘로 곱한다 */
+export function marbleStone(emissive: THREE.Color, withAo: boolean): THREE.MeshStandardMaterial {
+  return new THREE.MeshStandardMaterial({ color: MARBLE, vertexColors: withAo, roughness: 0.55, emissive });
+}
 
 const SCULPT_STONE = '#6d6669';
 /** 회색 맵의 평균을 이 값(sRGB 0~255)에 맞춘다. 선형으로 약 0.5 → SCULPT_LIFT를 곱하면 맨 돌과 같은 밝기가 된다.
