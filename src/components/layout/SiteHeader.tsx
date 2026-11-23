@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
+import CastleGateEye from './CastleGateEye';
 
 const primaryNavigation = [
   { to: '/live', label: 'LIVE' },
@@ -63,13 +64,16 @@ export default function SiteHeader() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-ruby-600/20 bg-castle-950/50 backdrop-blur-xl" style={{ boxShadow: '0 4px 30px rgba(0,0,0,0.5)' }}>
       <div className="flex h-nav items-center justify-between gap-4 px-[6%]">
-        <Link
-          to="/"
-          className="focus-ring rounded-sm font-display text-[1.4rem] font-bold tracking-[2px] uppercase nav:text-[1.8rem] nav:tracking-[4px]"
-          style={{ color: '#fff', textShadow: '0 0 15px rgba(255,26,74,0.8), 0 0 30px rgba(255,26,74,0.4)' }}
-        >
-          G-CASTLE
-        </Link>
+        <div className="flex items-center gap-3 nav:gap-4">
+          <Link
+            to="/"
+            className="focus-ring rounded-sm font-display text-[1.4rem] font-bold tracking-[2px] uppercase nav:text-[1.8rem] nav:tracking-[4px]"
+            style={{ color: '#fff', textShadow: '0 0 15px rgba(255,26,74,0.8), 0 0 30px rgba(255,26,74,0.4)' }}
+          >
+            G-CASTLE
+          </Link>
+          <CastleGateEye />
+        </div>
         <nav aria-label="주요 메뉴" className="hidden items-center gap-2 nav:flex lg:gap-4">
           {primaryNavigation.map(({ to, label }) => (
             <NavLink

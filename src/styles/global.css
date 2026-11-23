@@ -4748,3 +4748,253 @@ body.hide-site-header #main-app {
   color: var(--color-ink-500);
   font-size: 0.95rem;
 }
+
+/* 헤더 무한성 입구 (CastleGateEye): 커서를 따라보는 도깨비 눈. 가끔 깜빡이고, 올리면 크게 뜨며 이름이 나온다 */
+.castle-eye {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem;
+  border-radius: 0.5rem;
+  color: #fff;
+}
+
+.castle-eye__svg {
+  width: 2.9rem;
+  height: 1.8rem;
+  overflow: visible;
+  filter: drop-shadow(0 0 5px rgba(255, 26, 74, 0.85)) drop-shadow(0 0 14px rgba(255, 26, 74, 0.35));
+  transition:
+    filter 0.3s ease,
+    transform 0.3s ease;
+}
+
+.castle-eye__white {
+  fill: #170409;
+  stroke: #ff3a5c;
+  stroke-width: 1.2;
+}
+
+.castle-eye__lash {
+  fill: none;
+  stroke: #ff6b86;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.castle-eye__pupil {
+  transition: transform 0.12s ease-out;
+}
+
+/* 깜빡임: 4.5초에 한 번 눈꺼풀이 내려왔다 올라간다 */
+.castle-eye__open {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: castle-eye-blink 4.5s ease-in-out infinite;
+}
+
+.castle-eye:hover .castle-eye__svg,
+.castle-eye:focus-visible .castle-eye__svg {
+  transform: scale(1.12);
+  filter: drop-shadow(0 0 7px rgba(255, 26, 74, 1)) drop-shadow(0 0 22px rgba(255, 26, 74, 0.65));
+}
+
+.castle-eye:hover .castle-eye__open,
+.castle-eye:focus-visible .castle-eye__open {
+  animation: none;
+}
+
+.castle-eye-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.castle-eye {
+  position: relative;
+}
+
+.castle-eye__label {
+  display: none;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #ffd6df;
+  text-shadow: 0 0 10px rgba(255, 26, 74, 0.8);
+  transition:
+    color 0.3s ease,
+    letter-spacing 0.3s ease;
+}
+
+.castle-eye:hover .castle-eye__label,
+.castle-eye:focus-visible .castle-eye__label {
+  color: #fff;
+  letter-spacing: 0.18em;
+}
+
+@media (min-width: 52rem) {
+  .castle-eye__label {
+    display: inline;
+  }
+}
+
+/* 아직 안 눌러 본 사람: 눈 오른쪽 위 깜빡이는 빨간 점 */
+.castle-eye__new {
+  position: absolute;
+  top: 0.15rem;
+  left: 2.65rem;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: #ff1a4a;
+  box-shadow: 0 0 0 0 rgba(255, 26, 74, 0.7);
+  animation: castle-eye-ping 1.6s ease-out infinite;
+}
+
+@keyframes castle-eye-ping {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 26, 74, 0.7);
+  }
+  100% {
+    box-shadow: 0 0 0 0.6rem rgba(255, 26, 74, 0);
+  }
+}
+
+/* 눌렀을 때: 눈을 번쩍 뜨고 동공이 세로로 찢어진다 */
+.castle-eye.is-awake .castle-eye__open {
+  animation: none;
+}
+
+.castle-eye.is-awake .castle-eye__svg {
+  transform: scale(1.35);
+  filter: drop-shadow(0 0 10px rgba(255, 26, 74, 1)) drop-shadow(0 0 30px rgba(255, 26, 74, 0.8));
+}
+
+.castle-eye.is-awake .castle-eye__slit {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: castle-eye-slit 0.35s ease-out forwards;
+}
+
+/* 누르면: X자로 두 번 벤 뒤 가운데를 세로로 벤다(각 0.13s, 벨 때마다 흔들림).
+   X자 틈은 살짝, 마지막 세로 틈은 화면이 좌우로 갈라지듯 크게 벌어지고 그 어둠 속으로 이동한다 */
+.castle-slash {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  overflow: hidden;
+  pointer-events: all;
+  background: rgba(0, 0, 0, 0);
+  animation: castle-slash-dark 1.15s ease-in forwards;
+}
+
+.castle-slash__cut {
+  position: absolute;
+  left: 50%;
+  top: var(--y);
+  width: 170vmax;
+  height: 12vmax;
+  overflow: visible;
+  transform: translate(-50%, -50%) rotate(var(--a));
+  clip-path: inset(0 100% 0 0);
+  animation: castle-slash-cut 0.13s cubic-bezier(0.1, 0.8, 0.2, 1) var(--d) forwards;
+}
+
+.castle-slash__edge {
+  fill: #fff;
+  filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 10px #ff3a50);
+  animation: castle-slash-edge 0.45s ease-out var(--d) forwards;
+}
+
+.castle-slash__gap {
+  fill: #050103;
+  stroke: #ff1a3c;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  transform: scaleY(0);
+  animation: castle-slash-gap 0.6s cubic-bezier(0.6, 0, 0.8, 0.2) calc(var(--d) + 0.18s) forwards;
+}
+
+#root.castle-shake {
+  animation: castle-shake 0.18s linear;
+}
+
+/* 끝나면 위아래(틈이 벌어지는 방향)는 넉넉히 풀어 큰 틈이 잘리지 않게 한다 */
+@keyframes castle-slash-cut {
+  to {
+    clip-path: inset(-120vmax 0 -120vmax 0);
+  }
+}
+
+/* 칼날 빛: 번쩍 → 가늘어지며 사라진다 */
+@keyframes castle-slash-edge {
+  0% {
+    opacity: 1;
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* 베인 틈이 벌어진다 */
+@keyframes castle-slash-gap {
+  to {
+    transform: scaleY(var(--open, 3));
+  }
+}
+
+@keyframes castle-shake {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-5px, 3px);
+  }
+  50% {
+    transform: translate(4px, -3px);
+  }
+  75% {
+    transform: translate(-2px, 2px);
+  }
+}
+
+@keyframes castle-slash-dark {
+  0%,
+  75% {
+    background: rgba(0, 0, 0, 0);
+  }
+  100% {
+    background: #000;
+  }
+}
+
+@keyframes castle-eye-slit {
+  to {
+    transform: scale(0.55, 1.35);
+  }
+}
+
+@keyframes castle-eye-blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .castle-eye__open,
+  .castle-eye__pupil,
+  .castle-eye__new {
+    animation: none;
+    transition: none;
+  }
+}
