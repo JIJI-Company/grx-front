@@ -21,7 +21,8 @@ export interface StatueGlow {
 // 등롱이 쌓이면 멤버 색 빛이 석상을 비추고(light·reach), 발치에 빛이 번진다(pool). 단계가 오를수록 넓게.
 // 광원은 석상에서 떨어져 있어(Statue.tsx) 가까이서 봐도 고르게 은은하다. 높은 단계는 세기보다 넓이로 차이를 낸다
 const GLOW: Record<LanternTier, StatueGlow> = {
-  0: { emissive: 0, light: 0.6, reach: 5, pool: 0, poolRadius: 1 },
+  // 등롱이 없어도 얼굴·옷은 보이게(0.6은 B2 주황 주변광만 받아 거의 실루엣이었다, 2026-11-23)
+  0: { emissive: 0, light: 5, reach: 6, pool: 0, poolRadius: 1 },
   1: { emissive: 0, light: 11, reach: 7, pool: 0.12, poolRadius: 1.4 },
   2: { emissive: 0, light: 24, reach: 8.5, pool: 0.2, poolRadius: 1.9 },
   3: { emissive: 0, light: 34, reach: 10, pool: 0.28, poolRadius: 2.5 },
