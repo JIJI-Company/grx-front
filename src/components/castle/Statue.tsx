@@ -99,7 +99,8 @@ function StatueModel({
           const mat =
             (STATUE_FINISH === 'sculpt' && sculptMaterial(map, emissive)) ||
             // alphaTest: 투명하게 비운 부분(얼굴 앞에 뜬 앞머리 겹, project_face.py)은 그리지 않는다
-            new THREE.MeshStandardMaterial({ map, roughness: 0.8, emissive, alphaTest: (m.material as THREE.MeshStandardMaterial).alphaTest || 0 });
+            // 정점 색이 있으면 구운 그늘(bl_aovc.py)이라 텍스처에 곱한다
+            new THREE.MeshStandardMaterial({ map, roughness: 0.8, emissive, vertexColors: !!m.geometry.attributes.color, alphaTest: (m.material as THREE.MeshStandardMaterial).alphaTest || 0 });
           textured.current.push(mat);
           m.material = mat;
         } else if (STATUE_FINISH === 'marble') {
