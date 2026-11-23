@@ -1,4 +1,4 @@
-import { withDevStatueModels } from '../castle/devStatueModels';
+import { withStatueModels } from '../castle/devStatueModels';
 import type {
   MembersGrouped,
   Member,
@@ -163,7 +163,7 @@ export const apiGetYoutubeLatest = (): Promise<{ items: YoutubeVideo[] }> =>
 // ─── Castle (무한성) ─────────────────────────────────────────────────────────
 
 export const apiGetCastleStatues = (): Promise<CastleStatueFloor[]> =>
-  USE_MOCK ? mock.mockGetCastleStatues() : get<CastleStatueFloor[]>('/castle/statues').then(withDevStatueModels);
+  USE_MOCK ? mock.mockGetCastleStatues() : get<CastleStatueFloor[]>('/castle/statues').then(withStatueModels);
 
 export const apiGetCastleHalls = (): Promise<CastleHallSummary[]> =>
   USE_MOCK ? mock.mockGetCastleHalls() : get('/castle/halls');
