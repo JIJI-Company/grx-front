@@ -360,7 +360,7 @@ export function walkAreaOf(floor: FloorDef, statues: PlacedStatue[]): WalkArea {
 
 // 석상 이름표의 계급 표기. DB 계급 이름(예: 'New')보다 우선한다
 const RANK_LABEL: Partial<Record<CastleStatueFloor['rankSlug'], string>> = {
-  new: '신입',
+  new: '항아리',
   'lower-rank': '하현',
   'upper-rank': '상현',
 };
